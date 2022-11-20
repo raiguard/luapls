@@ -1,0 +1,11 @@
+github.com/gorilla/websocket v1.4.1/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
+github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
+github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/sourcegraph/jsonrpc2 v0.1.0 h1:ohJHjZ+PcaLxDUjqk2NC3tIGsVa5bXThe1ZheSXOjuk=
+github.com/sourcegraph/jsonrpc2 v0.1.0/go.mod h1:ZafdZgk/axhT1cvZAPOhw+95nz2I/Ra5qMlU4gTRwIo=
+github.com/tliron/glsp v0.1.1 h1:GNNgUX9p1Q9MoPQooJoZ0+WaLL03EkhcKZUYJAtiNqs=
+github.com/tliron/glsp v0.1.1/go.mod h1:RVyVKeY3U+Nlc3DRklUiaegNsQyjzNTEool6YWh1v7g=
+github.com/tliron/kutil v0.1.56 h1:DZ0oxiFo7OJna++LxLDGRDtg5HCGISmJ6akFy5Rekec=
+github.com/tliron/kutil v0.1.56/go.mod h1:G5aUj57GWBcBI8o9hzQJuo5b14kC7Knf/hmflqyJTEU=
