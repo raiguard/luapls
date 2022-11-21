@@ -12,10 +12,12 @@ import (
 type TokenType int
 
 const (
-	TokComment TokenType = iota
+	TokBoolLiteral TokenType = iota
+	TokComment
 	TokIdentifier
-	TokLabel
 	TokKeyword
+	TokLabel
+	TokNilLiteral
 	TokNumber
 	TokRawString
 	TokString
@@ -33,14 +35,18 @@ type Token struct {
 func StrToken(token *Token) string {
 	typeStr := ""
 	switch token.Type {
+	case TokBoolLiteral:
+		typeStr = "BoolLiteral"
 	case TokComment:
 		typeStr = "Comment"
 	case TokIdentifier:
 		typeStr = "Identifier"
-	case TokLabel:
-		typeStr = "Label"
 	case TokKeyword:
 		typeStr = "Keyword"
+	case TokLabel:
+		typeStr = "Label"
+	case TokNilLiteral:
+		typeStr = "NilLiteral"
 	case TokNumber:
 		typeStr = "Number"
 	case TokRawString:
@@ -65,10 +71,10 @@ func StrToken(token *Token) string {
 }
 
 var keywords = map[string]bool{
-	"and": true, "break": true, "do": true, "else": true, "elseif": true, "end": true,
-	"false": true, "for": true, "function": true, "goto": true, "if": true, "in": true,
-	"local": true, "nil": true, "not": true, "or": true, "repeat": true, "return": true,
-	"then": true, "true": true, "until": true, "while": true,
+	"and": true, "break": true, "do": true, "else": true, "elseif": true,
+	"end": true, "for": true, "function": true, "goto": true, "if": true,
+	"in": true, "local": true, "not": true, "or": true, "repeat": true,
+	"return": true, "then": true, "until": true, "while": true,
 }
 
 var symbols = []string{
@@ -192,8 +198,13 @@ func next(s string) (TokenType, int) {
 		for i < len(s) && isAlnum(s[i]) {
 			i++
 		}
-		if keywords[s[:i]] {
+		remaining := s[:i]
+		if keywords[remaining] {
 			return TokKeyword, i
+		} else if remaining == "false" || remaining == "true" {
+			return TokBoolLiteral, i
+		} else if remaining == "nil" {
+			return TokNilLiteral, i
 		}
 		return TokIdentifier, i
 	}
