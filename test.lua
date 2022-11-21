@@ -1,4 +1,4 @@
--- NUMBERS
+-- Numbers
 
 local num_1 = 3
 local num_2 = 3.0
@@ -11,22 +11,37 @@ local num_7 = 0x0.1E
 local num_8 = 0xA23p-4
 local num_9 = 0X1.921FB54442D18P+1
 
-local foo = 2 + -3
-local bar = 'the quick fox'
+-- Strings
+
+local single_string = 'the quick fox'
+local double_string = "the quick fox"
+
+local bool_1 = false
+local bool_2 = true
+local nillit = nil
 
 local exp = -1.53e-5-4
 local exp_2 = 0xA32e.CDp6432
 
-print(foo, bar)
+-- Multiple assignment
 
-if foo < 5 then
-  local baz = foo local foo = bar
-  print("greater") print("lesser")
+local first, second = "second", "first"
+
+-- Other
+
+print(num_1, num_2)
+
+if num_2 < 5 then
+  print("not greater") print("lesser")
 end
 
-for i = 1.532, #bar do
-  print(bar[i])
+for i = 1, #double_string do
+  print(double_string[i])
   goto continue
+end
+
+function foo(param)
+  print(param, num_1)
 end
 
 ::continue::
