@@ -13,52 +13,184 @@ type Scanner struct {
 // Initializes the scanner.
 func (s *Scanner) Init(src []byte) {
 	s.src = src
+	s.ch = src[0]
 }
 
 // Scans and returns the next token in the source.
-func (s *Scanner) Scan() (pos int, tok Token, lit string) {
-	s.advanceSpace()
+func (s *Scanner) Scan() (int, Token, string) {
+	s.nextWhitespace()
 
-	pos = s.pos
+	start := s.pos
+	tok := INVALID
 
 	switch ch := s.ch; {
 	case isLetter(ch):
-		lit = s.scanIdentifier()
-		// TODO: Keywords are all > 1 letter
-		if realTok, isKeyword := tokens[lit]; isKeyword {
-			tok = realTok
-		} else {
-			tok = IDENTIFIER
-		}
+		tok = IDENTIFIER
+		s.nextIdentifier()
 	case isDigit(ch):
 		tok = NUMBER
-		lit = s.scanNumber()
+		s.nextNumber()
 	case isEOF(ch):
-    	tok = EOF
-    case ch == '\'' || ch == '"':
-        tok = STRING
-        lit = s.scanString()
+		tok = EOF
+	case ch == '\'' || ch == '"':
+		tok = STRING
+		s.nextString()
 	default:
-    	// Always advance
-    	s.next()
+		// Always advance
+		s.next()
+
+		// Compound symbols
+		ch2 := s.ch
+		switch ch {
+		case '=':
+			switch ch2 {
+			case '=':
+				tok = EQL
+				s.next()
+			default:
+				tok = ASSIGN
+			}
+		case '<':
+			switch ch2 {
+			case '=':
+				tok = LEQ
+				s.next()
+			default:
+				tok = LSS
+			}
+		case '>':
+			switch ch2 {
+			case '=':
+				tok = GEQ
+				s.next()
+			default:
+				tok = GTR
+			}
+		case '~':
+			if ch2 == '=' {
+				tok = NEQ
+				s.next()
+			} else {
+				// TODO: Error
+			}
+		case ':':
+			if ch2 == ':' {
+				s.next()
+				s.nextIdentifier()
+				if s.ch == ':' {
+					s.next()
+					if s.ch == ':' {
+						tok = LABEL
+						s.next()
+						break
+					}
+				}
+				// TODO: Error
+			} else {
+				tok = COLON
+			}
+		case '.':
+			if ch2 == '.' {
+				s.next()
+				if s.ch == '.' {
+					tok = VARARG
+				} else {
+					tok = CONCAT
+				}
+			} else {
+				tok = DOT
+			}
+		case '-':
+			if ch2 == '-' {
+				tok = COMMENT
+				// TODO: Raw string comments
+				// Advance to the next newline
+				for {
+					s.next()
+					if s.ch == '\n' || s.ch == eof {
+						break
+					}
+				}
+			} else {
+				tok = SUB
+			}
+		default:
+			realTok, reserved := tokens[string(ch)]
+			if reserved {
+				tok = realTok
+			} else {
+				// TODO: Error?
+			}
+		}
 	}
 
-	return
+	lit := string(s.src[start:s.pos])
+	// Convert identifier to reserved token if it is one
+	if tok == IDENTIFIER {
+		if realTok, reserved := tokens[lit]; reserved {
+			tok = realTok
+		}
+	}
+
+	return start, tok, lit
 }
 
 // Advances to the next byte in the source.
 func (s *Scanner) next() {
 	s.pos++
 	if s.pos == len(s.src) {
-    	// TODO: Handle this
+		// TODO: Handle this
 		s.ch = eof
 	} else {
 		s.ch = s.src[s.pos]
 	}
 }
 
-// Advances to the next non-numeric character.
-func (s *Scanner) advanceNumber(isHexNum bool) {
+func (s *Scanner) nextIdentifier() {
+	// First character was already read
+	s.next()
+
+	for {
+		ch := s.ch
+		if !isAlnum(ch) && ch != '_' {
+			break
+		}
+		s.next()
+	}
+}
+
+func (s *Scanner) nextNumber() {
+	isHexNum := false
+
+	// First digit is always a number
+	s.next()
+
+	// Hexadecimal numbers
+	if s.ch == 'x' || s.ch == 'X' {
+		isHexNum = true
+		s.next()
+	}
+
+	s.nextNumeric(isHexNum)
+
+	// Decimal part
+	if s.ch == '.' {
+		s.next()
+		s.nextNumeric(isHexNum)
+	}
+
+	// Exponent part
+	if isExponentLiteral(s.ch, isHexNum) {
+		s.next()
+		// Exponent may have a sign
+		if s.ch == '+' || s.ch == '-' {
+			s.next()
+		}
+		s.nextNumeric(isHexNum)
+	}
+}
+
+func (s *Scanner) nextNumeric(isHexNum bool) {
 	for {
 		switch ch := s.ch; {
 		case isHexNum && !isHex(ch):
@@ -70,9 +202,24 @@ func (s *Scanner) advanceNumber(isHexNum bool) {
 	}
 }
 
-// Advances to the next non-whitespace character.
-// TODO: Store leading and trailing space in each Node?
-func (s *Scanner) advanceSpace() {
+func (s *Scanner) nextString() {
+	delim := s.ch
+
+	// Collect all bytes until the next occurrence of the delimiter
+	for {
+		s.next()
+		if s.ch == delim {
+			// Advance once more to capture the closing delimiter
+			s.next()
+			break
+		} else if s.ch == '\n' {
+			// TODO: Error on unterminated string
+			break
+		}
+	}
+}
+
+func (s *Scanner) nextWhitespace() {
 	for {
 		if isSpace(s.ch) {
 			if s.ch == '\n' {
@@ -83,75 +230,4 @@ func (s *Scanner) advanceSpace() {
 			break
 		}
 	}
-}
-
-func (s *Scanner) scanIdentifier() string {
-	start := s.pos
-
-	// First character was already read
-	s.next()
-
-	for {
-		ch := s.ch
-		if !isAlnum(ch) && ch != '_' {
-			break
-		}
-		s.next()
-	}
-
-	return string(s.src[start:s.pos])
-}
-
-func (s *Scanner) scanNumber() string {
-	isHexNum := false
-	start := s.pos
-
-	// First digit is always a number
-	s.next()
-
-	// Hexadecimal numbers
-	if s.ch == 'x' || s.ch == 'X' {
-		isHexNum = true
-		s.next()
-	}
-
-	s.advanceNumber(isHexNum)
-
-	// Decimal part
-	if s.ch == '.' {
-		s.next()
-		s.advanceNumber(isHexNum)
-	}
-
-	// Exponent part
-	if isExponentLiteral(s.ch, isHexNum) {
-		s.next()
-		// Exponent may have a sign
-		if s.ch == '+' || s.ch == '-' {
-			s.next()
-		}
-		s.advanceNumber(isHexNum)
-	}
-
-	return string(s.src[start:s.pos])
-}
-
-func (s *Scanner) scanString() string {
-    start := s.pos
-    delim := s.ch
-
-    // Collect all bytes until the next occurrence of the delimiter
-    for {
-        s.next()
-        if s.ch == delim {
-            // Advance once more to capture the closing delimiter
-            s.next()
-            break
-        } else if s.ch == '\n' {
-            // TODO: Error on unterminated string
-            break
-        }
-    }
-
-	return string(s.src[start:s.pos])
 }

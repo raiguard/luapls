@@ -69,9 +69,10 @@ const (
 	LBRACK // [
 	RBRACK // ]
 	// DCOLON // ::
+	COMMA     // ,
 	SEMICOLON // ;
 	COLON     // :
-	INDEX     // .
+	DOT       // .
 	CONCAT    // ..
 	VARARG    // ...
 	symbol_end
@@ -123,9 +124,10 @@ var tokens = map[string]Token{
 	"}":   RBRACE,
 	"[":   LBRACK,
 	"]":   RBRACK,
+	",":   COMMA,
 	";":   SEMICOLON,
 	":":   COLON,
-	".":   INDEX,
+	".":   DOT,
 	"..":  CONCAT,
 	"...": VARARG,
 }
