@@ -19,6 +19,7 @@ const lsName = "luapls"
 var version string = "0.0.1"
 var handler protocol.Handler
 
+var files = map[string][]lua.TokenExt{}
 var rootPath string = ""
 
 func main() {
@@ -27,8 +28,9 @@ func main() {
 	handler.Shutdown = shutdown
 	handler.SetTrace = setTrace
 	handler.TextDocumentDidOpen = textDocumentDidOpen
+	handler.TextDocumentDocumentHighlight = textDocumentHighlight
 
-	server := server.NewServer(&handler, "gopls", true)
+	server := server.NewServer(&handler, lsName, true)
 
 	server.RunStdio()
 }
@@ -60,7 +62,7 @@ func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 		if err != nil {
 			return err
 		}
-		scanFile(src)
+		parseFile(path, src)
 	}
 	logToEditor(ctx, fmt.Sprint("Initial scan (", len(toParse), " files): ", time.Since(before)))
 	return nil
@@ -77,18 +79,27 @@ func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 }
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	scanFile([]byte(params.TextDocument.Text))
+	parseFile(params.TextDocument.URI, []byte(params.TextDocument.Text))
 	return nil
 }
 
-func scanFile(src []byte) {
-	var s lua.Scanner
-	s.Init(src)
-
-	for {
-		_, tok, _ := s.Scan()
-		if tok == lua.EOF {
-			break
+func textDocumentHighlight(ctc *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
+	if tokens, ok := files[params.TextDocument.URI]; ok {
+		for i := 0; i < len(tokens); i++ {
+			token := &tokens[i]
+			if withinRange(&token.Range, &params.Position) {
+				return []protocol.DocumentHighlight{{
+					Range: token.Range,
+				}}, nil
+			}
 		}
 	}
+	return nil, nil
+}
+
+func parseFile(filename string, src []byte) {
+	var p lua.Parser
+	p.Init(filename, src)
+	p.Parse()
+	files[filename] = p.Tokens
 }

@@ -1,11 +1,14 @@
 package lua
 
+import protocol "github.com/tliron/glsp/protocol_3_16"
+
 // Scanner lexes Lua source code into a series of Tokens.
 // TODO: Create multiple lexers for different Lua flavors.
 type Scanner struct {
 	src []byte
 
 	ch   byte
+	col  int
 	line int
 	pos  int
 }
@@ -17,10 +20,10 @@ func (s *Scanner) Init(src []byte) {
 }
 
 // Scans and returns the next token in the source.
-func (s *Scanner) Scan() (int, Token, string) {
+func (s *Scanner) Scan() (protocol.Range, Token, string) {
 	s.nextWhitespace()
 
-	start := s.pos
+	startCol, startLine, startPos := s.col, s.line, s.pos
 	tok := INVALID
 
 	switch ch := s.ch; {
@@ -124,7 +127,7 @@ func (s *Scanner) Scan() (int, Token, string) {
 		}
 	}
 
-	lit := string(s.src[start:s.pos])
+	lit := string(s.src[startPos:s.pos])
 	// Convert identifier to reserved token if it is one
 	if tok == IDENTIFIER {
 		if realTok, reserved := tokens[lit]; reserved {
@@ -132,12 +135,16 @@ func (s *Scanner) Scan() (int, Token, string) {
 		}
 	}
 
-	return start, tok, lit
+	return protocol.Range{
+		Start: protocol.Position{Line: uint32(startLine), Character: uint32(startCol)},
+		End:   protocol.Position{Line: uint32(s.line), Character: uint32(s.col)},
+	}, tok, lit
 }
 
 // Advances to the next byte in the source.
 func (s *Scanner) next() {
 	s.pos++
+	s.col++
 	if s.pos == len(s.src) {
 		// TODO: Handle this
 		s.ch = eof
@@ -223,6 +230,7 @@ func (s *Scanner) nextWhitespace() {
 	for {
 		if isSpace(s.ch) {
 			if s.ch == '\n' {
+				s.col = -1
 				s.line++
 			}
 			s.next()
