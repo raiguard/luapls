@@ -1,4 +1,6 @@
-luapls: *.go lua/*.go
+all: luapls
+
+luapls:
 	@go build -o luapls
 
 clean:
@@ -7,4 +9,4 @@ clean:
 test: *.go
 	@go test
 
-.PHONY: clean
+.PHONY: clean luapls test
