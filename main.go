@@ -2,7 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"luapls/lua"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -13,6 +18,8 @@ const lsName = "luapls"
 
 var version string = "0.0.1"
 var handler protocol.Handler
+
+var rootPath string = ""
 
 func main() {
 	handler.Initialize = initialize
@@ -28,6 +35,7 @@ func main() {
 
 func initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
 	capabilities := handler.CreateServerCapabilities()
+	rootPath = *params.RootPath
 
 	return protocol.InitializeResult{
 		Capabilities: capabilities,
@@ -39,6 +47,22 @@ func initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, erro
 }
 
 func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
+	var toParse []string
+	filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
+		if strings.HasSuffix(path, ".lua") {
+			toParse = append(toParse, path)
+		}
+		return nil
+	})
+	before := time.Now()
+	for _, path := range toParse {
+		src, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		scanFile(src)
+	}
+	logToEditor(ctx, fmt.Sprint("Initial scan (", len(toParse), " files): ", time.Since(before)))
 	return nil
 }
 
@@ -53,16 +77,18 @@ func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 }
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
+	scanFile([]byte(params.TextDocument.Text))
+	return nil
+}
+
+func scanFile(src []byte) {
 	var s lua.Scanner
-	s.Init([]byte(params.TextDocument.Text))
+	s.Init(src)
 
 	for {
-		pos, tok, lit := s.Scan()
+		_, tok, _ := s.Scan()
 		if tok == lua.EOF {
 			break
 		}
-		logToEditor(ctx, fmt.Sprint(pos, tok, " ", lit))
 	}
-
-	return nil
 }
