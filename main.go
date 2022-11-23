@@ -28,6 +28,7 @@ func main() {
 	handler.Shutdown = shutdown
 	handler.SetTrace = setTrace
 	handler.TextDocumentDidOpen = textDocumentDidOpen
+	handler.TextDocumentDidChange = textDocumentDidChange
 	handler.TextDocumentDocumentHighlight = textDocumentHighlight
 
 	server := server.NewServer(&handler, lsName, true)
@@ -80,6 +81,18 @@ func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	parseFile(params.TextDocument.URI, []byte(params.TextDocument.Text))
+	return nil
+}
+
+func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
+	for _, change := range params.ContentChanges {
+		// FIXME: Don't brute-force rescan the entire thing
+		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
+			before := time.Now()
+			parseFile(params.TextDocument.URI, []byte(change.Text))
+			logToEditor(ctx, fmt.Sprint("Rescan duration: ", time.Since(before)))
+		}
+	}
 	return nil
 }
 
