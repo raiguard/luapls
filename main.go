@@ -111,8 +111,8 @@ func textDocumentHighlight(ctc *glsp.Context, params *protocol.DocumentHighlight
 }
 
 func parseFile(filename string, src []byte) {
-	var p lua.Parser
-	p.Init(filename, src)
-	p.Parse()
-	files[filename] = p.Tokens
+	// var p lua.Parser
+	// p.Init(filename, src)
+	// p.Parse()
+	// files[filename] = p.Tokens
 }

@@ -4,12 +4,16 @@ import (
 	"strings"
 )
 
-// A representation of all possible tokens in the Lua language
-type Token uint8
+type Token struct {
+	Kind      TokenKind
+	Line, Col int
+}
+
+type TokenKind uint8
 
 const (
 	// Special
-	INVALID Token = iota
+	INVALID TokenKind = iota
 	EOF
 	COMMENT // Can be single-line or multi-line (raw string)
 	SPACE   // Tabs or spaces
@@ -78,7 +82,7 @@ const (
 	symbol_end
 )
 
-var tokens = map[string]Token{
+var tokenKinds = map[string]TokenKind{
 	// Keywords
 	"and":      AND,
 	"break":    BREAK,
@@ -146,7 +150,7 @@ func isIdentifier(s string) bool {
 }
 
 func isKeyword(s string) bool {
-	tok, ok := tokens[s]
+	tok, ok := tokenKinds[s]
 	return ok && keyword_beg < tok && tok < keyword_end
 }
 

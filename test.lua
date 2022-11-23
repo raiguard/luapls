@@ -35,6 +35,14 @@ if num_2 < 5 then
   print("not greater") print("lesser")
 end
 
+if (function() return true end)() then
+  print("it worked")
+end
+
+if ... then
+  print("vararg!?")
+end
+
 for i = 1, #double_string do
   print(double_string[i])
   goto continue
@@ -43,5 +51,6 @@ end
 function foo(param)
   print(param, num_1)
 end
+
 
 ::continue::

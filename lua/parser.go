@@ -4,24 +4,23 @@ import protocol "github.com/tliron/glsp/protocol_3_16"
 
 // Parser constructs an AST from Lua source code.
 type Parser struct {
-    // Tree *Block
-    Tokens []TokenExt
+    Tree *BlockStatement
 
     filename string
-    scanner *Scanner
+    scanner *scanner
 }
 
 // Temporary type for representing tokens
 type TokenExt struct {
     Lit string
     Range protocol.Range
-    Token
+    TokenKind
 }
 
 // Initializes the parser.
 func (p *Parser) Init(filename string, src []byte) {
-    var s Scanner
-    s.Init(src)
+    var s scanner
+    s.init(src)
     p.filename = filename
     p.scanner = &s
 }
@@ -29,10 +28,9 @@ func (p *Parser) Init(filename string, src []byte) {
 // Parses the file.
 func (p *Parser) Parse() {
 	for {
-		rng, tok, lit := p.scanner.Scan()
-		if tok == EOF {
+		tok, _ := p.scanner.scan()
+		if tok.Kind == EOF {
 			break
 		}
-		p.Tokens = append(p.Tokens, TokenExt{lit, rng, tok})
 	}
 }

@@ -1,73 +1,119 @@
 package lua
 
-import (
-	protocol "github.com/tliron/glsp/protocol_3_16"
+import protocol "github.com/tliron/glsp/protocol_3_16"
+
+type Statement interface {
+	Range() protocol.Range
+
+	statement()
+}
+
+type (
+	AssignmentStatement struct {
+		Explist []Expression
+		Varlist []Variable
+	}
+	BreakStatement Identifier
+	BlockStatement struct {
+		Members []Statement
+	}
+	ChunkStatement struct {
+		Members []Statement
+	}
+	DoStatement struct {
+		Block BlockStatement
+
+		Do  Token
+		End Token
+	}
+	ForStatement struct {
+		Block    BlockStatement
+		Init     Identifier
+		InitExp  Expression
+		LimitExp Expression
+		DeltaExp *Expression // Might not exist
+
+		For Token
+		Do  Token
+		End Token
+	}
+	ForInStatement struct {
+		Block    BlockStatement
+		Explist  []Expression
+		Namelist []Identifier
+
+		For Token
+		Do  Token
+		End Token
+	}
+	GotoStatement struct {
+		Label Identifier
+
+		Goto Token
+	}
+	IfStatement struct {
+		Block BlockStatement
+		Exp   Expression
+
+		If   Token
+		Then Token
+		End  Token
+	}
+	LabelStatement Identifier
+	LocalStatement struct {
+		Explist  []Expression
+		Namelist []Token
+
+		Token
+	}
+	ReturnStatement struct {
+		Explist []Expression
+
+		Return Token
+	}
+	RepeatStatement struct {
+		Block BlockStatement
+		Exp   Expression
+
+		Repeat Token
+		Until  Token
+	}
+	WhileStatement struct {
+		Block BlockStatement
+		Exp   Expression
+
+		While Token
+		Do    Token
+		End   Token
+	}
 )
 
-// Node is implemented by all types in the AST.
-type Node interface {
-	GetRange() protocol.Range
+// TODO:
+
+type Expression interface {
+	Range() protocol.Range
+
+	expression()
 }
 
-// Block is a list of statements to execute.
-type Block struct {
-	Range protocol.Range
-	Stmts []Node
-}
+type (
+	IndexExpression struct {
+		Base    Expression
+		Indexer Token // TODO: Make a separate node for this?
+		Key     Expression
+	}
+	MemberExpression struct {
+		Base Expression
+		Key  Identifier
+	}
+)
 
-func (self *Block) GetRange() protocol.Range {
-	return self.Range
-}
-
-type BreakStatement struct {
-    Range protocol.Range
-}
-
-func (stmt *BreakStatement) GetRange() protocol.Range {
-	return stmt.Range
-}
-
-type DoStatement struct {
-    Block *Block
-	Range protocol.Range
-}
-
-func (self *DoStatement) GetRange() protocol.Range {
-    return self.Range
-}
-
-// An empty statement contains no logic and is denoted by a semicolon.
-type EmptyStatement struct {
-	Range protocol.Range
-}
-
-func (self *EmptyStatement) GetRange() protocol.Range {
-    return self.Range
-}
-
-type GotoStatement struct {
-    Label Identifier
-	Range protocol.Range
-}
-
-func (self *GotoStatement) GetRange() protocol.Range {
-    return self.Range
+// Variable is a restricted subset of Expression.
+type Variable interface {
+	variable() // To differentiate variables.
 }
 
 type Identifier struct {
-	Range protocol.Range
-    Raw string
-}
-
-func (self *Identifier) GetRange() protocol.Range {
-    return self.Range
-}
-
-type Label struct {
-	Range protocol.Range
-    Raw string
-}
-
-func (self *Label) GetRange() protocol.Range {
-    return self.Range
+	Raw string
+	Token
 }

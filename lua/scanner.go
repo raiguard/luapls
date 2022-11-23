@@ -1,10 +1,8 @@
 package lua
 
-import protocol "github.com/tliron/glsp/protocol_3_16"
-
-// Scanner lexes Lua source code into a series of Tokens.
+// scanner lexes Lua source code into a series of tokens.
 // TODO: Create multiple lexers for different Lua flavors.
-type Scanner struct {
+type scanner struct {
 	src []byte
 
 	ch   byte
@@ -14,29 +12,29 @@ type Scanner struct {
 }
 
 // Initializes the scanner.
-func (s *Scanner) Init(src []byte) {
+func (s *scanner) init(src []byte) {
 	s.src = src
 	s.ch = src[0]
 }
 
 // Scans and returns the next token in the source.
-func (s *Scanner) Scan() (protocol.Range, Token, string) {
+func (s *scanner) scan() (Token, string) {
 	s.nextWhitespace()
 
-	startCol, startLine, startPos := s.col, s.line, s.pos
-	tok := INVALID
+	col, line, startPos := s.col, s.line, s.pos
+	kind := INVALID
 
 	switch ch := s.ch; {
 	case isLetter(ch):
-		tok = IDENTIFIER
+		kind = IDENTIFIER
 		s.nextIdentifier()
 	case isDigit(ch):
-		tok = NUMBER
+		kind = NUMBER
 		s.nextNumber()
 	case isEOF(ch):
-		tok = EOF
+		kind = EOF
 	case ch == '\'' || ch == '"':
-		tok = STRING
+		kind = STRING
 		s.nextString()
 	default:
 		// Always advance
@@ -48,30 +46,30 @@ func (s *Scanner) Scan() (protocol.Range, Token, string) {
 		case '=':
 			switch ch2 {
 			case '=':
-				tok = EQL
+				kind = EQL
 				s.next()
 			default:
-				tok = ASSIGN
+				kind = ASSIGN
 			}
 		case '<':
 			switch ch2 {
 			case '=':
-				tok = LEQ
+				kind = LEQ
 				s.next()
 			default:
-				tok = LSS
+				kind = LSS
 			}
 		case '>':
 			switch ch2 {
 			case '=':
-				tok = GEQ
+				kind = GEQ
 				s.next()
 			default:
-				tok = GTR
+				kind = GTR
 			}
 		case '~':
 			if ch2 == '=' {
-				tok = NEQ
+				kind = NEQ
 				s.next()
 			} else {
 				// TODO: Error
@@ -83,29 +81,29 @@ func (s *Scanner) Scan() (protocol.Range, Token, string) {
 				if s.ch == ':' {
 					s.next()
 					if s.ch == ':' {
-						tok = LABEL
+						kind = LABEL
 						s.next()
 						break
 					}
 				}
 				// TODO: Error
 			} else {
-				tok = COLON
+				kind = COLON
 			}
 		case '.':
 			if ch2 == '.' {
 				s.next()
 				if s.ch == '.' {
-					tok = VARARG
+					kind = VARARG
 				} else {
-					tok = CONCAT
+					kind = CONCAT
 				}
 			} else {
-				tok = DOT
+				kind = DOT
 			}
 		case '-':
 			if ch2 == '-' {
-				tok = COMMENT
+				kind = COMMENT
 				// TODO: Raw string comments
 				// Advance to the next newline
 				for {
@@ -115,12 +113,12 @@ func (s *Scanner) Scan() (protocol.Range, Token, string) {
 					}
 				}
 			} else {
-				tok = SUB
+				kind = SUB
 			}
 		default:
-			realTok, reserved := tokens[string(ch)]
+			realTok, reserved := tokenKinds[string(ch)]
 			if reserved {
-				tok = realTok
+				kind = realTok
 			} else {
 				// TODO: Error?
 			}
@@ -129,20 +127,23 @@ func (s *Scanner) Scan() (protocol.Range, Token, string) {
 
 	lit := string(s.src[startPos:s.pos])
 	// Convert identifier to reserved token if it is one
-	if tok == IDENTIFIER {
-		if realTok, reserved := tokens[lit]; reserved {
-			tok = realTok
+	if kind == IDENTIFIER {
+		if realTok, reserved := tokenKinds[lit]; reserved {
+			kind = realTok
 		}
 	}
 
-	return protocol.Range{
-		Start: protocol.Position{Line: uint32(startLine), Character: uint32(startCol)},
-		End:   protocol.Position{Line: uint32(s.line), Character: uint32(s.col)},
-	}, tok, lit
+    return Token{
+    	Line: line,
+    	Col:  col,
+    	Kind: kind,
+    }, lit
 }
 
+// HELPER FUNCTIONS
+
 // Advances to the next byte in the source.
-func (s *Scanner) next() {
+func (s *scanner) next() {
 	s.pos++
 	s.col++
 	if s.pos == len(s.src) {
@@ -153,7 +154,7 @@ func (s *Scanner) next() {
 	}
 }
 
-func (s *Scanner) nextIdentifier() {
+func (s *scanner) nextIdentifier() {
 	// First character was already read
 	s.next()
 
@@ -166,7 +167,7 @@ func (s *Scanner) nextIdentifier() {
 	}
 }
 
-func (s *Scanner) nextNumber() {
+func (s *scanner) nextNumber() {
 	isHexNum := false
 
 	// First digit is always a number
@@ -197,7 +198,7 @@ func (s *Scanner) nextNumber() {
 	}
 }
 
-func (s *Scanner) nextNumeric(isHexNum bool) {
+func (s *scanner) nextNumeric(isHexNum bool) {
 	for {
 		switch ch := s.ch; {
 		case isHexNum && !isHex(ch):
@@ -209,7 +210,7 @@ func (s *Scanner) nextNumeric(isHexNum bool) {
 	}
 }
 
-func (s *Scanner) nextString() {
+func (s *scanner) nextString() {
 	delim := s.ch
 
 	// Collect all bytes until the next occurrence of the delimiter
@@ -226,7 +227,7 @@ func (s *Scanner) nextString() {
 	}
 }
 
-func (s *Scanner) nextWhitespace() {
+func (s *scanner) nextWhitespace() {
 	for {
 		if isSpace(s.ch) {
 			if s.ch == '\n' {
