@@ -133,11 +133,10 @@ func (s *scanner) scan() (Token, string) {
 		}
 	}
 
-    return Token{
-    	Line: line,
-    	Col:  col,
-    	Kind: kind,
-    }, lit
+	return Token{
+		Kind: kind,
+		Pos:  TokenPos{Line: line, Col: col},
+	}, lit
 }
 
 // HELPER FUNCTIONS

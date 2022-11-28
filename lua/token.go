@@ -5,8 +5,13 @@ import (
 )
 
 type Token struct {
-	Kind      TokenKind
-	Line, Col int
+	Kind TokenKind
+	Pos  TokenPos
+}
+
+type TokenPos struct {
+	Col  int
+	Line int
 }
 
 type TokenKind uint8

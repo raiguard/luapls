@@ -1,28 +1,21 @@
 package lua
 
-import protocol "github.com/tliron/glsp/protocol_3_16"
+// import protocol "github.com/tliron/glsp/protocol_3_16"
 
 // Parser constructs an AST from Lua source code.
 type Parser struct {
-    Tree *BlockStatement
+	Tree *BlockStmt
 
-    filename string
-    scanner *scanner
-}
-
-// Temporary type for representing tokens
-type TokenExt struct {
-    Lit string
-    Range protocol.Range
-    TokenKind
+	filename string
+	scanner  *scanner
 }
 
 // Initializes the parser.
 func (p *Parser) Init(filename string, src []byte) {
-    var s scanner
-    s.init(src)
-    p.filename = filename
-    p.scanner = &s
+	var s scanner
+	s.init(src)
+	p.filename = filename
+	p.scanner = &s
 }
 
 // Parses the file.
