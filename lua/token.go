@@ -22,7 +22,7 @@ const (
 	EOF
 	COMMENT // Can be single-line or multi-line (raw string)
 	SPACE   // Tabs or spaces
-	IDENTIFIER
+	IDENT   // Generic identifiers
 	// Keywords
 	keyword_beg
 	AND

@@ -26,7 +26,7 @@ func (s *scanner) scan() (Token, string) {
 
 	switch ch := s.ch; {
 	case isLetter(ch):
-		kind = IDENTIFIER
+		kind = IDENT
 		s.nextIdentifier()
 	case isDigit(ch):
 		kind = NUMBER
@@ -125,10 +125,10 @@ func (s *scanner) scan() (Token, string) {
 		}
 	}
 
-	lit := string(s.src[startPos:s.pos])
+	raw := string(s.src[startPos:s.pos])
 	// Convert identifier to reserved token if it is one
-	if kind == IDENTIFIER {
-		if realTok, reserved := tokenKinds[lit]; reserved {
+	if kind == IDENT {
+		if realTok, reserved := tokenKinds[raw]; reserved {
 			kind = realTok
 		}
 	}
@@ -136,7 +136,7 @@ func (s *scanner) scan() (Token, string) {
 	return Token{
 		Kind: kind,
 		Pos:  TokenPos{Line: line, Col: col},
-	}, lit
+	}, raw
 }
 
 // HELPER FUNCTIONS

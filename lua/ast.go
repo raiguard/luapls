@@ -2,8 +2,8 @@ package lua
 
 // A Node of the AST.
 type Node interface {
-	Pos() TokenPos
-	End() TokenPos
+	Pos() TokenPos // The starting position of the node
+	End() TokenPos // The position following the end of the node
 }
 
 // STATEMENTS
@@ -18,18 +18,31 @@ type (
 		Explist ExprList
 		Varlist ExprList
 	}
-	BreakStmt Identifier
+	BreakStmt Ident
 	BlockStmt struct {
 		Members []Stmt
 		Start   TokenPos
+	}
+	CompoundIfStmt struct {
+		Clauses    []Stmt
+		If, EndTok TokenPos
 	}
 	DoStmt struct {
 		Block      BlockStmt
 		Do, EndTok TokenPos
 	}
+	ElseStmt struct {
+		Block        BlockStmt
+		Else, EndTok TokenPos
+	}
+	ElseifStmt struct {
+		Block                BlockStmt
+		Exp                  Expr
+		Elseif, Then, EndTok TokenPos
+	}
 	ForStmt struct {
 		Block           BlockStmt
-		Init            Identifier
+		Init            Ident
 		InitExp         Expr
 		LimitExp        Expr
 		DeltaExp        *Expr // Might not exist
@@ -38,35 +51,34 @@ type (
 	FunctionStmt struct {
 		Body             BlockStmt
 		Funcname         Expr
-		Params           IdentifierList
+		Params           IdentList
 		Function, EndTok TokenPos
 	}
 	ForInStmt struct {
 		Block           BlockStmt
 		Explist         ExprList
-		Namelist        IdentifierList
+		Namelist        IdentList
 		For, Do, EndTok TokenPos
 	}
 	GotoStmt struct {
-		Label Identifier
+		Label Ident
 		Goto  TokenPos
 	}
-	// TODO: Elseif / else
 	IfStmt struct {
 		Block            BlockStmt
 		Exp              Expr
 		If, Then, EndTok TokenPos
 	}
-	LabelStmt         Identifier
+	LabelStmt         Ident
 	LocalFunctionStmt struct {
 		Body                    BlockStmt
 		Funcname                Expr
-		Params                  IdentifierList
+		Params                  IdentList
 		Local, Function, EndTok TokenPos
 	}
 	LocalStmt struct {
 		Explist       ExprList
-		Namelist      IdentifierList
+		Namelist      IdentList
 		Local, Equals TokenPos
 	}
 	ReturnStmt struct {
@@ -89,8 +101,8 @@ func (x *AssignmentStmt) Pos() TokenPos { return x.Varlist.Pos() }
 func (x *AssignmentStmt) End() TokenPos { return x.Explist.End() }
 func (x *AssignmentStmt) stmtNode()     {}
 
-func (x *BreakStmt) Pos() TokenPos { return x.Pos() } // TODO: Identifier Pos()
-func (x *BreakStmt) End() TokenPos { return x.End() } // TODO: Identifier End()
+func (x *BreakStmt) Pos() TokenPos { return x.Pos() } // TODO: Ident Pos()
+func (x *BreakStmt) End() TokenPos { return x.End() } // TODO: Ident End()
 func (x *BreakStmt) stmtNode()     {}
 
 func (x *BlockStmt) Pos() TokenPos { return x.Start }
@@ -103,11 +115,29 @@ func (x *BlockStmt) End() TokenPos {
 }
 func (x *BlockStmt) stmtNode() {}
 
+func (x *CompoundIfStmt) Pos() TokenPos { return x.If }
+func (x *CompoundIfStmt) End() TokenPos {
+	return TokenPos{Col: x.EndTok.Col + 2, Line: x.EndTok.Line}
+}
+func (x *CompoundIfStmt) stmtNode() {}
+
 func (x *DoStmt) Pos() TokenPos { return x.Do }
 func (x *DoStmt) End() TokenPos {
 	return TokenPos{Col: x.EndTok.Col + 2, Line: x.EndTok.Line}
 }
 func (x *DoStmt) stmtNode() {}
+
+func (x *ElseStmt) Pos() TokenPos { return x.Else }
+func (x *ElseStmt) End() TokenPos {
+	return TokenPos{Col: x.EndTok.Col + 2, Line: x.EndTok.Line}
+}
+func (x *ElseStmt) stmtNode() {}
+
+func (x *ElseifStmt) Pos() TokenPos { return x.Elseif }
+func (x *ElseifStmt) End() TokenPos {
+	return TokenPos{Col: x.EndTok.Col + 2, Line: x.EndTok.Line}
+}
+func (x *ElseifStmt) stmtNode() {}
 
 func (x *ForStmt) Pos() TokenPos { return x.For }
 func (x *ForStmt) End() TokenPos {
@@ -137,8 +167,8 @@ func (x *IfStmt) End() TokenPos {
 }
 func (x *IfStmt) stmtNode() {}
 
-func (x *LabelStmt) Pos() TokenPos { return x.Pos() } // TODO: Identifier Pos()
-func (x *LabelStmt) End() TokenPos { return x.End() } // TODO: Identifier End()
+func (x *LabelStmt) Pos() TokenPos { return x.Pos() } // TODO: Ident Pos()
+func (x *LabelStmt) End() TokenPos { return x.End() } // TODO: Ident End()
 func (x *LabelStmt) stmtNode()     {}
 
 func (x *LocalFunctionStmt) Pos() TokenPos { return x.Local }
@@ -180,11 +210,11 @@ type (
 	}
 	ClassMemberExpr struct { // Index with :
 		Base Expr
-		Key  Identifier
+		Key  Ident
 	}
 	FunctionExpr struct {
 		Body   BlockStmt
-		Params IdentifierList
+		Params IdentList
 
 		Function, EndTok TokenPos
 	}
@@ -200,7 +230,7 @@ type (
 	}
 	MemberExpr struct { // Index with .
 		Base Expr
-		Key  Identifier
+		Key  Ident
 	}
 	TableConstructorExpr struct {
 		Fields      ExprList
@@ -267,28 +297,28 @@ func (l *ExprList) End() TokenPos {
 
 // IDENTIFIERS
 
-type Identifier struct {
+type Ident struct {
 	Raw string
 	TokenPos
 }
 
-func (x *Identifier) Pos() TokenPos { return x.TokenPos }
-func (x *Identifier) End() TokenPos {
+func (x *Ident) Pos() TokenPos { return x.TokenPos }
+func (x *Ident) End() TokenPos {
 	return TokenPos{Col: x.TokenPos.Col + len(x.Raw), Line: x.TokenPos.Line}
 }
 
 // A list of identifiers.
-type IdentifierList struct {
+type IdentList struct {
 	Node
-	Identifiers []Identifier
+	Idents []Ident
 	Start, Stop TokenPos
 }
 
-func (l *IdentifierList) Pos() TokenPos { return l.Start }
-func (l *IdentifierList) End() TokenPos {
-	identsLen := len(l.Identifiers)
+func (l *IdentList) Pos() TokenPos { return l.Start }
+func (l *IdentList) End() TokenPos {
+	identsLen := len(l.Idents)
 	if identsLen == 0 {
 		return l.Start
 	}
-	return l.Identifiers[identsLen-1].End()
+	return l.Idents[identsLen-1].End()
 }
