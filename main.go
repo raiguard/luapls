@@ -30,6 +30,7 @@ func main() {
 	handler.TextDocumentDidOpen = textDocumentDidOpen
 	handler.TextDocumentDidChange = textDocumentDidChange
 	handler.TextDocumentDocumentHighlight = textDocumentHighlight
+	handler.TextDocumentHover = textDocumentHover
 
 	server := server.NewServer(&handler, lsName, true)
 
@@ -104,6 +105,21 @@ func textDocumentHighlight(ctc *glsp.Context, params *protocol.DocumentHighlight
 				return []protocol.DocumentHighlight{{
 					Range: token.Range,
 				}}, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
+func textDocumentHover(ctc *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+	if tokens, ok := files[params.TextDocument.URI]; ok {
+		for i := 0; i < len(tokens); i++ {
+			token := &tokens[i]
+			if withinRange(&token.Range, &params.Position) {
+				return &protocol.Hover{
+					Contents: lua.TokenString[token.Token],
+					// Range:    &token.Range,
+				}, nil
 			}
 		}
 	}

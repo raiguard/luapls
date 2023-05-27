@@ -132,6 +132,68 @@ var tokens = map[string]Token{
 	"...": VARARG,
 }
 
+var TokenString = map[Token]string{
+	COMMENT:    "comment",
+	SPACE:      "space",
+	IDENTIFIER: "identifier",
+
+	AND:      "and",
+	BREAK:    "break",
+	DO:       "do",
+	ELSE:     "else",
+	ELSEIF:   "elseif",
+	END:      "end",
+	FOR:      "for",
+	FUNCTION: "function",
+	GOTO:     "goto",
+	IF:       "if",
+	IN:       "in",
+	LOCAL:    "local",
+	NOT:      "not",
+	OR:       "or",
+	REPEAT:   "repeat",
+	RETURN:   "return",
+	THEN:     "then",
+	UNTIL:    "until",
+	WHILE:    "while",
+
+	FALSE:     "false",
+	LABEL:     "label",
+	NIL:       "nil",
+	NUMBER:    "number",
+	RAWSTRING: "rawstring",
+	STRING:    "string",
+	TRUE:      "true",
+
+	ADD:    "add",
+	SUB:    "sub",
+	MUL:    "mul",
+	DIV:    "div",
+	MOD:    "mod",
+	POW:    "pow",
+	LEN:    "len",
+	EQL:    "eql",
+	NEQ:    "neq",
+	LEQ:    "leq",
+	GEQ:    "geq",
+	LSS:    "lss",
+	GTR:    "gtr",
+	ASSIGN: "assign",
+	LPAREN: "lparen",
+	RPAREN: "rparen",
+	LBRACE: "lbrace",
+	RBRACE: "rbrace",
+	LBRACK: "lbrack",
+	RBRACK: "rbrack",
+
+	COMMA:     "comma",
+	SEMICOLON: "semicolon",
+	COLON:     "colon",
+	DOT:       "dot",
+	CONCAT:    "concat",
+	VARARG:    "vararg",
+}
+
 func isIdentifier(s string) bool {
 	if s == "" || isKeyword(s) {
 		return false
