@@ -21,7 +21,7 @@ local bool_2 = true
 local nillit = nil
 
 local exp = -1.53e-5-4
-local exp_2 = 0xA32e.CDp6432
+local exp_2 = 0xA32e.CDp-6432-5
 
 -- Multiple assignment
 
@@ -43,5 +43,14 @@ end
 function foo(param)
   print(param, num_1)
 end
+
+local raw_string = [===[[[==[=]]==]====]
+	[=[]=]===]
+
+--[=[
+--
+--
+-- foo bar [[ hello world ]]
+]=]
 
 ::continue::

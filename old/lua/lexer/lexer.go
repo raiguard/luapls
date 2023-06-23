@@ -23,7 +23,6 @@ func New(input string) *Lexer {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
-tryAgain:
 	l.skipWhitespace()
 	l.savePosition()
 
@@ -55,7 +54,6 @@ tryAgain:
 	case '-':
 		if l.expectPeek('-') {
 			l.skipComment()
-			goto tryAgain
 		} else {
 			tok = l.readNewToken(token.MINUS)
 		}
@@ -194,14 +192,11 @@ func (l *Lexer) curLiteral() string {
 }
 
 func (l *Lexer) skipComment() {
-	if l.expectPeek('[') {
-		// TODO: error handling
-		l.readRawString()
-		return
-	}
+	// TODO: Raw string comments
 	for l.char != '\n' {
 		l.readChar()
 	}
+	l.readChar()
 }
 
 func (l *Lexer) skipWhitespace() {
