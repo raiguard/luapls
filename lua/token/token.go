@@ -142,3 +142,22 @@ var TokenStr = map[TokenType]string{
 	SEMICOLON: ";",
 	SPREAD:    "...",
 }
+
+var Keywords = map[string]TokenType{
+	"break":    BREAK,
+	"do":       DO,
+	"else":     ELSE,
+	"elseif":   ELSEIF,
+	"end":      END,
+	"for":      FOR,
+	"function": FUNCTION,
+	"goto":     GOTO,
+	"if":       IF,
+	"in":       IN,
+	"local":    LOCAL,
+	"repeat":   REPEAT,
+	"return":   RETURN,
+	"then":     THEN,
+	"until":    UNTIL,
+	"while":    WHILE,
+}

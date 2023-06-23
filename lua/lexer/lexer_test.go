@@ -1,15 +1,15 @@
 package lexer
 
 import (
+	"fmt"
 	"luapls/lua/token"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLexer(t *testing.T) {
-	input := "+-++%^=/==>>=<=<"
-
+func TestOperators(t *testing.T) {
+	input := "+-++%^=/==>>=<=<~="
 	tokens := []token.Token{
 		{Type: token.PLUS, Literal: "+", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 1, EndRow: 0}},
 		{Type: token.MINUS, Literal: "-", Range: token.Range{StartCol: 1, StartRow: 0, EndCol: 2, EndRow: 0}},
@@ -24,16 +24,59 @@ func TestLexer(t *testing.T) {
 		{Type: token.GEQ, Literal: ">=", Range: token.Range{StartCol: 11, StartRow: 0, EndCol: 13, EndRow: 0}},
 		{Type: token.LEQ, Literal: "<=", Range: token.Range{StartCol: 13, StartRow: 0, EndCol: 15, EndRow: 0}},
 		{Type: token.LT, Literal: "<", Range: token.Range{StartCol: 15, StartRow: 0, EndCol: 16, EndRow: 0}},
+		{Type: token.NEQ, Literal: "~=", Range: token.Range{StartCol: 16, StartRow: 0, EndCol: 18, EndRow: 0}},
 	}
+	testLexer(t, input, tokens)
+}
 
+func TestKeywords(t *testing.T) {
+	input := "local while for"
+	tokens := []token.Token{
+		{Type: token.LOCAL, Literal: "local", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 5, EndRow: 0}},
+		{Type: token.WHILE, Literal: "while", Range: token.Range{StartCol: 6, StartRow: 0, EndCol: 11, EndRow: 0}},
+		{Type: token.FOR, Literal: "for", Range: token.Range{StartCol: 12, StartRow: 0, EndCol: 15, EndRow: 0}},
+	}
+	testLexer(t, input, tokens)
+}
+
+func TestAssignment(t *testing.T) {
+	input := "local foo = 123"
+	tokens := []token.Token{
+		{Type: token.LOCAL, Literal: "local", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 5, EndRow: 0}},
+		{Type: token.IDENT, Literal: "foo", Range: token.Range{StartCol: 6, StartRow: 0, EndCol: 9, EndRow: 0}},
+		{Type: token.ASSIGN, Literal: "=", Range: token.Range{StartCol: 10, StartRow: 0, EndCol: 11, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "123", Range: token.Range{StartCol: 12, StartRow: 0, EndCol: 15, EndRow: 0}},
+	}
+	testLexer(t, input, tokens)
+}
+
+func TestNumbers(t *testing.T) {
+	input := "3 3.0 3.1416 314.16e-2 0.31416E1 0xff 0x0.1E 0xA23p-4 0X1.921FB54442D18P+1"
+	tokens := []token.Token{
+		{Type: token.NUMBER, Literal: "3", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 1, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "3.0", Range: token.Range{StartCol: 2, StartRow: 0, EndCol: 5, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "3.1416", Range: token.Range{StartCol: 6, StartRow: 0, EndCol: 12, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "314.16e-2", Range: token.Range{StartCol: 13, StartRow: 0, EndCol: 22, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "0.31416E1", Range: token.Range{StartCol: 23, StartRow: 0, EndCol: 32, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "0xff", Range: token.Range{StartCol: 33, StartRow: 0, EndCol: 37, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "0x0.1E", Range: token.Range{StartCol: 38, StartRow: 0, EndCol: 44, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "0xA23p-4", Range: token.Range{StartCol: 45, StartRow: 0, EndCol: 53, EndRow: 0}},
+		{Type: token.NUMBER, Literal: "0X1.921FB54442D18P+1", Range: token.Range{StartCol: 54, StartRow: 0, EndCol: 74, EndRow: 0}},
+	}
+	testLexer(t, input, tokens)
+}
+
+func testLexer(t *testing.T, input string, tokens []token.Token) {
 	l := New(input)
-	for _, tok := range tokens {
-		realTok := l.NextToken()
-		assert.Equal(t, realTok.Type, tok.Type)
-		assert.Equal(t, realTok.Literal, tok.Literal)
-		assert.Equal(t, realTok.Range.StartCol, tok.Range.StartCol)
-		assert.Equal(t, realTok.Range.StartRow, tok.Range.StartRow)
-		assert.Equal(t, realTok.Range.EndCol, tok.Range.EndCol)
-		assert.Equal(t, realTok.Range.EndRow, tok.Range.EndRow)
+	for _, expected := range tokens {
+		fmt.Println(expected.Literal)
+		actual := l.NextToken()
+		fmt.Println(actual.Literal)
+		assert.Equal(t, expected.Type, actual.Type)
+		assert.Equal(t, expected.Literal, actual.Literal)
+		assert.Equal(t, expected.Range.StartCol, actual.Range.StartCol)
+		assert.Equal(t, expected.Range.StartRow, actual.Range.StartRow)
+		assert.Equal(t, expected.Range.EndCol, actual.Range.EndCol)
+		assert.Equal(t, expected.Range.EndRow, actual.Range.EndRow)
 	}
 }
