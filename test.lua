@@ -51,6 +51,6 @@ local raw_string = [===[[[==[=]]==]====]
 --
 --
 -- foo bar [[ hello world ]]
-]=]
+]=
 
 ::continue::

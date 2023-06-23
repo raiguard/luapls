@@ -54,8 +54,10 @@ tryAgain:
 		}
 	case '-':
 		if l.expectPeek('-') {
-			l.skipComment()
-			goto tryAgain
+			if l.skipComment() {
+				// FIXME: This sucks
+				goto tryAgain
+			}
 		} else {
 			tok = l.readNewToken(token.MINUS)
 		}
@@ -77,8 +79,9 @@ tryAgain:
 		tok = l.readNewToken(token.RPAREN)
 	case '[':
 		if l.peekChar() == '[' || l.peekChar() == '=' {
-			l.readRawString()
-			tok = l.readNewToken(token.RAWSTRING)
+			if l.readRawString() {
+				tok = l.readNewToken(token.RAWSTRING)
+			}
 		} else {
 			tok = l.readNewToken(token.LBRACK)
 		}
@@ -193,15 +196,14 @@ func (l *Lexer) curLiteral() string {
 	return l.input[l.savedPos:l.position]
 }
 
-func (l *Lexer) skipComment() {
+func (l *Lexer) skipComment() bool {
 	if l.expectPeek('[') {
-		// TODO: error handling
-		l.readRawString()
-		return
+		return l.readRawString()
 	}
 	for l.char != '\n' {
 		l.readChar()
 	}
+	return true
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -291,16 +293,10 @@ func (l *Lexer) readRawString() bool {
 		for l.expectPeek('=') {
 			thisLevel += 1
 		}
-		if thisLevel == level {
+		if thisLevel == level && l.expectPeek(']') {
 			break
 		}
 		l.readChar()
-	}
-	if !l.expectPeek(']') {
-		return false
-	}
-	if !l.expectPeek(']') {
-		return false
 	}
 
 	return true
