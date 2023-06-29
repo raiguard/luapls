@@ -29,7 +29,7 @@ tryAgain:
 
 	switch l.char {
 	case 0:
-		return token.Token{Type: token.EOF}
+		return l.newToken(token.EOF)
 	case '=':
 		if l.expectPeek('=') {
 			tok = l.readNewToken(token.EQUAL)
