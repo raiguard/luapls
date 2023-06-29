@@ -24,6 +24,7 @@ func TestOperators(t *testing.T) {
 		{Type: token.LEQ, Literal: "<=", Range: token.Range{StartCol: 13, StartRow: 0, EndCol: 15, EndRow: 0}},
 		{Type: token.LT, Literal: "<", Range: token.Range{StartCol: 15, StartRow: 0, EndCol: 16, EndRow: 0}},
 		{Type: token.NEQ, Literal: "~=", Range: token.Range{StartCol: 16, StartRow: 0, EndCol: 18, EndRow: 0}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 18, StartRow: 0, EndCol: 18, EndRow: 0}},
 	}
 	testLexer(t, input, tokens)
 }
@@ -34,6 +35,7 @@ func TestKeywords(t *testing.T) {
 		{Type: token.LOCAL, Literal: "local", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 5, EndRow: 0}},
 		{Type: token.WHILE, Literal: "while", Range: token.Range{StartCol: 6, StartRow: 0, EndCol: 11, EndRow: 0}},
 		{Type: token.FOR, Literal: "for", Range: token.Range{StartCol: 12, StartRow: 0, EndCol: 15, EndRow: 0}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 15, StartRow: 0, EndCol: 15, EndRow: 0}},
 	}
 	testLexer(t, input, tokens)
 }
@@ -53,6 +55,7 @@ local foo = 123
 		{Type: token.NUMBER, Literal: "2", Range: token.Range{StartCol: 4, StartRow: 2, EndCol: 5, EndRow: 2}},
 		{Type: token.EQUAL, Literal: "==", Range: token.Range{StartCol: 6, StartRow: 2, EndCol: 8, EndRow: 2}},
 		{Type: token.NUMBER, Literal: "4", Range: token.Range{StartCol: 9, StartRow: 2, EndCol: 10, EndRow: 2}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 0, StartRow: 3, EndCol: 0, EndRow: 3}},
 	}
 	testLexer(t, input, tokens)
 }
@@ -69,6 +72,7 @@ func TestNumbers(t *testing.T) {
 		{Type: token.NUMBER, Literal: "0x0.1E", Range: token.Range{StartCol: 38, StartRow: 0, EndCol: 44, EndRow: 0}},
 		{Type: token.NUMBER, Literal: "0xA23p-4", Range: token.Range{StartCol: 45, StartRow: 0, EndCol: 53, EndRow: 0}},
 		{Type: token.NUMBER, Literal: "0X1.921FB54442D18P+1", Range: token.Range{StartCol: 54, StartRow: 0, EndCol: 74, EndRow: 0}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 74, StartRow: 0, EndCol: 74, EndRow: 0}},
 	}
 	testLexer(t, input, tokens)
 }
@@ -78,6 +82,7 @@ func TestStrings(t *testing.T) {
 	tokens := []token.Token{
 		{Type: token.STRING, Literal: "'314.16e-2'", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 11, EndRow: 0}},
 		{Type: token.STRING, Literal: "\"foo bar\"", Range: token.Range{StartCol: 12, StartRow: 0, EndCol: 21, EndRow: 0}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 21, StartRow: 0, EndCol: 21, EndRow: 0}},
 	}
 	testLexer(t, input, tokens)
 }
@@ -87,6 +92,7 @@ func TestRawStrings(t *testing.T) {
   19"38'44'"al]====]`
 	tokens := []token.Token{
 		{Type: token.RAWSTRING, Literal: "[====[asdkflasdkfjs]===]\n  19\"38'44'\"al]====]", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 20, EndRow: 1}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 20, StartRow: 1, EndCol: 20, EndRow: 1}},
 	}
 	testLexer(t, input, tokens)
 }
@@ -97,6 +103,7 @@ func TestLabel(t *testing.T) {
 		{Type: token.LABEL, Literal: "::", Range: token.Range{StartCol: 0, StartRow: 0, EndCol: 2, EndRow: 0}},
 		{Type: token.IDENT, Literal: "foo_BAR_314", Range: token.Range{StartCol: 2, StartRow: 0, EndCol: 13, EndRow: 0}},
 		{Type: token.LABEL, Literal: "::", Range: token.Range{StartCol: 13, StartRow: 0, EndCol: 15, EndRow: 0}},
+		{Type: token.EOF, Literal: "", Range: token.Range{StartCol: 15, StartRow: 0, EndCol: 15, EndRow: 0}},
 	}
 	testLexer(t, input, tokens)
 }
