@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"luapls/lua/token"
+	"github.com/raiguard/luapls/lua/token"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

@@ -11,6 +11,7 @@ const (
 	LABEL
 
 	// Keywords
+	keywordStart
 	BREAK
 	DO
 	ELSE
@@ -27,19 +28,24 @@ const (
 	THEN
 	UNTIL
 	WHILE
+	keywordEnd
 
 	// Literals
+	literalStart
 	FALSE
 	NIL
 	NUMBER
 	RAWSTRING
 	STRING
 	TRUE
+	literalEnd
 
 	// Operators
+	operatorStart
 	AND
 	ASSIGN
 	CARET
+	CONCAT
 	EQUAL
 	GEQ
 	GT
@@ -54,22 +60,26 @@ const (
 	PLUS
 	SLASH
 	STAR
+	operatorEnd
 
 	// Structure
+	structStart
 	LPAREN
 	RPAREN
 	LBRACK
 	RBRACK
 	LBRACE
 	RBRACE
+	structEnd
 
 	// Grammar
+	grammarStart
 	COLON
 	COMMA
-	CONCAT
 	DOT
 	SEMICOLON
 	SPREAD
+	grammarEnd
 )
 
 type Token struct {
@@ -160,4 +170,8 @@ var Keywords = map[string]TokenType{
 	"then":     THEN,
 	"until":    UNTIL,
 	"while":    WHILE,
+}
+
+func IsOperator(tok TokenType) bool {
+	return tok > operatorStart && tok < operatorEnd
 }

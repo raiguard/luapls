@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"luapls/lua/lexer"
-	"luapls/lua/token"
 	"os"
+
+	"github.com/raiguard/luapls/lua/lexer"
+	"github.com/raiguard/luapls/lua/token"
 )
 
 func main() {

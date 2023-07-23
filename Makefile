@@ -7,6 +7,6 @@ clean:
 	rm -f luapls
 
 test: *.go
-	@go test
+	@go test ./...
 
 .PHONY: clean luapls test
