@@ -91,7 +91,7 @@ func (p *Parser) parseStatement() ast.Statement {
 
 func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 	ident := ast.Identifier(p.curToken)
-	stmt := ast.AssignmentStatement{
+	stmt := &ast.AssignmentStatement{
 		Token: p.curToken,
 		Name:  &ident,
 	}
@@ -108,7 +108,7 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 		p.nextToken()
 	}
 
-	return &stmt
+	return stmt
 }
 
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
