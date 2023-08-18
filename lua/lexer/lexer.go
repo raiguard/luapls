@@ -11,7 +11,7 @@ type Lexer struct {
 	char         byte
 	col, row     int
 
-	savedCol, savedRow, savedPos int
+	savedCol, savedRow, savedPos uint32
 }
 
 func New(input string) *Lexer {
@@ -169,9 +169,9 @@ func (l *Lexer) expectPeek(expected byte) bool {
 }
 
 func (l *Lexer) savePosition() {
-	l.savedCol = l.col
-	l.savedRow = l.row
-	l.savedPos = l.position
+	l.savedCol = uint32(l.col)
+	l.savedRow = uint32(l.row)
+	l.savedPos = uint32(l.position)
 }
 
 func (l *Lexer) newToken(tokType token.TokenType) token.Token {
@@ -181,8 +181,8 @@ func (l *Lexer) newToken(tokType token.TokenType) token.Token {
 		Range: token.Range{
 			StartCol: l.savedCol,
 			StartRow: l.savedRow,
-			EndCol:   l.col,
-			EndRow:   l.row,
+			EndCol:   uint32(l.col),
+			EndRow:   uint32(l.row),
 		},
 	}
 }

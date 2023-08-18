@@ -47,6 +47,14 @@ end
 local raw_string = [===[[[==[=]]==]====]
 	[=[]=]===]
 
+local other_raw = [[
+
+
+
+
+food
+]]
+
 --[=[
 --
 --

@@ -9,4 +9,4 @@ clean:
 test: *.go
 	@go test ./...
 
-.PHONY: clean test
+.PHONY: clean luapls test

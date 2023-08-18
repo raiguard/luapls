@@ -89,11 +89,14 @@ type Token struct {
 }
 
 type Range struct {
-	StartCol, StartRow int
-	EndCol, EndRow     int
+	StartCol, StartRow uint32
+	EndCol, EndRow     uint32
 }
 
 var TokenStr = map[TokenType]string{
+	IDENT: "identifier",
+	LABEL: "label",
+
 	// Keywords
 	BREAK:    "break",
 	DO:       "do",
@@ -113,9 +116,12 @@ var TokenStr = map[TokenType]string{
 	WHILE:    "while",
 
 	// Literals
-	FALSE: "false",
-	NIL:   "nil",
-	TRUE:  "true",
+	FALSE:     "false",
+	NIL:       "nil",
+	NUMBER:    "number",
+	RAWSTRING: "rawstring",
+	STRING:    "string",
+	TRUE:      "true",
 
 	// Operators
 	AND:     "and",
