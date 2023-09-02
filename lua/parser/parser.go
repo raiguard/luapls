@@ -48,6 +48,8 @@ func (p *Parser) ParseBlock() *ast.Block {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
+		} else {
+			p.nextToken() // Always make some progress
 		}
 	}
 

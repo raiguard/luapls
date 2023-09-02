@@ -267,10 +267,16 @@ func (l *Lexer) readIdentifier() string {
 }
 
 func (l *Lexer) readString(quote byte) bool {
-	l.readChar()
-	for l.char != '\n' && l.char != quote {
+	for {
+		if l.peekChar() == '\n' {
+			break
+		}
+		if l.peekChar() == quote && l.char != '\\' {
+			break
+		}
 		l.readChar()
 	}
+	l.readChar()
 	return l.char == quote
 }
 

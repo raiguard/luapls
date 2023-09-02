@@ -44,6 +44,7 @@ func TestLocalStatement(t *testing.T) {
 		local foo = 123
 		local bar = 456
 		local baz = "lorem ipsum"
+		local complex = "\"dolor sit amet"
 	`
 
 	l := lexer.New(input)
@@ -59,6 +60,7 @@ func TestLocalStatement(t *testing.T) {
 		{"foo", 123.0},
 		{"bar", 456.0},
 		{"baz", "lorem ipsum"},
+		{"complex", "\\\"dolor sit amet"},
 	}
 
 	require.Equal(t, len(tests), len(stmts))

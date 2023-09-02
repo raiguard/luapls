@@ -15,6 +15,7 @@ local num_9 = 0X1.921FB54442D18P+1
 
 local single_string = 'the quick fox'
 local double_string = "the quick fox"
+local confusing_quotes = "\"the quick fox"
 
 local bool_1 = false
 local bool_2 = true
