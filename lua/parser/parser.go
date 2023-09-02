@@ -1,3 +1,7 @@
+// Package Parser implements a recursive descent parser for Lua 5.2. It is
+// heavily based on "Writing an Interpreter in Go" by Thorston Ball.
+// https://interpreterbook.com/
+
 package parser
 
 import (
@@ -80,16 +84,16 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	// case token.LOCAL:
-	// 	return p.parseLocalStatement()
 	case token.IDENT:
 		return p.parseAssignmentStatement()
+	case token.LOCAL:
+		return p.parseLocalStatement()
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
+func (p *Parser) parseAssignmentStatement() ast.Statement {
 	ident := ast.Identifier(p.curToken)
 	stmt := &ast.AssignmentStatement{
 		Token: p.curToken,
@@ -108,6 +112,20 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 		p.nextToken()
 	}
 
+	return stmt
+}
+
+func (p *Parser) parseLocalStatement() ast.Statement {
+	stmt := &ast.LocalStatement{
+		Token: p.curToken,
+	}
+	p.nextToken()
+	switch p.curToken.Type {
+	case token.IDENT:
+		stmt.Statement = p.parseAssignmentStatement()
+	default:
+		p.errors = append(p.errors, fmt.Sprintf("Invalid token in local statement: %s", token.TokenStr[p.curToken.Type]))
+	}
 	return stmt
 }
 

@@ -18,7 +18,7 @@ func TestBlock(t *testing.T) {
 	p := New(l)
 
 	block := p.ParseBlock()
-	statements := block.Statements
+	stmts := block.Statements
 
 	tests := []struct {
 		name string
@@ -28,14 +28,48 @@ func TestBlock(t *testing.T) {
 		{"bar", 456},
 	}
 
-	require.Equal(t, len(tests), len(statements))
+	require.Equal(t, len(tests), len(stmts))
 	for i, test := range tests {
-		assnStmt, ok := statements[i].(*ast.AssignmentStatement)
+		assnStmt, ok := stmts[i].(*ast.AssignmentStatement)
 		require.True(t, ok)
 		require.Equal(t, test.name, assnStmt.Name.String())
 		lit, ok := assnStmt.Value.(*ast.NumberLiteral)
 		require.True(t, ok)
 		require.Equal(t, test.num, lit.Value)
+	}
+}
+
+func TestLocalStatement(t *testing.T) {
+	input := `
+		local foo = 123
+		local bar = 456
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	block := p.ParseBlock()
+	stmts := block.Statements
+
+	tests := []struct {
+		name  string
+		value float64
+	}{
+		{"foo", 123},
+		{"bar", 456},
+	}
+
+	require.Equal(t, len(tests), len(stmts))
+
+	for i, test := range tests {
+		localStmt, ok := stmts[i].(*ast.LocalStatement)
+		require.True(t, ok)
+		assnStmt, ok := localStmt.Statement.(*ast.AssignmentStatement)
+		require.True(t, ok)
+		require.Equal(t, test.name, assnStmt.Name.String())
+		lit, ok := assnStmt.Value.(*ast.NumberLiteral)
+		require.True(t, ok)
+		require.Equal(t, test.value, lit.Value)
 	}
 }
 
