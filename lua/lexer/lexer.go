@@ -4,6 +4,7 @@ import (
 	"github.com/raiguard/luapls/lua/token"
 )
 
+// TODO: Support unicode
 type Lexer struct {
 	input        string
 	position     int
@@ -55,7 +56,7 @@ tryAgain:
 	case '-':
 		if l.expectPeek('-') {
 			if l.skipComment() {
-				// FIXME: This sucks
+				// TODO: This sucks
 				goto tryAgain
 			}
 		} else {
