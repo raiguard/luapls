@@ -7,6 +7,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
@@ -155,6 +156,8 @@ func (p *Parser) getPrefixParser() prefixParseFn {
 		return p.parseIdentifier
 	case token.NUMBER:
 		return p.parseNumberLiteral
+	case token.STRING:
+		return p.parseStringLiteral
 	}
 	return nil
 }
@@ -183,6 +186,15 @@ func (p *Parser) parseNumberLiteral() ast.Expression {
 
 	p.nextToken()
 
+	return lit
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	lit := &ast.StringLiteral{
+		Token: p.curToken,
+		Value: strings.Trim(p.curToken.Literal, "\"'"),
+	}
+	p.nextToken()
 	return lit
 }
 

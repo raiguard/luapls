@@ -43,6 +43,7 @@ func TestLocalStatement(t *testing.T) {
 	input := `
 		local foo = 123
 		local bar = 456
+		local baz = "lorem ipsum"
 	`
 
 	l := lexer.New(input)
@@ -53,10 +54,11 @@ func TestLocalStatement(t *testing.T) {
 
 	tests := []struct {
 		name  string
-		value float64
+		value any
 	}{
-		{"foo", 123},
-		{"bar", 456},
+		{"foo", 123.0},
+		{"bar", 456.0},
+		{"baz", "lorem ipsum"},
 	}
 
 	require.Equal(t, len(tests), len(stmts))
@@ -67,9 +69,15 @@ func TestLocalStatement(t *testing.T) {
 		assnStmt, ok := localStmt.Statement.(*ast.AssignmentStatement)
 		require.True(t, ok)
 		require.Equal(t, test.name, assnStmt.Name.String())
-		lit, ok := assnStmt.Value.(*ast.NumberLiteral)
-		require.True(t, ok)
-		require.Equal(t, test.value, lit.Value)
+		value := assnStmt.Value
+		switch value.(type) {
+		case *ast.NumberLiteral:
+			require.Equal(t, test.value, value.(*ast.NumberLiteral).Value)
+		case *ast.StringLiteral:
+			require.Equal(t, test.value, value.(*ast.StringLiteral).Value)
+		default:
+			require.FailNow(t, "Untested token type %s", value.String())
+		}
 	}
 }
 

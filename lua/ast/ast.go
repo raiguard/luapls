@@ -68,3 +68,11 @@ type NumberLiteral struct {
 
 func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) String() string  { return nl.Token.Literal }
+
+type StringLiteral struct {
+	Token token.Token
+	Value string // Without quotes
+}
+
+func (sl *StringLiteral) expressionNode() {}
+func (sl *StringLiteral) String() string  { return sl.Token.Literal }
