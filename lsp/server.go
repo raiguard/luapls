@@ -66,7 +66,7 @@ func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 		if err != nil {
 			return err
 		}
-		lexFile(path, string(src))
+		lexFile(ctx, path, string(src))
 	}
 	logToEditor(ctx, fmt.Sprint("Initial scan (", len(toParse), " files): ", time.Since(before)))
 	return nil
@@ -83,7 +83,7 @@ func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 }
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	lexFile(params.TextDocument.URI, params.TextDocument.Text)
+	lexFile(ctx, params.TextDocument.URI, params.TextDocument.Text)
 	return nil
 }
 
@@ -91,7 +91,7 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			before := time.Now()
-			lexFile(params.TextDocument.URI, change.Text)
+			lexFile(ctx, params.TextDocument.URI, change.Text)
 			logToEditor(ctx, fmt.Sprint("Rescan duration: ", time.Since(before)))
 		}
 	}
@@ -126,7 +126,8 @@ func textDocumentHover(ctc *glsp.Context, params *protocol.HoverParams) (*protoc
 	return nil, nil
 }
 
-func lexFile(filename, src string) {
+func lexFile(ctx *glsp.Context, filename, src string) {
+	logToEditor(ctx, fmt.Sprintf("Lexing %s", filename))
 	l := lexer.New(src)
 	for {
 		tok := l.NextToken()
