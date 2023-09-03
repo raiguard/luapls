@@ -21,13 +21,15 @@ func TestString(t *testing.T) {
 					Literal: "foo",
 					Range:   token.Range{StartCol: 6, StartRow: 0, EndCol: 9, EndRow: 3},
 				},
-				Value: &NumberLiteral{
-					Token: token.Token{
-						Type:    token.NUMBER,
-						Literal: "123",
-						Range:   token.Range{},
+				Exps: []Expression{
+					&NumberLiteral{
+						Token: token.Token{
+							Type:    token.NUMBER,
+							Literal: "123",
+							Range:   token.Range{},
+						},
+						Value: 123,
 					},
-					Value: 123,
 				},
 				isLocal: false,
 			},

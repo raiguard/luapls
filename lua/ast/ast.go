@@ -32,13 +32,17 @@ type Statement interface {
 type AssignmentStatement struct {
 	Token   token.Token
 	Name    *Identifier
-	Value   Expression
+	Exps    []Expression
 	isLocal bool
 }
 
 func (as *AssignmentStatement) statementNode() {}
 func (as *AssignmentStatement) String() string {
-	return fmt.Sprintf("%s = %s", as.Name.Literal, as.Value.String())
+	values := []string{}
+	for _, exp := range as.Exps {
+		values = append(values, exp.String())
+	}
+	return fmt.Sprintf("%s = %s", as.Name.Literal, strings.Join(values, ", "))
 }
 
 type BreakStatement token.Token

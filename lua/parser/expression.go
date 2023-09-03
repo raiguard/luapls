@@ -47,6 +47,28 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	return leftExp
 }
 
+func (p *Parser) parseExpressionList() []ast.Expression {
+	exps := []ast.Expression{}
+	exp := p.parseExpression(LOWEST)
+	if exp == nil {
+		return nil
+	}
+	exps = append(exps, exp)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		exp = p.parseExpression(LOWEST)
+		if exp == nil {
+			// TODO: Error
+			return nil
+		}
+		exps = append(exps, exp)
+	}
+
+	return exps
+}
+
 func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	expression := &ast.BinaryExpression{
 		Token:    p.curToken,
@@ -80,8 +102,6 @@ func (p *Parser) parseUnaryExpression() ast.Expression {
 	exp.Right = p.parseExpression(UNARY)
 	return exp
 }
-
-// Basic types
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	ident := ast.Identifier(p.curToken)

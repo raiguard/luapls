@@ -43,7 +43,7 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(LOWEST)
+	stmt.Exps = p.parseExpressionList()
 
 	return stmt
 }
