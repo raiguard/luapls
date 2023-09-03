@@ -12,6 +12,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.BREAK:
 		stat = p.parseBreakStatement()
+	case token.DO:
+		stat = p.parseDoStatement()
 	case token.GOTO:
 		stat = p.parseGotoStatement()
 	case token.IDENT:
@@ -50,6 +52,13 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 
 func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 	stmt := ast.BreakStatement(p.curToken)
+	return &stmt
+}
+
+func (p *Parser) parseDoStatement() *ast.DoStatement {
+	stmt := ast.DoStatement{Token: p.curToken}
+	p.nextToken()
+	stmt.Block = *p.ParseBlock()
 	return &stmt
 }
 

@@ -47,6 +47,16 @@ func (bs *BreakStatement) String() string {
 	return bs.Literal
 }
 
+type DoStatement struct {
+	Token token.Token
+	Block Block
+}
+
+func (ds *DoStatement) statementNode() {}
+func (ds *DoStatement) String() string {
+	return fmt.Sprintf("%s\n%s\nend", ds.Token.Literal, ds.Block.String())
+}
+
 type GotoStatement struct {
 	Token token.Token
 	Label Identifier

@@ -30,6 +30,12 @@ func TestBreakStatement(t *testing.T) {
 	testStatement(t, "break", func(stmt ast.BreakStatement) {})
 }
 
+func TestDoStatement(t *testing.T) {
+	testStatement(t, "do i = 1 end", func(stmt ast.DoStatement) {
+		require.Equal(t, 1, len(stmt.Block.Statements))
+	})
+}
+
 func TestGotoStatement(t *testing.T) {
 	testStatement(t, "goto continue", func(stmt ast.GotoStatement) {
 		require.Equal(t, "continue", stmt.Label.String())
