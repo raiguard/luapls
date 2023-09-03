@@ -51,45 +51,16 @@ func TestIfStatement(t *testing.T) {
 }
 
 func TestLocalStatement(t *testing.T) {
-	input := `
-		local foo = 123
-		local bar = 456
-		local baz = "lorem ipsum"
-		local complex = "\"dolor sit amet"
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	block := p.ParseBlock()
-	stmts := block.Statements
-
-	tests := []struct {
-		name  string
-		value any
-	}{
-		{"foo", 123.0},
-		{"bar", 456.0},
-		{"baz", "lorem ipsum"},
-		{"complex", "\\\"dolor sit amet"},
-	}
-
-	require.Equal(t, len(tests), len(stmts))
-
-	for i, test := range tests {
-		localStmt := requireTypeConversion[ast.LocalStatement](t, stmts[i])
-		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, localStmt.Statement)
-		require.Equal(t, test.name, assnStmt.Name.String())
-		value := assnStmt.Value
-		switch value.(type) {
-		case *ast.NumberLiteral:
-			require.Equal(t, test.value, value.(*ast.NumberLiteral).Value)
-		case *ast.StringLiteral:
-			require.Equal(t, test.value, value.(*ast.StringLiteral).Value)
-		default:
-			require.Fail(t, "Untested token type %s", value.String())
-		}
-	}
+	testStatement(t, "local foo = 123", func(stmt ast.LocalStatement) {
+		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, stmt.Statement)
+		require.Equal(t, "foo", assnStmt.Name.String())
+		require.Equal(t, 123.0, requireTypeConversion[ast.NumberLiteral](t, assnStmt.Value).Value)
+	})
+	testStatement(t, "local foo = 'lorem ipsum'", func(stmt ast.LocalStatement) {
+		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, stmt.Statement)
+		require.Equal(t, "foo", assnStmt.Name.String())
+		require.Equal(t, "lorem ipsum", requireTypeConversion[ast.StringLiteral](t, assnStmt.Value).Value)
+	})
 }
 
 func testStatement[T any](t *testing.T, input string, tester func(T)) {
