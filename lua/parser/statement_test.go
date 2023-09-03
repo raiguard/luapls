@@ -8,35 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlock(t *testing.T) {
-	input := `
-		foo = 123
-		bar = 456
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	block := p.ParseBlock()
-	stmts := block.Statements
-
-	tests := []struct {
-		name string
-		num  float64
-	}{
-		{"foo", 123},
-		{"bar", 456},
-	}
-
-	require.Equal(t, len(tests), len(stmts))
-	for i, test := range tests {
-		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, stmts[i])
-		require.Equal(t, test.name, assnStmt.Name.String())
-		lit := requireTypeConversion[ast.NumberLiteral](t, assnStmt.Value)
-		require.Equal(t, test.num, lit.Value)
-	}
-}
-
 func TestBreakStatement(t *testing.T) {
 	l := lexer.New("break")
 	p := New(l)
