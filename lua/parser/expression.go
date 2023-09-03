@@ -69,7 +69,7 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exps
 }
 
-func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpression {
 	expression := &ast.BinaryExpression{
 		Token:    p.curToken,
 		Left:     left,
@@ -93,7 +93,7 @@ func (p *Parser) parseSurroundingExpression(end token.TokenType) ast.Expression 
 	return exp
 }
 
-func (p *Parser) parseUnaryExpression() ast.Expression {
+func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
 	exp := &ast.UnaryExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
@@ -108,7 +108,7 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 	return &ident
 }
 
-func (p *Parser) parseNumberLiteral() ast.Expression {
+func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 	lit := &ast.NumberLiteral{Token: p.curToken}
 
 	// TODO: Handle all kinds of number
@@ -124,7 +124,7 @@ func (p *Parser) parseNumberLiteral() ast.Expression {
 	return lit
 }
 
-func (p *Parser) parseStringLiteral() ast.Expression {
+func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	lit := &ast.StringLiteral{
 		Token: p.curToken,
 		Value: strings.Trim(p.curToken.Literal, "\"'"),

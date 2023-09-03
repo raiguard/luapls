@@ -30,7 +30,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	return stat
 }
 
-func (p *Parser) parseAssignmentStatement() ast.Statement {
+func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 	stmt := &ast.AssignmentStatement{
 		Token: p.curToken,
 	}
@@ -44,12 +44,12 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 	return stmt
 }
 
-func (p *Parser) parseBreakStatement() ast.Statement {
+func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 	stmt := ast.BreakStatement(p.curToken)
 	return &stmt
 }
 
-func (p *Parser) parseGotoStatement() ast.Statement {
+func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 	stmt := ast.GotoStatement{Token: p.curToken}
 	if !p.expectPeek(token.IDENT) {
 		return nil
@@ -58,7 +58,7 @@ func (p *Parser) parseGotoStatement() ast.Statement {
 	return &stmt
 }
 
-func (p *Parser) parseIfStatement() ast.Statement {
+func (p *Parser) parseIfStatement() *ast.IfStatement {
 	stmt := &ast.IfStatement{Token: p.curToken}
 
 	p.nextToken()
@@ -88,7 +88,7 @@ func (p *Parser) parseIfStatement() ast.Statement {
 	return stmt
 }
 
-func (p *Parser) parseLocalStatement() ast.Statement {
+func (p *Parser) parseLocalStatement() *ast.LocalStatement {
 	stmt := &ast.LocalStatement{
 		Token: p.curToken,
 	}
