@@ -6,12 +6,10 @@ package parser
 
 import (
 	"fmt"
-	"testing"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/token"
-	"github.com/stretchr/testify/require"
 )
 
 type Parser struct {
@@ -98,10 +96,4 @@ func (p *Parser) peekPrecedence() operatorPrecedence {
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", token.TokenStr[t])
 	p.errors = append(p.errors, msg)
-}
-
-func requireTypeConversion[T any](t *testing.T, val any) T {
-	res, ok := val.(*T)
-	require.True(t, ok)
-	return *res
 }

@@ -44,3 +44,9 @@ func testStatements(t *testing.T, tests []statementTest) {
 		require.Equal(t, test.expected, block.String())
 	}
 }
+
+func requireTypeConversion[T any](t *testing.T, val any) T {
+	res, ok := val.(*T)
+	require.True(t, ok)
+	return *res
+}
