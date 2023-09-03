@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/raiguard/luapls/lsp"
+	"github.com/raiguard/luapls/lua/lexer"
+	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/repl"
 )
 
@@ -16,9 +18,26 @@ func main() {
 	}
 
 	switch args[1] {
+	case "lex":
+		lexFile(args[2])
 	case "lsp":
 		lsp.Run()
 	case "repl":
 		repl.Run()
+	}
+}
+
+func lexFile(filename string) {
+	src, err := os.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	l := lexer.New(string(src))
+	for {
+		tok := l.NextToken()
+		if tok.Type == token.EOF || tok.Type == token.INVALID {
+			break
+		}
+		fmt.Println(tok.String())
 	}
 }
