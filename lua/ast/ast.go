@@ -58,14 +58,14 @@ func (gs *GotoStatement) String() string {
 }
 
 type IfStatement struct {
-	Token       token.Token
-	Condition   Expression
-	Consequence Block
+	Token     token.Token
+	Condition Expression
+	Block     Block
 }
 
 func (ls *IfStatement) statementNode() {}
 func (ls *IfStatement) String() string {
-	return fmt.Sprintf("%s %s then\n%s\nend", ls.Token.Literal, ls.Condition.String(), ls.Consequence.String())
+	return fmt.Sprintf("%s %s then\n%s\nend", ls.Token.Literal, ls.Condition.String(), ls.Block.String())
 }
 
 type LocalStatement struct {
@@ -91,9 +91,9 @@ func (ws *RepeatStatement) String() string {
 }
 
 type WhileStatement struct {
-	Token token.Token
-	Condition   Expression
-	Block Block
+	Token     token.Token
+	Condition Expression
+	Block     Block
 }
 
 func (ws *WhileStatement) statementNode() {}
@@ -107,15 +107,14 @@ type Expression interface {
 }
 
 type BinaryExpression struct {
-	Token    token.Token
-	Left     Expression
-	Operator string
-	Right    Expression
+	Token token.Token
+	Left  Expression
+	Right Expression
 }
 
 func (ie *BinaryExpression) expressionNode() {}
 func (ie *BinaryExpression) String() string {
-	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator, ie.Right.String())
+	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Token.Literal, ie.Right.String())
 }
 
 type Identifier token.Token

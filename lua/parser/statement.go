@@ -75,14 +75,14 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 
 	p.nextToken()
 
-	consequence := p.ParseBlock()
+	block := p.ParseBlock()
 
-	if consequence == nil {
+	if block == nil {
 		p.errors = append(p.errors, "Failed to parse block")
 		return nil
 	}
 
-	stmt.Consequence = *consequence
+	stmt.Block = *block
 
 	if !p.curTokenIs(token.END) {
 		p.errors = append(p.errors, fmt.Sprintf("Expected 'end', got %s", p.curToken.Literal))

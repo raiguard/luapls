@@ -71,10 +71,9 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 
 func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpression {
 	expression := &ast.BinaryExpression{
-		Token:    p.curToken,
-		Left:     left,
-		Operator: p.curToken.Literal,
-		Right:    nil,
+		Token: p.curToken,
+		Left:  left,
+		Right: nil,
 	}
 
 	precedence := p.curPrecedence()
