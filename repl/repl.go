@@ -12,7 +12,7 @@ import (
 )
 
 func Run() {
-	rl, err := readline.New("> ")
+	rl, err := readline.New("(luapls) ")
 	if err != nil {
 		panic(err)
 	}
@@ -26,9 +26,12 @@ func Run() {
 
 		l := lexer.New(line)
 
+		fmt.Println("TOKENS:")
 		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
 			fmt.Printf("%+v\n", tok)
 		}
+
+		fmt.Println("AST:")
 
 		l = lexer.New(line)
 		p := parser.New(l)

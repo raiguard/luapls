@@ -118,8 +118,7 @@ func textDocumentHover(ctc *glsp.Context, params *protocol.HoverParams) (*protoc
 			tok := &tokens[i]
 			if withinRange(&tok.Range, &params.Position) {
 				return &protocol.Hover{
-					Contents: fmt.Sprintf("Type: %s\n\nLiteral:\n```\n%s\n```", token.TokenStr[tok.Type], tok.Literal),
-					// Range:    &token.Range,
+					Contents: tok.String(),
 				}, nil
 			}
 		}
