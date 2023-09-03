@@ -42,24 +42,26 @@ const (
 
 	// Operators
 	operatorStart
-	AND
 	ASSIGN
+	HASH
+	NOT
+	infixOperatorStart
+	AND
 	CARET
 	CONCAT
 	EQUAL
 	GEQ
 	GT
-	HASH
 	LEQ
 	LT
-	MINUS
+	MINUS // Also a prefix operator
 	NEQ
-	NOT
 	OR
 	PERCENT
 	PLUS
 	SLASH
 	STAR
+	infixOperatorEnd
 	operatorEnd
 
 	// Structure
@@ -178,6 +180,6 @@ var Keywords = map[string]TokenType{
 	"while":    WHILE,
 }
 
-func IsOperator(tok TokenType) bool {
-	return tok > operatorStart && tok < operatorEnd
+func IsInfixOperator(tok TokenType) bool {
+	return tok > infixOperatorStart && tok < infixOperatorEnd
 }

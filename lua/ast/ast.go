@@ -67,6 +67,18 @@ type Expression interface {
 	expressionNode()
 }
 
+type InfixExpression struct {
+	Token    token.Token
+	Left     Expression
+	Operator string
+	Right    Expression
+}
+
+func (ie *InfixExpression) expressionNode() {}
+func (ie *InfixExpression) String() string {
+	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator, ie.Right.String())
+}
+
 type Identifier token.Token
 
 func (i *Identifier) expressionNode() {}

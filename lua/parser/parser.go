@@ -48,9 +48,8 @@ func (p *Parser) ParseBlock() *ast.Block {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
-		} else {
-			p.nextToken() // Always make some progress
 		}
+		p.nextToken()
 	}
 
 	return block
@@ -76,6 +75,13 @@ func (p *Parser) expectPeek(tokenType token.TokenType) bool {
 	)
 	// TODO: Error
 	return false
+}
+
+func (p *Parser) curPrecedence() operatorPrecedence {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+	return LOWEST
 }
 
 func (p *Parser) peekPrecedence() operatorPrecedence {
@@ -152,8 +158,6 @@ func (p *Parser) parseIfStatement() ast.Statement {
 		return nil
 	}
 
-	p.nextToken()
-
 	return stmt
 }
 
@@ -179,13 +183,9 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	}
 	leftExp := prefix()
 
-	for token.IsOperator(p.peekToken.Type) && precedence < p.peekPrecedence() {
-		infix := p.getInfixParser()
-		if infix == nil {
-			return leftExp
-		}
+	for token.IsInfixOperator(p.peekToken.Type) && precedence < p.peekPrecedence() {
 		p.nextToken()
-		leftExp = infix(leftExp)
+		leftExp = p.parseInfixExpression(leftExp)
 	}
 
 	return leftExp
@@ -203,8 +203,18 @@ func (p *Parser) getPrefixParser() prefixParseFn {
 	return nil
 }
 
-func (p *Parser) getInfixParser() infixParseFn {
-	return nil
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	expression := &ast.InfixExpression{
+		Token:    p.curToken,
+		Left:     left,
+		Operator: p.curToken.Literal,
+	}
+
+	precedence := p.curPrecedence()
+	p.nextToken()
+	expression.Right = p.parseExpression(precedence)
+
+	return expression
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
@@ -225,8 +235,6 @@ func (p *Parser) parseNumberLiteral() ast.Expression {
 
 	lit.Value = float64(value)
 
-	p.nextToken()
-
 	return lit
 }
 
@@ -235,7 +243,6 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 		Token: p.curToken,
 		Value: strings.Trim(p.curToken.Literal, "\"'"),
 	}
-	p.nextToken()
 	return lit
 }
 
@@ -247,7 +254,7 @@ type operatorPrecedence int
 const (
 	_ operatorPrecedence = iota
 	LOWEST
-	ASSIGN
+	CMP
 	LESSGREATER
 	SUM
 	PRODUCT
@@ -256,8 +263,8 @@ const (
 )
 
 var precedences = map[token.TokenType]operatorPrecedence{
-	token.ASSIGN: ASSIGN,
-	token.NEQ:    ASSIGN,
+	token.EQUAL:  CMP,
+	token.NEQ:    CMP,
 	token.LT:     LESSGREATER,
 	token.GT:     LESSGREATER,
 	token.PLUS:   SUM,
@@ -265,4 +272,5 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.SLASH:  PRODUCT,
 	token.STAR:   PRODUCT,
 	token.LPAREN: CALL,
+	token.LBRACK: CALL,
 }

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/raiguard/luapls/lua/ast"
@@ -109,6 +110,59 @@ func TestIfStatement(t *testing.T) {
 
 	consequence := ifStmt.Consequence
 	require.Equal(t, 2, len(consequence.Statements))
+}
+
+func TestInfixExpression(t *testing.T) {
+	infixTests := []struct {
+		input      string
+		leftValue  float64
+		operator   string
+		rightValue float64
+	}{
+		{"5 + 5", 5, "+", 5},
+		{"5 - 5", 5, "-", 5},
+		{"5 * 5", 5, "*", 5},
+		{"5 / 5", 5, "/", 5},
+		{"5 > 5", 5, ">", 5},
+		{"5 < 5", 5, "<", 5},
+		{"5 == 5", 5, "==", 5},
+		{"5 ~= 5", 5, "~=", 5},
+	}
+
+	for _, tt := range infixTests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		exp := p.parseExpression(LOWEST)
+		checkParserErrors(t, p)
+
+		infix, ok := exp.(*ast.InfixExpression)
+		require.True(t, ok)
+
+		testNumberLiteral(t, infix.Left, tt.leftValue)
+
+		require.Equal(t, tt.operator, infix.Operator)
+
+		testNumberLiteral(t, infix.Right, tt.rightValue)
+	}
+}
+
+func checkParserErrors(t *testing.T, p *Parser) {
+	if len(p.errors) == 0 {
+		return
+	}
+
+	t.Errorf("parser has %d errors", len(p.errors))
+	for _, msg := range p.errors {
+		t.Errorf("parser error: %q", msg)
+	}
+	t.FailNow()
+}
+
+func testNumberLiteral(t *testing.T, il ast.Expression, value float64) {
+	integ, ok := il.(*ast.NumberLiteral)
+	require.True(t, ok)
+	require.Equal(t, value, integ.Value)
+	require.Equal(t, fmt.Sprintf("%.0f", value), integ.Token.Literal)
 }
 
 // func testNodeList(t *testing.T, expected []ast.Node, actual []ast.Node) {
