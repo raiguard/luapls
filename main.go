@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -24,7 +25,7 @@ func main() {
 	case "lsp":
 		lsp.Run()
 	case "parse":
-		parseFile(args[2])
+		parseFile(args[2], len(args) > 3 && args[3] == "json")
 	case "repl":
 		repl.Run()
 	}
@@ -45,7 +46,7 @@ func lexFile(filename string) {
 	}
 }
 
-func parseFile(filename string) {
+func parseFile(filename string, printJson bool) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -59,5 +60,13 @@ func parseFile(filename string) {
 	if len(p.Errors()) > 0 {
 		return
 	}
-	fmt.Println(block.String())
+	if printJson {
+		bytes, err := json.MarshalIndent(block, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(bytes))
+	} else {
+		fmt.Println(block.String())
+	}
 }
