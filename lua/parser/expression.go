@@ -17,9 +17,9 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	}
 	leftExp := prefix()
 
-	for token.IsInfixOperator(p.peekToken.Type) {
+	for isBinaryOperator(p.peekToken.Type) {
 		peekPrecedence := p.peekPrecedence()
-		if token.IsRightAssociative(p.peekToken.Type) {
+		if isRightAssociative(p.peekToken.Type) {
 			peekPrecedence += 1
 		}
 		if precedence >= peekPrecedence {
@@ -155,4 +155,30 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.CARET:   POW,
 	token.LPAREN:  CALL,
 	token.LBRACK:  CALL,
+}
+
+var binaryOperators = map[token.TokenType]bool{
+	token.AND:     true,
+	token.CARET:   true,
+	token.CONCAT:  true,
+	token.EQUAL:   true,
+	token.GEQ:     true,
+	token.GT:      true,
+	token.LEQ:     true,
+	token.LT:      true,
+	token.MINUS:   true, // Also a prefix operator
+	token.NEQ:     true,
+	token.OR:      true,
+	token.PERCENT: true,
+	token.PLUS:    true,
+	token.SLASH:   true,
+	token.STAR:    true,
+}
+
+func isBinaryOperator(tok token.TokenType) bool {
+	return binaryOperators[tok]
+}
+
+func isRightAssociative(tok token.TokenType) bool {
+	return tok == token.CARET || tok == token.CONCAT
 }

@@ -13,7 +13,6 @@ const (
 	LABEL
 
 	// Keywords
-	keywordStart
 	BREAK
 	DO
 	ELSE
@@ -30,43 +29,34 @@ const (
 	THEN
 	UNTIL
 	WHILE
-	keywordEnd
 
 	// Literals
-	literalStart
 	FALSE
 	NIL
 	NUMBER
 	RAWSTRING
 	STRING
 	TRUE
-	literalEnd
 
 	// Operators
-	operatorStart
-	ASSIGN
-	HASH
-	NOT
-	infixOperatorStart
 	AND
-	rightAssociativeStart
+	ASSIGN
 	CARET
 	CONCAT
-	rightAssociativeEnd
 	EQUAL
 	GEQ
 	GT
+	HASH
 	LEQ
 	LT
 	MINUS // Also a prefix operator
 	NEQ
+	NOT
 	OR
 	PERCENT
 	PLUS
 	SLASH
 	STAR
-	infixOperatorEnd
-	operatorEnd
 
 	// Structure
 	structStart
@@ -79,13 +69,11 @@ const (
 	structEnd
 
 	// Grammar
-	grammarStart
 	COLON
 	COMMA
 	DOT
 	SEMICOLON
 	SPREAD
-	grammarEnd
 )
 
 type Token struct {
@@ -189,12 +177,4 @@ var Reserved = map[string]TokenType{
 	"then":     THEN,
 	"until":    UNTIL,
 	"while":    WHILE,
-}
-
-func IsInfixOperator(tok TokenType) bool {
-	return tok > infixOperatorStart && tok < infixOperatorEnd
-}
-
-func IsRightAssociative(tok TokenType) bool {
-	return tok > rightAssociativeStart && tok < rightAssociativeEnd
 }
