@@ -16,7 +16,6 @@ func TestAssignmentStatement(t *testing.T) {
 		num := requireTypeConversion[ast.NumberLiteral](t, stmt.Exps[0])
 		require.Equal(t, 123.0, num.Value)
 	})
-	// TODO: This is invalid Lua, needs two variables
 	testStatement(t, "foo, bar = 123, 321", func(stmt ast.AssignmentStatement) {
 		require.Equal(t, 2, len(stmt.Vars))
 		require.Equal(t, "foo", stmt.Vars[0].String())
