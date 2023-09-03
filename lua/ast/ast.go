@@ -68,14 +68,23 @@ func (gs *GotoStatement) String() string {
 }
 
 type IfStatement struct {
-	Token     token.Token
-	Condition Expression
-	Block     Block
+	Token   token.Token
+	Clauses []IfClause
 }
 
 func (is *IfStatement) statementNode() {}
 func (is *IfStatement) String() string {
-	return fmt.Sprintf("%s %s then\n%s\nend", is.Token.Literal, is.Condition.String(), is.Block.String())
+	return fmt.Sprintf("%send", nodeListToString(is.Clauses))
+}
+
+type IfClause struct {
+	Condition Expression
+	Block     Block
+}
+
+func (ic IfClause) statementNode() {}
+func (ic IfClause) String() string {
+	return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Block.String())
 }
 
 type LabelStatement struct {

@@ -50,27 +50,26 @@ func TestIfStatement(t *testing.T) {
 		end
 	`
 	testStatement(t, input, func(stmt ast.IfStatement) {
-		lit := requireTypeConversion[ast.Identifier](t, stmt.Condition)
+		require.Equal(t, 1, len(stmt.Clauses))
+		clause := stmt.Clauses[0]
+		lit := requireTypeConversion[ast.Identifier](t, clause.Condition)
 		require.Equal(t, "foo", lit.String())
 
-		block := stmt.Block
+		block := clause.Block
 		require.Equal(t, 2, len(block.Statements))
 	})
 
 	input2 := `
 		if 1 + 2 == 4 then
 			math_is_true = false
+		elseif 2 + 2 == 4 then
+			math_is_true = true
 		end
 	`
 	testStatement(t, input2, func(stmt ast.IfStatement) {
-		exp := requireTypeConversion[ast.BinaryExpression](t, stmt.Condition)
-		require.Equal(t, "((1 + 2) == 4)", exp.String())
-
-		block := stmt.Block
-		require.Equal(t, 1, len(block.Statements))
-		blockStmt := requireTypeConversion[ast.AssignmentStatement](t, block.Statements[0])
-		require.Equal(t, "math_is_true", blockStmt.Vars[0].String())
-		require.Equal(t, "false", blockStmt.Exps[0].String())
+		require.Equal(t, 2, len(stmt.Clauses))
+		require.Equal(t, 1, len(stmt.Clauses[0].Block.Statements))
+		require.Equal(t, 1, len(stmt.Clauses[1].Block.Statements))
 	})
 }
 

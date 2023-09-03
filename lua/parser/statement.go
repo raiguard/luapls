@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
 )
@@ -74,11 +72,33 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 }
 
 func (p *Parser) parseIfStatement() *ast.IfStatement {
-	stmt := &ast.IfStatement{Token: p.curToken}
+	stmt := &ast.IfStatement{
+		Token:   p.curToken,
+		Clauses: []ast.IfClause{},
+	}
 
 	p.nextToken()
 
-	stmt.Condition = p.parseExpression(LOWEST)
+	stmt.Clauses = append(stmt.Clauses, *p.parseIfClause())
+
+	for p.curTokenIs(token.ELSEIF) {
+		p.nextToken()
+		stmt.Clauses = append(stmt.Clauses, *p.parseIfClause())
+	}
+
+	if !p.curTokenIs(token.END) {
+		p.invalidTokenError(token.END, p.curToken.Type)
+		return nil
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseIfClause() *ast.IfClause {
+	condition := p.parseExpression(LOWEST)
+	if condition == nil {
+		return nil
+	}
 
 	if !p.expectPeek(token.THEN) {
 		return nil
@@ -93,14 +113,11 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 		return nil
 	}
 
-	stmt.Block = *block
-
-	if !p.curTokenIs(token.END) {
-		p.errors = append(p.errors, fmt.Sprintf("Expected 'end', got %s", p.curToken.Literal))
-		return nil
+	clause := ast.IfClause{
+		Condition: condition,
+		Block:     *block,
 	}
-
-	return stmt
+	return &clause
 }
 
 func (p *Parser) parseLabelStatement() *ast.LabelStatement {
