@@ -16,6 +16,12 @@ func TestBreakStatement(t *testing.T) {
 	requireTypeConversion[ast.BreakStatement](t, stmt)
 }
 
+func TestGotoStatement(t *testing.T) {
+	testStatement(t, "goto continue", func(stmt ast.GotoStatement) {
+		require.Equal(t, "continue", stmt.Label.String())
+	})
+}
+
 func TestIfStatement(t *testing.T) {
 	input := `
 		if foo then
@@ -81,4 +87,12 @@ func TestLocalStatement(t *testing.T) {
 			require.Fail(t, "Untested token type %s", value.String())
 		}
 	}
+}
+
+func testStatement[T any](t *testing.T, input string, tester func(T)) {
+	l := lexer.New(input)
+	p := New(l)
+	stmt := p.parseStatement()
+	checkParserErrors(t, p)
+	tester(requireTypeConversion[T](t, stmt))
 }

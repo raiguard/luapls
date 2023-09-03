@@ -48,6 +48,16 @@ func (bs *BreakStatement) String() string {
 	return bs.Literal
 }
 
+type GotoStatement struct {
+	Token token.Token
+	Label Identifier
+}
+
+func (gs *GotoStatement) statementNode() {}
+func (gs *GotoStatement) String() string {
+	return gs.Label.String()
+}
+
 type IfStatement struct {
 	Token       token.Token
 	Condition   Expression

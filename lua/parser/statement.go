@@ -12,6 +12,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.BREAK:
 		stat = p.parseBreakStatement()
+	case token.GOTO:
+		stat = p.parseGotoStatement()
 	case token.IDENT:
 		stat = p.parseAssignmentStatement()
 	case token.IF:
@@ -48,6 +50,15 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 
 func (p *Parser) parseBreakStatement() ast.Statement {
 	stmt := ast.BreakStatement(p.curToken)
+	return &stmt
+}
+
+func (p *Parser) parseGotoStatement() ast.Statement {
+	stmt := ast.GotoStatement{Token: p.curToken}
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt.Label = ast.Identifier(p.curToken)
 	return &stmt
 }
 
