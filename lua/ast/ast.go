@@ -41,6 +41,13 @@ func (as *AssignmentStatement) String() string {
 	return fmt.Sprintf("%s = %s", as.Name.Literal, as.Value.String())
 }
 
+type BreakStatement token.Token
+
+func (bs *BreakStatement) statementNode() {}
+func (bs *BreakStatement) String() string {
+	return bs.Literal
+}
+
 type IfStatement struct {
 	Token       token.Token
 	Condition   Expression

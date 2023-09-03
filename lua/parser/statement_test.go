@@ -37,6 +37,14 @@ func TestBlock(t *testing.T) {
 	}
 }
 
+func TestBreakStatement(t *testing.T) {
+	l := lexer.New("break")
+	p := New(l)
+	stmt := p.parseStatement()
+	checkParserErrors(t, p)
+	requireTypeConversion[ast.BreakStatement](t, stmt)
+}
+
 func TestIfStatement(t *testing.T) {
 	input := `
 		if foo then

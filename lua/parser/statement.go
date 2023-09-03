@@ -10,6 +10,8 @@ import (
 func (p *Parser) parseStatement() ast.Statement {
 	var stat ast.Statement
 	switch p.curToken.Type {
+	case token.BREAK:
+		stat = p.parseBreakStatement()
 	case token.IDENT:
 		stat = p.parseAssignmentStatement()
 	case token.IF:
@@ -42,6 +44,11 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 	stmt.Value = p.parseExpression(LOWEST)
 
 	return stmt
+}
+
+func (p *Parser) parseBreakStatement() ast.Statement {
+	stmt := ast.BreakStatement(p.curToken)
+	return &stmt
 }
 
 func (p *Parser) parseIfStatement() ast.Statement {
