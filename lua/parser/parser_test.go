@@ -23,8 +23,7 @@ func checkParserErrors(t *testing.T, p *Parser) {
 }
 
 func testNumberLiteral(t *testing.T, il ast.Expression, value float64) {
-	integ, ok := il.(*ast.NumberLiteral)
-	require.True(t, ok)
+	integ := requireTypeConversion[ast.NumberLiteral](t, il)
 	require.Equal(t, value, integ.Value)
 	require.Equal(t, fmt.Sprintf("%.0f", value), integ.Token.Literal)
 }

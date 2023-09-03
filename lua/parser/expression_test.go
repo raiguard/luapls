@@ -31,8 +31,7 @@ func TestInfixExpression(t *testing.T) {
 		exp := p.parseExpression(LOWEST)
 		checkParserErrors(t, p)
 
-		infix, ok := exp.(*ast.BinaryExpression)
-		require.True(t, ok)
+		infix := requireTypeConversion[ast.BinaryExpression](t, exp)
 
 		testNumberLiteral(t, infix.Left, tt.leftValue)
 

@@ -30,11 +30,9 @@ func TestBlock(t *testing.T) {
 
 	require.Equal(t, len(tests), len(stmts))
 	for i, test := range tests {
-		assnStmt, ok := stmts[i].(*ast.AssignmentStatement)
-		require.True(t, ok)
+		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, stmts[i])
 		require.Equal(t, test.name, assnStmt.Name.String())
-		lit, ok := assnStmt.Value.(*ast.NumberLiteral)
-		require.True(t, ok)
+		lit := requireTypeConversion[ast.NumberLiteral](t, assnStmt.Value)
 		require.Equal(t, test.num, lit.Value)
 	}
 }
@@ -55,11 +53,9 @@ func TestIfStatement(t *testing.T) {
 
 	require.Equal(t, 1, len(stmts))
 
-	ifStmt, ok := stmts[0].(*ast.IfStatement)
-	require.True(t, ok)
+	ifStmt := requireTypeConversion[ast.IfStatement](t, stmts[0])
 
-	lit, ok := ifStmt.Condition.(*ast.Identifier)
-	require.True(t, ok)
+	lit := requireTypeConversion[ast.Identifier](t, ifStmt.Condition)
 	require.Equal(t, "foo", lit.String())
 
 	consequence := ifStmt.Consequence
@@ -93,10 +89,8 @@ func TestLocalStatement(t *testing.T) {
 	require.Equal(t, len(tests), len(stmts))
 
 	for i, test := range tests {
-		localStmt, ok := stmts[i].(*ast.LocalStatement)
-		require.True(t, ok)
-		assnStmt, ok := localStmt.Statement.(*ast.AssignmentStatement)
-		require.True(t, ok)
+		localStmt := requireTypeConversion[ast.LocalStatement](t, stmts[i])
+		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, localStmt.Statement)
 		require.Equal(t, test.name, assnStmt.Name.String())
 		value := assnStmt.Value
 		switch value.(type) {
