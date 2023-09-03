@@ -55,7 +55,7 @@ type GotoStatement struct {
 
 func (gs *GotoStatement) statementNode() {}
 func (gs *GotoStatement) String() string {
-	return gs.Label.String()
+	return fmt.Sprintf("%s %s", gs.Token.Literal, gs.Label.String())
 }
 
 type IfStatement struct {
