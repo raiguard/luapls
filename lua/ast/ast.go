@@ -92,6 +92,17 @@ type NumberLiteral struct {
 func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) String() string  { return nl.Token.Literal }
 
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode() {}
+func (pe *PrefixExpression) String() string {
+	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
+}
+
 type StringLiteral struct {
 	Token token.Token
 	Value string // Without quotes

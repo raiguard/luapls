@@ -146,6 +146,15 @@ func TestInfixExpression(t *testing.T) {
 	}
 }
 
+func TestOperatorPrecedence(t *testing.T) {
+	testStatements(t, []statementTest{
+		{"i = 1 + 2 - 3 * -4 / 5 % 6 ^ 7 .. 8", "i = (((1 + 2) - (((3 * (-4)) / 5) % (6 ^ 7))) .. 8)"},
+		{"i = 2 + 2 + 2", "i = ((2 + 2) + 2)"},
+		{"i = 2 ^ 2 ^ 2", "i = (2 ^ (2 ^ 2))"},
+		{"i = 2 .. 2 .. 2", "i = (2 .. (2 .. 2))"},
+	})
+}
+
 func checkParserErrors(t *testing.T, p *Parser) {
 	if len(p.errors) == 0 {
 		return
@@ -163,6 +172,23 @@ func testNumberLiteral(t *testing.T, il ast.Expression, value float64) {
 	require.True(t, ok)
 	require.Equal(t, value, integ.Value)
 	require.Equal(t, fmt.Sprintf("%.0f", value), integ.Token.Literal)
+}
+
+type statementTest struct {
+	input, expected string
+}
+
+func testStatements(t *testing.T, tests []statementTest) {
+	for _, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+
+		block := p.ParseBlock()
+		require.NotNil(t, block)
+		require.Equal(t, 1, len(block.Statements))
+
+		require.Equal(t, test.expected, block.String())
+	}
 }
 
 // func testNodeList(t *testing.T, expected []ast.Node, actual []ast.Node) {

@@ -35,6 +35,10 @@ func New(lexer *lexer.Lexer) *Parser {
 	return p
 }
 
+func (p *Parser) Errors() []string {
+	return p.errors
+}
+
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.lexer.NextToken()
@@ -70,8 +74,8 @@ func (p *Parser) expectPeek(tokenType token.TokenType) bool {
 	}
 	p.errors = append(p.errors,
 		fmt.Sprintf("Invalid token: expected %s, got %s",
-			token.TokenStr[p.peekToken.Type],
-			token.TokenStr[tokenType]),
+			token.TokenStr[tokenType],
+			token.TokenStr[p.peekToken.Type]),
 	)
 	// TODO: Error
 	return false
@@ -183,8 +187,14 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	}
 	leftExp := prefix()
 
-	// TODO: Concat and pow operators are right-associative
-	for token.IsInfixOperator(p.peekToken.Type) && precedence < p.peekPrecedence() {
+	for token.IsInfixOperator(p.peekToken.Type) {
+		peekPrecedence := p.peekPrecedence()
+		if token.IsRightAssociative(p.peekToken.Type) {
+			peekPrecedence += 1
+		}
+		if precedence >= peekPrecedence {
+			break
+		}
 		p.nextToken()
 		leftExp = p.parseInfixExpression(leftExp)
 	}
@@ -196,6 +206,8 @@ func (p *Parser) getPrefixParser() prefixParseFn {
 	switch p.curToken.Type {
 	case token.IDENT:
 		return p.parseIdentifier
+	case token.MINUS:
+		return p.parsePrefixExpression
 	case token.NUMBER:
 		return p.parseNumberLiteral
 	case token.STRING:
@@ -237,6 +249,16 @@ func (p *Parser) parseNumberLiteral() ast.Expression {
 	lit.Value = float64(value)
 
 	return lit
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+	p.nextToken()
+	expression.Right = p.parseExpression(PREFIX)
+	return expression
 }
 
 func (p *Parser) parseStringLiteral() ast.Expression {

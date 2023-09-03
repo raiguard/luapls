@@ -47,8 +47,10 @@ const (
 	NOT
 	infixOperatorStart
 	AND
+	rightAssociativeStart
 	CARET
 	CONCAT
+	rightAssociativeEnd
 	EQUAL
 	GEQ
 	GT
@@ -182,4 +184,8 @@ var Keywords = map[string]TokenType{
 
 func IsInfixOperator(tok TokenType) bool {
 	return tok > infixOperatorStart && tok < infixOperatorEnd
+}
+
+func IsRightAssociative(tok TokenType) bool {
+	return tok > rightAssociativeStart && tok < rightAssociativeEnd
 }
