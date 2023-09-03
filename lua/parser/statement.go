@@ -31,18 +31,14 @@ func (p *Parser) parseStatement() ast.Statement {
 }
 
 func (p *Parser) parseAssignmentStatement() ast.Statement {
-	ident := ast.Identifier(p.curToken)
 	stmt := &ast.AssignmentStatement{
 		Token: p.curToken,
-		Name:  ident,
 	}
-
+	stmt.Vars = parseNodeList(p, p.parseIdentifier)
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
 	}
-
 	p.nextToken()
-
 	stmt.Exps = p.parseExpressionList()
 
 	return stmt
@@ -96,12 +92,36 @@ func (p *Parser) parseLocalStatement() ast.Statement {
 	stmt := &ast.LocalStatement{
 		Token: p.curToken,
 	}
-	p.nextToken()
-	switch p.curToken.Type {
-	case token.IDENT:
-		stmt.Statement = p.parseAssignmentStatement()
-	default:
-		p.errors = append(p.errors, fmt.Sprintf("Invalid token in local statement: %s", token.TokenStr[p.curToken.Type]))
+	if !p.expectPeek(token.IDENT) {
+		return nil
 	}
+	stmt.Names = parseNodeList(p, p.parseIdentifier)
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+	p.nextToken()
+	stmt.Exps = p.parseExpressionList()
+
 	return stmt
+}
+
+func parseNodeList[T ast.Node](p *Parser, parseFunc func() *T) []T {
+	values := []T{}
+	val := parseFunc()
+	if val == nil {
+		return values
+	}
+	values = append(values, *val)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		val = parseFunc()
+		if val == nil {
+			break
+		}
+		values = append(values, *val)
+	}
+
+	return values
 }

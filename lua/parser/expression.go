@@ -103,7 +103,7 @@ func (p *Parser) parseUnaryExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseIdentifier() ast.Expression {
+func (p *Parser) parseIdentifier() *ast.Identifier {
 	ident := ast.Identifier(p.curToken)
 	return &ident
 }

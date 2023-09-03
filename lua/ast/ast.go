@@ -30,19 +30,14 @@ type Statement interface {
 }
 
 type AssignmentStatement struct {
-	Token   token.Token
-	Name    Identifier
-	Exps    []Expression
-	isLocal bool
+	Token token.Token
+	Vars  []Identifier
+	Exps  []Expression
 }
 
 func (as *AssignmentStatement) statementNode() {}
 func (as *AssignmentStatement) String() string {
-	values := []string{}
-	for _, exp := range as.Exps {
-		values = append(values, exp.String())
-	}
-	return fmt.Sprintf("%s = %s", as.Name.Literal, strings.Join(values, ", "))
+	return fmt.Sprintf("%s = %s", nodeListToString(as.Vars), nodeListToString(as.Exps))
 }
 
 type BreakStatement token.Token
@@ -74,13 +69,14 @@ func (ls *IfStatement) String() string {
 }
 
 type LocalStatement struct {
-	Token     token.Token
-	Statement Statement
+	Token token.Token
+	Names []Identifier
+	Exps  []Expression
 }
 
 func (ls *LocalStatement) statementNode() {}
 func (ls *LocalStatement) String() string {
-	return fmt.Sprintf("%s %s", ls.Token.Literal, ls.Statement.String())
+	return fmt.Sprintf("%s %s = %s", ls.Token.Literal, nodeListToString(ls.Names), nodeListToString(ls.Exps))
 }
 
 type Expression interface {
@@ -102,8 +98,8 @@ func (ie *BinaryExpression) String() string {
 
 type Identifier token.Token
 
-func (i *Identifier) expressionNode() {}
-func (i *Identifier) String() string  { return i.Literal }
+func (i Identifier) expressionNode() {}
+func (i Identifier) String() string  { return i.Literal }
 
 type NumberLiteral struct {
 	Token token.Token
@@ -131,3 +127,11 @@ type StringLiteral struct {
 
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) String() string  { return sl.Token.Literal }
+
+func nodeListToString[T Node](nodes []T) string {
+	items := []string{}
+	for _, node := range nodes {
+		items = append(items, node.String())
+	}
+	return strings.Join(items, ", ")
+}
