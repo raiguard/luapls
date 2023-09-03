@@ -9,11 +9,7 @@ import (
 )
 
 func TestBreakStatement(t *testing.T) {
-	l := lexer.New("break")
-	p := New(l)
-	stmt := p.parseStatement()
-	checkParserErrors(t, p)
-	requireTypeConversion[ast.BreakStatement](t, stmt)
+	testStatement(t, "break", func(stmt ast.BreakStatement) {})
 }
 
 func TestGotoStatement(t *testing.T) {
@@ -29,22 +25,29 @@ func TestIfStatement(t *testing.T) {
 			bar = "baz"
 		end
 	`
+	testStatement(t, input, func(stmt ast.IfStatement) {
+		lit := requireTypeConversion[ast.Identifier](t, stmt.Condition)
+		require.Equal(t, "foo", lit.String())
 
-	l := lexer.New(input)
-	p := New(l)
+		consequence := stmt.Consequence
+		require.Equal(t, 2, len(consequence.Statements))
+	})
 
-	block := p.ParseBlock()
-	stmts := block.Statements
+	input2 := `
+		if 1 + 2 == 4 then
+			math_is_true = false
+		end
+	`
+	testStatement(t, input2, func(stmt ast.IfStatement) {
+		exp := requireTypeConversion[ast.BinaryExpression](t, stmt.Condition)
+		require.Equal(t, "((1 + 2) == 4)", exp.String())
 
-	require.Equal(t, 1, len(stmts))
-
-	ifStmt := requireTypeConversion[ast.IfStatement](t, stmts[0])
-
-	lit := requireTypeConversion[ast.Identifier](t, ifStmt.Condition)
-	require.Equal(t, "foo", lit.String())
-
-	consequence := ifStmt.Consequence
-	require.Equal(t, 2, len(consequence.Statements))
+		consequence := stmt.Consequence
+		require.Equal(t, 1, len(consequence.Statements))
+		consequenceStmt := requireTypeConversion[ast.AssignmentStatement](t, consequence.Statements[0])
+		require.Equal(t, "math_is_true", consequenceStmt.Name.String())
+		require.Equal(t, "false", consequenceStmt.Value.String())
+	})
 }
 
 func TestLocalStatement(t *testing.T) {
