@@ -34,7 +34,7 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 	ident := ast.Identifier(p.curToken)
 	stmt := &ast.AssignmentStatement{
 		Token: p.curToken,
-		Name:  &ident,
+		Name:  ident,
 	}
 
 	if !p.expectPeek(token.ASSIGN) {

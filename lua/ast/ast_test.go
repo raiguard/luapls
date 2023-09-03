@@ -16,7 +16,7 @@ func TestString(t *testing.T) {
 					Literal: "foo",
 					Range:   token.Range{StartCol: 0, StartRow: 0, EndCol: 3, EndRow: 0},
 				},
-				Name: &Identifier{
+				Name: Identifier{
 					Type:    token.IDENT,
 					Literal: "foo",
 					Range:   token.Range{StartCol: 6, StartRow: 0, EndCol: 9, EndRow: 3},

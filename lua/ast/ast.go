@@ -31,7 +31,7 @@ type Statement interface {
 
 type AssignmentStatement struct {
 	Token   token.Token
-	Name    *Identifier
+	Name    Identifier
 	Exps    []Expression
 	isLocal bool
 }
