@@ -69,6 +69,11 @@ func (p *Parser) expectPeek(tokenType token.TokenType) bool {
 		p.nextToken()
 		return true
 	}
+	p.errors = append(p.errors,
+		fmt.Sprintf("Invalid token: expected %s, got %s",
+			token.TokenStr[p.peekToken.Type],
+			token.TokenStr[tokenType]),
+	)
 	// TODO: Error
 	return false
 }
@@ -89,6 +94,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.IDENT:
 		return p.parseAssignmentStatement()
+	case token.IF:
+		return p.parseIfStatement()
 	case token.LOCAL:
 		return p.parseLocalStatement()
 	default:
@@ -114,6 +121,38 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+
+	return stmt
+}
+
+func (p *Parser) parseIfStatement() ast.Statement {
+	stmt := &ast.IfStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	stmt.Condition = p.parseExpression(LOWEST) // TODO: We don't have required semicolons in Lua
+
+	if !p.expectPeek(token.THEN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	consequence := p.ParseBlock()
+
+	if consequence == nil {
+		p.errors = append(p.errors, "Failed to parse block")
+		return nil
+	}
+
+	stmt.Consequence = *consequence
+
+	if !p.curTokenIs(token.END) {
+		p.errors = append(p.errors, fmt.Sprintf("Expected 'end', got %s", p.curToken.Literal))
+		return nil
+	}
+
+	p.nextToken()
 
 	return stmt
 }

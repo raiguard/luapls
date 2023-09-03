@@ -1,9 +1,10 @@
 package parser
 
 import (
+	"testing"
+
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -81,6 +82,33 @@ func TestLocalStatement(t *testing.T) {
 			require.FailNow(t, "Untested token type %s", value.String())
 		}
 	}
+}
+
+func TestIfStatement(t *testing.T) {
+	input := `
+		if foo then
+			foo = 123
+			bar = "baz"
+		end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	block := p.ParseBlock()
+	stmts := block.Statements
+
+	require.Equal(t, 1, len(stmts))
+
+	ifStmt, ok := stmts[0].(*ast.IfStatement)
+	require.True(t, ok)
+
+	lit, ok := ifStmt.Condition.(*ast.Identifier)
+	require.True(t, ok)
+	require.Equal(t, "foo", lit.String())
+
+	consequence := ifStmt.Consequence
+	require.Equal(t, 2, len(consequence.Statements))
 }
 
 // func testNodeList(t *testing.T, expected []ast.Node, actual []ast.Node) {

@@ -41,6 +41,17 @@ func (as *AssignmentStatement) String() string {
 	return fmt.Sprintf("%s = %s", as.Name.Literal, as.Value.String())
 }
 
+type IfStatement struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence Block
+}
+
+func (ls *IfStatement) statementNode() {}
+func (ls *IfStatement) String() string {
+	return fmt.Sprintf("%s %s then\n%s\nend", ls.Token.Literal, ls.Condition.String(), ls.Consequence.String())
+}
+
 type LocalStatement struct {
 	Token     token.Token
 	Statement Statement
