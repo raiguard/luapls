@@ -183,6 +183,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	}
 	leftExp := prefix()
 
+	// TODO: Concat and pow operators are right-associative
 	for token.IsInfixOperator(p.peekToken.Type) && precedence < p.peekPrecedence() {
 		p.nextToken()
 		leftExp = p.parseInfixExpression(leftExp)
@@ -254,23 +255,35 @@ type operatorPrecedence int
 const (
 	_ operatorPrecedence = iota
 	LOWEST
+	OR
+	AND
 	CMP
-	LESSGREATER
+	CONCAT
 	SUM
 	PRODUCT
 	PREFIX
+	POW
 	CALL
 )
 
 var precedences = map[token.TokenType]operatorPrecedence{
-	token.EQUAL:  CMP,
-	token.NEQ:    CMP,
-	token.LT:     LESSGREATER,
-	token.GT:     LESSGREATER,
-	token.PLUS:   SUM,
-	token.MINUS:  SUM,
-	token.SLASH:  PRODUCT,
-	token.STAR:   PRODUCT,
-	token.LPAREN: CALL,
-	token.LBRACK: CALL,
+	token.OR:      OR,
+	token.AND:     AND,
+	token.LT:      CMP,
+	token.GT:      CMP,
+	token.LEQ:     CMP,
+	token.GEQ:     CMP,
+	token.NEQ:     CMP,
+	token.EQUAL:   CMP,
+	token.CONCAT:  CONCAT,
+	token.PLUS:    SUM,
+	token.MINUS:   SUM,
+	token.STAR:    PRODUCT,
+	token.SLASH:   PRODUCT,
+	token.PERCENT: PRODUCT,
+	token.NOT:     PREFIX,
+	token.HASH:    PREFIX,
+	token.CARET:   POW,
+	token.LPAREN:  CALL,
+	token.LBRACK:  CALL,
 }
