@@ -49,7 +49,7 @@ const (
 	HASH
 	LEQ
 	LT
-	MINUS // Also a prefix operator
+	MINUS
 	NEQ
 	NOT
 	OR

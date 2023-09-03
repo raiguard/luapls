@@ -10,12 +10,12 @@ import (
 )
 
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
-	prefix := p.getPrefixParser()
-	if prefix == nil {
-		p.noPrefixParseFnError(p.peekToken.Type)
+	unary := p.getUnaryParser()
+	if unary == nil {
+		p.noUnaryParseFnError(p.peekToken.Type)
 		return nil
 	}
-	leftExp := prefix()
+	leftExp := unary()
 
 	for isBinaryOperator(p.peekToken.Type) {
 		peekPrecedence := p.peekPrecedence()
@@ -32,7 +32,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	return leftExp
 }
 
-func (p *Parser) getPrefixParser() prefixParseFn {
+func (p *Parser) getUnaryParser() unaryParseFn {
 	switch p.curToken.Type {
 	case token.HASH:
 		return p.parseUnaryExpression
@@ -82,7 +82,7 @@ func (p *Parser) parseUnaryExpression() ast.Expression {
 		Operator: p.curToken.Literal,
 	}
 	p.nextToken()
-	exp.Right = p.parseExpression(PREFIX)
+	exp.Right = p.parseExpression(UNARY)
 	return exp
 }
 
@@ -117,7 +117,7 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 	return lit
 }
 
-type prefixParseFn func() ast.Expression
+type unaryParseFn func() ast.Expression
 
 type operatorPrecedence int
 
@@ -130,7 +130,7 @@ const (
 	CONCAT
 	SUM
 	PRODUCT
-	PREFIX
+	UNARY
 	POW
 	CALL
 )
@@ -150,8 +150,8 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.STAR:    PRODUCT,
 	token.SLASH:   PRODUCT,
 	token.PERCENT: PRODUCT,
-	token.NOT:     PREFIX,
-	token.HASH:    PREFIX,
+	token.NOT:     UNARY,
+	token.HASH:    UNARY,
 	token.CARET:   POW,
 	token.LPAREN:  CALL,
 	token.LBRACK:  CALL,
@@ -166,7 +166,7 @@ var binaryOperators = map[token.TokenType]bool{
 	token.GT:      true,
 	token.LEQ:     true,
 	token.LT:      true,
-	token.MINUS:   true, // Also a prefix operator
+	token.MINUS:   true, // Also a unary operator
 	token.NEQ:     true,
 	token.OR:      true,
 	token.PERCENT: true,
