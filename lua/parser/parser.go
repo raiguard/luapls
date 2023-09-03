@@ -92,8 +92,3 @@ func (p *Parser) peekPrecedence() operatorPrecedence {
 	}
 	return LOWEST
 }
-
-func (p *Parser) noUnaryParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no unary parse function for %s found", token.TokenStr[t])
-	p.errors = append(p.errors, msg)
-}

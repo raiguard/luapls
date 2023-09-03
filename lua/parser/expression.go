@@ -10,12 +10,27 @@ import (
 )
 
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
-	unary := p.getUnaryParser()
-	if unary == nil {
-		p.noUnaryParseFnError(p.peekToken.Type)
+	// TODO: Some of these should probably be separate AST types
+	var leftExp ast.Expression
+	switch p.curToken.Type {
+	case token.HASH:
+		leftExp = p.parseUnaryExpression()
+	case token.IDENT:
+		leftExp = p.parseIdentifier()
+	case token.LPAREN:
+		leftExp = p.parseSurroundingExpression(token.RPAREN)
+	case token.MINUS:
+		leftExp = p.parseUnaryExpression()
+	case token.NOT:
+		leftExp = p.parseUnaryExpression()
+	case token.NUMBER:
+		leftExp = p.parseNumberLiteral()
+	case token.STRING:
+		leftExp = p.parseStringLiteral()
+	default:
+		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.curToken.String()))
 		return nil
 	}
-	leftExp := unary()
 
 	for isBinaryOperator(p.peekToken.Type) {
 		peekPrecedence := p.peekPrecedence()
@@ -30,26 +45,6 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	}
 
 	return leftExp
-}
-
-func (p *Parser) getUnaryParser() unaryParseFn {
-	switch p.curToken.Type {
-	case token.HASH:
-		return p.parseUnaryExpression
-	case token.IDENT:
-		return p.parseIdentifier
-	case token.LPAREN:
-		return p.parseParenthesizedExpression
-	case token.MINUS:
-		return p.parseUnaryExpression
-	case token.NOT:
-		return p.parseUnaryExpression
-	case token.NUMBER:
-		return p.parseNumberLiteral
-	case token.STRING:
-		return p.parseStringLiteral
-	}
-	return nil
 }
 
 func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
@@ -67,10 +62,10 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
-func (p *Parser) parseParenthesizedExpression() ast.Expression {
+func (p *Parser) parseSurroundingExpression(end token.TokenType) ast.Expression {
 	p.nextToken()
 	exp := p.parseExpression(LOWEST)
-	if !p.expectPeek(token.RPAREN) {
+	if !p.expectPeek(end) {
 		return nil
 	}
 	return exp
