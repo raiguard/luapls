@@ -85,6 +85,13 @@ func TestLocalStatement(t *testing.T) {
 	})
 }
 
+func TestWhileStatement(t *testing.T) {
+	testStatement(t, "while i < 10 do i = i + 1 end", func(stmt ast.WhileStatement) {
+		require.Equal(t, "(i < 10)", stmt.Condition.String())
+		require.Equal(t, 1, len(stmt.Block.Statements))
+	})
+}
+
 func testStatement[T any](t *testing.T, input string, tester func(T)) {
 	l := lexer.New(input)
 	p := New(l)

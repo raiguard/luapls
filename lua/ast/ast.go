@@ -79,6 +79,17 @@ func (ls *LocalStatement) String() string {
 	return fmt.Sprintf("%s %s = %s", ls.Token.Literal, nodeListToString(ls.Names), nodeListToString(ls.Exps))
 }
 
+type WhileStatement struct {
+	Token token.Token
+	Condition   Expression
+	Block Block
+}
+
+func (ws *WhileStatement) statementNode() {}
+func (ws *WhileStatement) String() string {
+	return fmt.Sprintf("%s %s do\n%s\nend", ws.Token.Literal, ws.Condition.String(), ws.Block.String())
+}
+
 type Expression interface {
 	Node
 	expressionNode()

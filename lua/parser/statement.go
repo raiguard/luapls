@@ -20,6 +20,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		stat = p.parseIfStatement()
 	case token.LOCAL:
 		stat = p.parseLocalStatement()
+	case token.WHILE:
+		stat = p.parseWhileStatement()
 	default:
 		p.errors = append(p.errors, "Unexpected <exp>")
 		return nil
@@ -102,6 +104,20 @@ func (p *Parser) parseLocalStatement() *ast.LocalStatement {
 	p.nextToken()
 	stmt.Exps = p.parseExpressionList()
 
+	return stmt
+}
+
+func (p *Parser) parseWhileStatement() *ast.WhileStatement {
+	stmt := &ast.WhileStatement{
+		Token: p.curToken,
+	}
+	p.nextToken()
+	stmt.Condition = p.parseExpression(LOWEST)
+	if !p.expectPeek(token.DO) {
+		return nil
+	}
+	p.nextToken()
+	stmt.Block = *p.ParseBlock()
 	return stmt
 }
 
