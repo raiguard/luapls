@@ -8,17 +8,22 @@ import (
 )
 
 func (p *Parser) parseStatement() ast.Statement {
+	var stat ast.Statement
 	switch p.curToken.Type {
 	case token.IDENT:
-		return p.parseAssignmentStatement()
+		stat = p.parseAssignmentStatement()
 	case token.IF:
-		return p.parseIfStatement()
+		stat = p.parseIfStatement()
 	case token.LOCAL:
-		return p.parseLocalStatement()
+		stat = p.parseLocalStatement()
 	default:
 		p.errors = append(p.errors, "Unexpected <exp>")
 		return nil
 	}
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return stat
 }
 
 func (p *Parser) parseAssignmentStatement() ast.Statement {
@@ -35,10 +40,6 @@ func (p *Parser) parseAssignmentStatement() ast.Statement {
 	p.nextToken()
 
 	stmt.Value = p.parseExpression(LOWEST)
-
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
 
 	return stmt
 }
