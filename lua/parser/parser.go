@@ -109,6 +109,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.LOCAL:
 		return p.parseLocalStatement()
 	default:
+		p.errors = append(p.errors, "Unexpected <exp>")
 		return nil
 	}
 }

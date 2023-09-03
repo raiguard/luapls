@@ -1,5 +1,7 @@
 package token
 
+import "fmt"
+
 type TokenType int
 
 const (
@@ -90,6 +92,10 @@ type Token struct {
 	Type    TokenType
 	Literal string
 	Range   Range
+}
+
+func (t Token) String() string {
+	return fmt.Sprintf("[%s] %s %v", TokenStr[t.Type], t.Literal, t.Range)
 }
 
 type Range struct {
