@@ -1,0 +1,88 @@
+package parser
+
+import (
+	"fmt"
+
+	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/token"
+)
+
+func (p *Parser) parseStatement() ast.Statement {
+	switch p.curToken.Type {
+	case token.IDENT:
+		return p.parseAssignmentStatement()
+	case token.IF:
+		return p.parseIfStatement()
+	case token.LOCAL:
+		return p.parseLocalStatement()
+	default:
+		p.errors = append(p.errors, "Unexpected <exp>")
+		return nil
+	}
+}
+
+func (p *Parser) parseAssignmentStatement() ast.Statement {
+	ident := ast.Identifier(p.curToken)
+	stmt := &ast.AssignmentStatement{
+		Token: p.curToken,
+		Name:  &ident,
+	}
+
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseIfStatement() ast.Statement {
+	stmt := &ast.IfStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	stmt.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.THEN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	consequence := p.ParseBlock()
+
+	if consequence == nil {
+		p.errors = append(p.errors, "Failed to parse block")
+		return nil
+	}
+
+	stmt.Consequence = *consequence
+
+	if !p.curTokenIs(token.END) {
+		p.errors = append(p.errors, fmt.Sprintf("Expected 'end', got %s", p.curToken.Literal))
+		return nil
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseLocalStatement() ast.Statement {
+	stmt := &ast.LocalStatement{
+		Token: p.curToken,
+	}
+	p.nextToken()
+	switch p.curToken.Type {
+	case token.IDENT:
+		stmt.Statement = p.parseAssignmentStatement()
+	default:
+		p.errors = append(p.errors, fmt.Sprintf("Invalid token in local statement: %s", token.TokenStr[p.curToken.Type]))
+	}
+	return stmt
+}

@@ -67,15 +67,15 @@ type Expression interface {
 	expressionNode()
 }
 
-type InfixExpression struct {
+type BinaryExpression struct {
 	Token    token.Token
 	Left     Expression
 	Operator string
 	Right    Expression
 }
 
-func (ie *InfixExpression) expressionNode() {}
-func (ie *InfixExpression) String() string {
+func (ie *BinaryExpression) expressionNode() {}
+func (ie *BinaryExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator, ie.Right.String())
 }
 
@@ -92,14 +92,14 @@ type NumberLiteral struct {
 func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) String() string  { return nl.Token.Literal }
 
-type PrefixExpression struct {
+type UnaryExpression struct {
 	Token    token.Token
 	Operator string
 	Right    Expression
 }
 
-func (pe *PrefixExpression) expressionNode() {}
-func (pe *PrefixExpression) String() string {
+func (pe *UnaryExpression) expressionNode() {}
+func (pe *UnaryExpression) String() string {
 	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
 }
 
