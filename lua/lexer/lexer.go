@@ -201,7 +201,7 @@ func (l *Lexer) skipComment() bool {
 	if l.expectPeek('[') {
 		return l.readRawString()
 	}
-	for l.char != '\n' {
+	for l.char != 0 && l.char != '\n' {
 		l.readChar()
 	}
 	return true
