@@ -6,6 +6,7 @@ import (
 
 	"github.com/raiguard/luapls/lsp"
 	"github.com/raiguard/luapls/lua/lexer"
+	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/repl"
 )
@@ -22,6 +23,8 @@ func main() {
 		lexFile(args[2])
 	case "lsp":
 		lsp.Run()
+	case "parse":
+		parseFile(args[2])
 	case "repl":
 		repl.Run()
 	}
@@ -40,4 +43,21 @@ func lexFile(filename string) {
 		}
 		fmt.Println(tok.String())
 	}
+}
+
+func parseFile(filename string) {
+	src, err := os.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	l := lexer.New(string(src))
+	p := parser.New(l)
+	block := p.ParseBlock()
+	for _, err := range p.Errors() {
+		fmt.Println(err)
+	}
+	if len(p.Errors()) > 0 {
+		return
+	}
+	fmt.Println(block.String())
 }
