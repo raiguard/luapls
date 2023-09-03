@@ -73,9 +73,19 @@ type IfStatement struct {
 	Block     Block
 }
 
-func (ls *IfStatement) statementNode() {}
-func (ls *IfStatement) String() string {
-	return fmt.Sprintf("%s %s then\n%s\nend", ls.Token.Literal, ls.Condition.String(), ls.Block.String())
+func (is *IfStatement) statementNode() {}
+func (is *IfStatement) String() string {
+	return fmt.Sprintf("%s %s then\n%s\nend", is.Token.Literal, is.Condition.String(), is.Block.String())
+}
+
+type LabelStatement struct {
+	Token token.Token
+	Label Identifier
+}
+
+func (ls *LabelStatement) statementNode() {}
+func (ls *LabelStatement) String() string {
+	return fmt.Sprintf("::%s::", ls.Label.String())
 }
 
 type LocalStatement struct {

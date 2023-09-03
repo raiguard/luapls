@@ -74,6 +74,12 @@ func TestIfStatement(t *testing.T) {
 	})
 }
 
+func TestLabelStatement(t *testing.T) {
+	testStatement(t, "::continue::", func(stmt ast.LabelStatement) {
+		require.Equal(t, "continue", stmt.Label.Literal)
+	})
+}
+
 func TestLocalStatement(t *testing.T) {
 	testStatement(t, "local foo = 123", func(stmt ast.LocalStatement) {
 		require.Equal(t, 1, len(stmt.Names))

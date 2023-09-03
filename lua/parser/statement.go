@@ -20,6 +20,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		stat = p.parseAssignmentStatement()
 	case token.IF:
 		stat = p.parseIfStatement()
+	case token.LABEL:
+		stat = p.parseLabelStatement()
 	case token.LOCAL:
 		stat = p.parseLocalStatement()
 	case token.REPEAT:
@@ -99,6 +101,18 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseLabelStatement() *ast.LabelStatement {
+	stmt := ast.LabelStatement{
+		Token: p.curToken,
+	}
+	p.nextToken()
+	stmt.Label = *p.parseIdentifier()
+	if !p.expectPeek(token.LABEL) {
+		return nil
+	}
+	return &stmt
 }
 
 func (p *Parser) parseLocalStatement() *ast.LocalStatement {
