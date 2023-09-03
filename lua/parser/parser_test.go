@@ -78,9 +78,6 @@ func testStatements(t *testing.T, tests []statementTest) {
 
 func requireTypeConversion[T any](t *testing.T, val any) T {
 	res, ok := val.(*T)
-	if !ok {
-		fmt.Println("Failed")
-	}
 	require.True(t, ok)
 	return *res
 }

@@ -79,6 +79,17 @@ func (ls *LocalStatement) String() string {
 	return fmt.Sprintf("%s %s = %s", ls.Token.Literal, nodeListToString(ls.Names), nodeListToString(ls.Exps))
 }
 
+type RepeatStatement struct {
+	Token     token.Token
+	Block     Block
+	Condition Expression
+}
+
+func (ws *RepeatStatement) statementNode() {}
+func (ws *RepeatStatement) String() string {
+	return fmt.Sprintf("%s\n%s\nuntil %s", ws.Token.Literal, ws.Block.String(), ws.Condition.String())
+}
+
 type WhileStatement struct {
 	Token token.Token
 	Condition   Expression

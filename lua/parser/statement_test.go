@@ -85,6 +85,13 @@ func TestLocalStatement(t *testing.T) {
 	})
 }
 
+func TestRepeatStatement(t *testing.T) {
+	testStatement(t, "repeat i = i + 1 until i == 10", func(stmt ast.RepeatStatement) {
+		require.Equal(t, 1, len(stmt.Block.Statements))
+		require.Equal(t, "(i == 10)", stmt.Condition.String())
+	})
+}
+
 func TestWhileStatement(t *testing.T) {
 	testStatement(t, "while i < 10 do i = i + 1 end", func(stmt ast.WhileStatement) {
 		require.Equal(t, "(i < 10)", stmt.Condition.String())

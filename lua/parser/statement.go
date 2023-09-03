@@ -20,6 +20,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		stat = p.parseIfStatement()
 	case token.LOCAL:
 		stat = p.parseLocalStatement()
+	case token.REPEAT:
+		stat = p.parseRepeatStatement()
 	case token.WHILE:
 		stat = p.parseWhileStatement()
 	default:
@@ -104,6 +106,20 @@ func (p *Parser) parseLocalStatement() *ast.LocalStatement {
 	p.nextToken()
 	stmt.Exps = p.parseExpressionList()
 
+	return stmt
+}
+
+func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
+	stmt := &ast.RepeatStatement{
+		Token: p.curToken,
+	}
+	p.nextToken()
+	stmt.Block = *p.ParseBlock()
+	if !p.curTokenIs(token.UNTIL) {
+		return nil
+	}
+	p.nextToken()
+	stmt.Condition = p.parseExpression(LOWEST)
 	return stmt
 }
 

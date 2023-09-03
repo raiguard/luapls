@@ -43,10 +43,11 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) ParseBlock() *ast.Block {
-	block := &ast.Block{}
-	block.Statements = []ast.Statement{}
+	block := &ast.Block{
+		Statements: []ast.Statement{},
+	}
 
-	for !p.curTokenIs(token.EOF) && !p.curTokenIs(token.END) {
+	for !p.curTokenIs(token.EOF) && !p.curTokenIs(token.END) && !p.curTokenIs(token.UNTIL) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
@@ -70,13 +71,16 @@ func (p *Parser) expectPeek(tokenType token.TokenType) bool {
 		p.nextToken()
 		return true
 	}
+	p.invalidTokenError(tokenType, p.peekToken.Type)
+	return false
+}
+
+func (p *Parser) invalidTokenError(expected token.TokenType, got token.TokenType) {
 	p.errors = append(p.errors,
 		fmt.Sprintf("Invalid token: expected %s, got %s",
-			token.TokenStr[tokenType],
-			token.TokenStr[p.peekToken.Type]),
+			token.TokenStr[expected],
+			token.TokenStr[got]),
 	)
-	// TODO: Error
-	return false
 }
 
 func (p *Parser) curPrecedence() operatorPrecedence {
