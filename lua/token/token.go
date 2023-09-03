@@ -163,7 +163,8 @@ var TokenStr = map[TokenType]string{
 	SPREAD:    "...",
 }
 
-var Keywords = map[string]TokenType{
+var Reserved = map[string]TokenType{
+	"and":      AND,
 	"break":    BREAK,
 	"do":       DO,
 	"else":     ELSE,
@@ -175,6 +176,8 @@ var Keywords = map[string]TokenType{
 	"if":       IF,
 	"in":       IN,
 	"local":    LOCAL,
+	"not":      NOT,
+	"or":       OR,
 	"repeat":   REPEAT,
 	"return":   RETURN,
 	"then":     THEN,

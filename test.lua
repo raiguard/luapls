@@ -36,6 +36,8 @@ if num_2 < 5 then
   print("not greater") print("lesser")
 end
 
+i = num_1 and 4 or 5
+
 for i = 1, #double_string do
   print(double_string[i])
   goto continue

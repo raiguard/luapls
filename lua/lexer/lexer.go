@@ -125,7 +125,7 @@ tryAgain:
 			break
 		} else if isIdentifier(l.char) {
 			lit := l.readIdentifier()
-			if keyword, ok := token.Keywords[lit]; ok {
+			if keyword, ok := token.Reserved[lit]; ok {
 				tok = l.newToken(keyword)
 			} else {
 				tok = l.newToken(token.IDENT)

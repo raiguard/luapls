@@ -204,9 +204,15 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 
 func (p *Parser) getPrefixParser() prefixParseFn {
 	switch p.curToken.Type {
+	case token.HASH:
+		return p.parsePrefixExpression
 	case token.IDENT:
 		return p.parseIdentifier
+	case token.LPAREN:
+		return p.parseParenthesizedExpression
 	case token.MINUS:
+		return p.parsePrefixExpression
+	case token.NOT:
 		return p.parsePrefixExpression
 	case token.NUMBER:
 		return p.parseNumberLiteral
@@ -251,14 +257,23 @@ func (p *Parser) parseNumberLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseParenthesizedExpression() ast.Expression {
+	p.nextToken()
+	exp := p.parseExpression(LOWEST)
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+	return exp
+}
+
 func (p *Parser) parsePrefixExpression() ast.Expression {
-	expression := &ast.PrefixExpression{
+	exp := &ast.PrefixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
 	}
 	p.nextToken()
-	expression.Right = p.parseExpression(PREFIX)
-	return expression
+	exp.Right = p.parseExpression(PREFIX)
+	return exp
 }
 
 func (p *Parser) parseStringLiteral() ast.Expression {
