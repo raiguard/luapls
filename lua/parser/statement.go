@@ -54,7 +54,7 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
-	stmt.Label = ast.Identifier(p.curToken)
+	stmt.Label = *p.parseIdentifier()
 	return &stmt
 }
 
