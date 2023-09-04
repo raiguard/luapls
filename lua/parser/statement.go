@@ -12,6 +12,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		stat = p.parseBreakStatement()
 	case token.DO:
 		stat = p.parseDoStatement()
+	case token.FOR:
+		stat = p.parseForStatement()
 	case token.GOTO:
 		stat = p.parseGotoStatement()
 	case token.IDENT:
@@ -59,6 +61,57 @@ func (p *Parser) parseDoStatement() *ast.DoStatement {
 	stmt := ast.DoStatement{Token: p.curToken}
 	p.nextToken()
 	stmt.Block = *p.ParseBlock()
+	return &stmt
+}
+
+func (p *Parser) parseForStatement() *ast.ForStatement {
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt := ast.ForStatement{Var: *p.parseIdentifier()}
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+	p.nextToken()
+	start := p.parseExpression(LOWEST)
+	if start == nil {
+		return nil
+	}
+	stmt.Start = start
+	if !p.expectPeek(token.COMMA) {
+		return nil
+	}
+	p.nextToken()
+	end := p.parseExpression(LOWEST)
+	if end == nil {
+		return nil
+	}
+	stmt.End = end
+	if p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		step := p.parseExpression(LOWEST)
+		if step == nil {
+			return nil
+		}
+		stmt.Step = &step
+	}
+	if !p.expectPeek(token.DO) {
+		return nil
+	}
+
+	p.nextToken()
+	block := p.ParseBlock()
+	if block == nil {
+		return nil
+	}
+	stmt.Block = *block
+	if !p.curTokenIs(token.END) {
+		p.invalidTokenError(token.END, p.curToken.Type)
+		return nil
+	}
+	p.nextToken()
+
 	return &stmt
 }
 

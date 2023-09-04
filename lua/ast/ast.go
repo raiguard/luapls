@@ -57,6 +57,36 @@ func (ds *DoStatement) String() string {
 	return fmt.Sprintf("%s\n%s\nend", ds.Token.Literal, ds.Block.String())
 }
 
+type ForStatement struct {
+	Var   Identifier
+	Start Expression
+	End   Expression
+	Step  *Expression // Optional
+	Block Block
+}
+
+func (fs *ForStatement) statementNode() {}
+func (fs *ForStatement) String() string {
+	if fs.Step != nil {
+		return fmt.Sprintf(
+			"for %s = %s, %s, %s do\n%s\nend",
+			fs.Var.String(),
+			fs.Start.String(),
+			fs.End.String(),
+			(*fs.Step).String(),
+			fs.Block.String(),
+		)
+	} else {
+		return fmt.Sprintf(
+			"for %s = %s, %s do\n%s\nend",
+			fs.Var.String(),
+			fs.Start.String(),
+			fs.End.String(),
+			fs.Block.String(),
+		)
+	}
+}
+
 type GotoStatement struct {
 	Token token.Token
 	Label Identifier

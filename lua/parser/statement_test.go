@@ -36,6 +36,16 @@ func TestDoStatement(t *testing.T) {
 	})
 }
 
+func TestForStatement(t *testing.T) {
+	testStatement(t, "for i = 1, 100 do j = j + i end", func(stmt ast.ForStatement) {
+		require.Equal(t, "i", stmt.Var.String())
+		require.Equal(t, "1", stmt.Start.String())
+		require.Equal(t, "100", stmt.End.String())
+		require.Nil(t, stmt.Step)
+		require.Equal(t, 1, len(stmt.Block.Statements))
+	})
+}
+
 func TestGotoStatement(t *testing.T) {
 	testStatement(t, "goto continue", func(stmt ast.GotoStatement) {
 		require.Equal(t, "continue", stmt.Label.String())
