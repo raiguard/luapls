@@ -38,6 +38,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		}
 	case token.REPEAT:
 		stat = p.parseRepeatStatement()
+	case token.RETURN:
+		stat = p.parseReturnStatement()
 	case token.WHILE:
 		stat = p.parseWhileStatement()
 	}
@@ -302,6 +304,12 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 	p.nextToken()
 	stmt.Condition = p.parseExpression(LOWEST)
 	return stmt
+}
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	p.nextToken()
+	stmt := ast.ReturnStatement{Exps: p.parseExpressionList()}
+	return &stmt
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {

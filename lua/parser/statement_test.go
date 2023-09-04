@@ -135,6 +135,14 @@ func TestRepeatStatement(t *testing.T) {
 	})
 }
 
+func TestReturnStatement(t *testing.T) {
+	testStatement(t, "return foo, bar", func(stmt ast.ReturnStatement) {
+		require.Equal(t, 2, len(stmt.Exps))
+		require.Equal(t, "foo", stmt.Exps[0].String())
+		require.Equal(t, "bar", stmt.Exps[1].String())
+	})
+}
+
 func TestWhileStatement(t *testing.T) {
 	testStatement(t, "while i < 10 do i = i + 1 end", func(stmt ast.WhileStatement) {
 		require.Equal(t, "(i < 10)", stmt.Condition.String())

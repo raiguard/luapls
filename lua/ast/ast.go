@@ -101,7 +101,7 @@ func (fs *ForInStatement) String() string {
 type FunctionStatement struct {
 	Name    Identifier
 	Params  []Identifier
-	Body   Block
+	Body    Block
 	IsLocal bool
 }
 
@@ -177,9 +177,18 @@ type RepeatStatement struct {
 	Condition Expression
 }
 
-func (ws *RepeatStatement) statementNode() {}
-func (ws *RepeatStatement) String() string {
-	return fmt.Sprintf("%s\n%s\nuntil %s", ws.Token.Literal, ws.Block.String(), ws.Condition.String())
+func (rs *RepeatStatement) statementNode() {}
+func (rs *RepeatStatement) String() string {
+	return fmt.Sprintf("%s\n%s\nuntil %s", rs.Token.Literal, rs.Block.String(), rs.Condition.String())
+}
+
+type ReturnStatement struct {
+	Exps []Expression
+}
+
+func (rs *ReturnStatement) statementNode() {}
+func (rs *ReturnStatement) String() string {
+	return fmt.Sprintf("return %s", nodeListToString(rs.Exps))
 }
 
 type WhileStatement struct {
