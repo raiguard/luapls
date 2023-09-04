@@ -87,6 +87,17 @@ func (fs *ForStatement) String() string {
 	}
 }
 
+type ForInStatement struct {
+	Vars  []Identifier
+	Exps  []Expression
+	Block Block
+}
+
+func (fs *ForInStatement) statementNode() {}
+func (fs *ForInStatement) String() string {
+	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Vars), nodeListToString(fs.Exps), fs.Block.String())
+}
+
 type GotoStatement struct {
 	Token token.Token
 	Label Identifier

@@ -13,7 +13,12 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.DO:
 		stat = p.parseDoStatement()
 	case token.FOR:
-		stat = p.parseForStatement()
+		p.nextToken()
+		if p.peekTokenIs(token.ASSIGN) {
+			stat = p.parseForStatement()
+		} else if p.peekTokenIs(token.COMMA) {
+			stat = p.parseForInStatement()
+		}
 	case token.GOTO:
 		stat = p.parseGotoStatement()
 	case token.IDENT:
@@ -28,7 +33,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		stat = p.parseRepeatStatement()
 	case token.WHILE:
 		stat = p.parseWhileStatement()
-	default:
+	}
+	if stat == nil {
 		p.errors = append(p.errors, "Unexpected <exp>")
 		return nil
 	}
@@ -65,7 +71,12 @@ func (p *Parser) parseDoStatement() *ast.DoStatement {
 }
 
 func (p *Parser) parseForStatement() *ast.ForStatement {
-	if !p.expectPeek(token.IDENT) {
+	// Parser will have advanced to the next token, but tests will not
+	if p.curTokenIs(token.FOR) {
+		p.nextToken()
+	}
+	if !p.curTokenIs(token.IDENT) {
+		p.invalidTokenError(token.IDENT, p.curToken.Type)
 		return nil
 	}
 	stmt := ast.ForStatement{Var: *p.parseIdentifier()}
@@ -110,7 +121,40 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 		p.invalidTokenError(token.END, p.curToken.Type)
 		return nil
 	}
+
+	return &stmt
+}
+
+func (p *Parser) parseForInStatement() *ast.ForInStatement {
+	// Parser will have advanced to the next token, but tests will not
+	if p.curTokenIs(token.FOR) {
+		p.nextToken()
+	}
+	if !p.curTokenIs(token.IDENT) {
+		p.invalidTokenError(token.IDENT, p.curToken.Type)
+		return nil
+	}
+	stmt := ast.ForInStatement{}
+	stmt.Vars = parseNodeList(p, p.parseIdentifier)
+	if !p.expectPeek(token.IN) {
+		return nil
+	}
 	p.nextToken()
+	stmt.Exps = p.parseExpressionList()
+	if !p.expectPeek(token.DO) {
+		return nil
+	}
+	p.nextToken()
+	block := p.ParseBlock()
+	if block == nil {
+		return nil
+	}
+	stmt.Block = *block
+
+	if !p.curTokenIs(token.END) {
+		p.invalidTokenError(token.END, p.curToken.Type)
+		return nil
+	}
 
 	return &stmt
 }
