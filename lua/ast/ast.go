@@ -210,6 +210,15 @@ func (ie *BinaryExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator.String(), ie.Right.String())
 }
 
+type BooleanLiteral struct {
+	Value bool
+}
+
+func (bl *BooleanLiteral) expressionNode() {}
+func (bl *BooleanLiteral) String() string {
+	return fmt.Sprintf("%t", bl.Value)
+}
+
 type Identifier struct {
 	Literal string
 }

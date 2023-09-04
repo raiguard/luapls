@@ -16,3 +16,12 @@ until i == 50
 if i == 50 then
   goto beginning
 end
+
+-- Not valid Lua. Oh well!
+for i = 1, 100, -1 do
+  i = (i - 1 / 4) ^ 16 % 3
+end
+
+for key, value in table do
+  return false
+end

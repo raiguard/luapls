@@ -41,6 +41,23 @@ func TestInfixExpression(t *testing.T) {
 	}
 }
 
+func TestBooleanLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"false", false},
+		{"true", true},
+	}
+	for _, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+		lit := p.parseBooleanLiteral()
+		checkParserErrors(t, p)
+		require.Equal(t, test.expected, lit.Value)
+	}
+}
+
 func TestOperatorPrecedence(t *testing.T) {
 	// TODO: Directly check parser output instead of String() output
 	testStatements(t, []statementTest{

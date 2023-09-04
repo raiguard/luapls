@@ -13,6 +13,8 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	// TODO: Some of these should probably be separate AST types
 	var leftExp ast.Expression
 	switch p.curToken.Type {
+	case token.TRUE, token.FALSE:
+		leftExp = p.parseBooleanLiteral()
 	case token.HASH:
 		leftExp = p.parseUnaryExpression()
 	case token.IDENT:
@@ -99,6 +101,16 @@ func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
 	p.nextToken()
 	exp.Right = p.parseExpression(UNARY)
 	return exp
+}
+
+func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
+	// If this returns an error, something has gone VERY wrong, so just explode
+	value, err := strconv.ParseBool(p.curToken.Literal)
+	if err != nil {
+		panic(err)
+	}
+	lit := ast.BooleanLiteral{value}
+	return &lit
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
