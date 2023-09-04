@@ -35,7 +35,7 @@ func TestInfixExpression(t *testing.T) {
 
 		testNumberLiteral(t, binaryExp.Left, tt.leftValue)
 
-		require.Equal(t, tt.operator, binaryExp.Token.Literal)
+		require.Equal(t, tt.operator, binaryExp.Operator.String())
 
 		testNumberLiteral(t, binaryExp.Right, tt.rightValue)
 	}

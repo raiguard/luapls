@@ -71,9 +71,9 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 
 func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpression {
 	expression := &ast.BinaryExpression{
-		Token: p.curToken,
-		Left:  left,
-		Right: nil,
+		Left:     left,
+		Operator: p.curToken.Type,
+		Right:    nil,
 	}
 
 	precedence := p.curPrecedence()
@@ -94,8 +94,7 @@ func (p *Parser) parseSurroundingExpression(end token.TokenType) ast.Expression 
 
 func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
 	exp := &ast.UnaryExpression{
-		Token:    p.curToken,
-		Operator: p.curToken.Literal,
+		Operator: p.curToken.Type,
 	}
 	p.nextToken()
 	exp.Right = p.parseExpression(UNARY)
@@ -108,7 +107,7 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
-	lit := &ast.NumberLiteral{Token: p.curToken}
+	lit := &ast.NumberLiteral{}
 
 	// TODO: Handle all kinds of number
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
@@ -125,7 +124,6 @@ func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	lit := &ast.StringLiteral{
-		Token: p.curToken,
 		Value: strings.Trim(p.curToken.Literal, "\"'"),
 	}
 	return lit

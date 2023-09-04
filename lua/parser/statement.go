@@ -54,9 +54,7 @@ func (p *Parser) parseStatement() ast.Statement {
 }
 
 func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
-	stmt := &ast.AssignmentStatement{
-		Token: p.curToken,
-	}
+	stmt := &ast.AssignmentStatement{}
 	stmt.Vars = parseNodeList(p, p.parseIdentifier)
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
@@ -73,7 +71,7 @@ func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 }
 
 func (p *Parser) parseDoStatement() *ast.DoStatement {
-	stmt := ast.DoStatement{Token: p.curToken}
+	stmt := ast.DoStatement{}
 	p.nextToken()
 	stmt.Body = *p.ParseBlock()
 	return &stmt
@@ -206,7 +204,7 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
 }
 
 func (p *Parser) parseGotoStatement() *ast.GotoStatement {
-	stmt := ast.GotoStatement{Token: p.curToken}
+	stmt := ast.GotoStatement{}
 	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
@@ -215,10 +213,7 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 }
 
 func (p *Parser) parseIfStatement() *ast.IfStatement {
-	stmt := &ast.IfStatement{
-		Token:   p.curToken,
-		Clauses: []ast.IfClause{},
-	}
+	stmt := &ast.IfStatement{Clauses: []ast.IfClause{}}
 
 	p.nextToken()
 
@@ -258,15 +253,13 @@ func (p *Parser) parseIfClause() *ast.IfClause {
 
 	clause := ast.IfClause{
 		Condition: condition,
-		Body:     *block,
+		Body:      *block,
 	}
 	return &clause
 }
 
 func (p *Parser) parseLabelStatement() *ast.LabelStatement {
-	stmt := ast.LabelStatement{
-		Token: p.curToken,
-	}
+	stmt := ast.LabelStatement{}
 	p.nextToken()
 	stmt.Label = *p.parseIdentifier()
 	if !p.expectPeek(token.LABEL) {
@@ -276,9 +269,7 @@ func (p *Parser) parseLabelStatement() *ast.LabelStatement {
 }
 
 func (p *Parser) parseLocalStatement() *ast.LocalStatement {
-	stmt := &ast.LocalStatement{
-		Token: p.curToken,
-	}
+	stmt := &ast.LocalStatement{}
 	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
@@ -293,9 +284,7 @@ func (p *Parser) parseLocalStatement() *ast.LocalStatement {
 }
 
 func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
-	stmt := &ast.RepeatStatement{
-		Token: p.curToken,
-	}
+	stmt := &ast.RepeatStatement{}
 	p.nextToken()
 	stmt.Body = *p.ParseBlock()
 	if !p.curTokenIs(token.UNTIL) {
@@ -313,9 +302,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {
-	stmt := &ast.WhileStatement{
-		Token: p.curToken,
-	}
+	stmt := &ast.WhileStatement{}
 	p.nextToken()
 	stmt.Condition = p.parseExpression(LOWEST)
 	if !p.expectPeek(token.DO) {

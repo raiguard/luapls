@@ -30,9 +30,8 @@ type Statement interface {
 }
 
 type AssignmentStatement struct {
-	Token token.Token
-	Vars  []Identifier
-	Exps  []Expression
+	Vars []Identifier
+	Exps []Expression
 }
 
 func (as *AssignmentStatement) statementNode() {}
@@ -48,13 +47,12 @@ func (bs *BreakStatement) String() string {
 }
 
 type DoStatement struct {
-	Token token.Token
-	Body  Block
+	Body Block
 }
 
 func (ds *DoStatement) statementNode() {}
 func (ds *DoStatement) String() string {
-	return fmt.Sprintf("%s\n%s\nend", ds.Token.Literal, ds.Body.String())
+	return fmt.Sprintf("do\n%s\nend", ds.Body.String())
 }
 
 type ForStatement struct {
@@ -121,17 +119,15 @@ func (fs *FunctionStatement) String() string {
 }
 
 type GotoStatement struct {
-	Token token.Token
 	Label Identifier
 }
 
 func (gs *GotoStatement) statementNode() {}
 func (gs *GotoStatement) String() string {
-	return fmt.Sprintf("%s %s", gs.Token.Literal, gs.Label.String())
+	return fmt.Sprintf("goto %s", gs.Label.String())
 }
 
 type IfStatement struct {
-	Token   token.Token
 	Clauses []IfClause
 }
 
@@ -151,7 +147,6 @@ func (ic IfClause) String() string {
 }
 
 type LabelStatement struct {
-	Token token.Token
 	Label Identifier
 }
 
@@ -161,25 +156,23 @@ func (ls *LabelStatement) String() string {
 }
 
 type LocalStatement struct {
-	Token token.Token
 	Names []Identifier
 	Exps  []Expression
 }
 
 func (ls *LocalStatement) statementNode() {}
 func (ls *LocalStatement) String() string {
-	return fmt.Sprintf("%s %s = %s", ls.Token.Literal, nodeListToString(ls.Names), nodeListToString(ls.Exps))
+	return fmt.Sprintf("local %s = %s", nodeListToString(ls.Names), nodeListToString(ls.Exps))
 }
 
 type RepeatStatement struct {
-	Token     token.Token
 	Body      Block
 	Condition Expression
 }
 
 func (rs *RepeatStatement) statementNode() {}
 func (rs *RepeatStatement) String() string {
-	return fmt.Sprintf("%s\n%s\nuntil %s", rs.Token.Literal, rs.Body.String(), rs.Condition.String())
+	return fmt.Sprintf("repeat\n%s\nuntil %s", rs.Body.String(), rs.Condition.String())
 }
 
 type ReturnStatement struct {
@@ -192,14 +185,13 @@ func (rs *ReturnStatement) String() string {
 }
 
 type WhileStatement struct {
-	Token     token.Token
 	Condition Expression
 	Body      Block
 }
 
 func (ws *WhileStatement) statementNode() {}
 func (ws *WhileStatement) String() string {
-	return fmt.Sprintf("%s %s do\n%s\nend", ws.Token.Literal, ws.Condition.String(), ws.Body.String())
+	return fmt.Sprintf("while %s do\n%s\nend", ws.Condition.String(), ws.Body.String())
 }
 
 type Expression interface {
@@ -208,14 +200,14 @@ type Expression interface {
 }
 
 type BinaryExpression struct {
-	Token token.Token
-	Left  Expression
-	Right Expression
+	Left     Expression
+	Operator token.TokenType
+	Right    Expression
 }
 
 func (ie *BinaryExpression) expressionNode() {}
 func (ie *BinaryExpression) String() string {
-	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Token.Literal, ie.Right.String())
+	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator.String(), ie.Right.String())
 }
 
 type Identifier token.Token
@@ -224,16 +216,14 @@ func (i Identifier) expressionNode() {}
 func (i Identifier) String() string  { return i.Literal }
 
 type NumberLiteral struct {
-	Token token.Token
 	Value float64
 }
 
 func (nl *NumberLiteral) expressionNode() {}
-func (nl *NumberLiteral) String() string  { return nl.Token.Literal }
+func (nl *NumberLiteral) String() string  { return fmt.Sprintf("%.f", nl.Value) }
 
 type UnaryExpression struct {
-	Token    token.Token
-	Operator string
+	Operator token.TokenType
 	Right    Expression
 }
 
@@ -243,12 +233,11 @@ func (pe *UnaryExpression) String() string {
 }
 
 type StringLiteral struct {
-	Token token.Token
 	Value string // Without quotes
 }
 
 func (sl *StringLiteral) expressionNode() {}
-func (sl *StringLiteral) String() string  { return sl.Token.Literal }
+func (sl *StringLiteral) String() string  { return sl.Value }
 
 func nodeListToString[T Node](nodes []T) string {
 	items := []string{}

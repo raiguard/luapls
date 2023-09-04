@@ -76,6 +76,10 @@ const (
 	SPREAD
 )
 
+func (t TokenType) String() string {
+	return TokenStr[t]
+}
+
 type Token struct {
 	Type    TokenType
 	Literal string

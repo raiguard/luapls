@@ -11,11 +11,6 @@ func TestString(t *testing.T) {
 	program := &Block{
 		Statements: []Statement{
 			&AssignmentStatement{
-				Token: token.Token{
-					Type:    token.IDENT,
-					Literal: "foo",
-					Range:   token.Range{StartCol: 0, StartRow: 0, EndCol: 3, EndRow: 0},
-				},
 				Vars: []Identifier{
 					{
 						Type:    token.IDENT,
@@ -24,14 +19,7 @@ func TestString(t *testing.T) {
 					},
 				},
 				Exps: []Expression{
-					&NumberLiteral{
-						Token: token.Token{
-							Type:    token.NUMBER,
-							Literal: "123",
-							Range:   token.Range{},
-						},
-						Value: 123,
-					},
+					&NumberLiteral{123},
 				},
 			},
 		},

@@ -54,9 +54,9 @@ func checkParserErrors(t *testing.T, p *Parser) {
 }
 
 func testNumberLiteral(t *testing.T, il ast.Expression, value float64) {
-	integ := requireTypeConversion[ast.NumberLiteral](t, il)
-	require.Equal(t, value, integ.Value)
-	require.Equal(t, fmt.Sprintf("%.0f", value), integ.Token.Literal)
+	num := requireTypeConversion[ast.NumberLiteral](t, il)
+	require.Equal(t, value, num.Value)
+	require.Equal(t, fmt.Sprintf("%.0f", value), num.String())
 }
 
 type statementTest struct {
