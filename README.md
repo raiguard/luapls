@@ -1,9 +1,8 @@
-# luapls-dev
+# luapls
 
 luapls is a language server for the Lua programming language.
 
-This repo is temporary and will be replaced once the first public release
-occurs.
+This project is under very heavy development and is not ready for use.
 
 ## Build
 
@@ -11,10 +10,5 @@ occurs.
 - [go](https://go.dev)
 
 ```
-make
+go build
 ```
-
-## Run
-
-`luapls` does not take any arguments - simply point your editor's LSP
-implementation to the executable and it will run.
