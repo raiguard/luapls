@@ -21,6 +21,16 @@ func (b *Block) String() string {
 	return strings.TrimSpace(out)
 }
 
+func nodeListToString[T Node](nodes []T) string {
+	items := []string{}
+	for _, node := range nodes {
+		items = append(items, node.String())
+	}
+	return strings.Join(items, ", ")
+}
+
+// Statements
+
 type Statement interface {
 	Node
 	statementNode()
@@ -191,6 +201,8 @@ func (ws *WhileStatement) String() string {
 	return fmt.Sprintf("while %s do\n%s\nend", ws.Condition.String(), ws.Body.String())
 }
 
+// Expressions
+
 type Expression interface {
 	Node
 	expressionNode()
@@ -206,6 +218,18 @@ func (ie *BinaryExpression) expressionNode() {}
 func (ie *BinaryExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator.String(), ie.Right.String())
 }
+
+type UnaryExpression struct {
+	Operator token.TokenType
+	Right    Expression
+}
+
+func (pe *UnaryExpression) expressionNode() {}
+func (pe *UnaryExpression) String() string {
+	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
+}
+
+// Literals (also expressions)
 
 type BooleanLiteral struct {
 	Value bool
@@ -230,27 +254,9 @@ type NumberLiteral struct {
 func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) String() string  { return fmt.Sprintf("%.f", nl.Value) }
 
-type UnaryExpression struct {
-	Operator token.TokenType
-	Right    Expression
-}
-
-func (pe *UnaryExpression) expressionNode() {}
-func (pe *UnaryExpression) String() string {
-	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
-}
-
 type StringLiteral struct {
 	Value string // Without quotes
 }
 
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) String() string  { return sl.Value }
-
-func nodeListToString[T Node](nodes []T) string {
-	items := []string{}
-	for _, node := range nodes {
-		items = append(items, node.String())
-	}
-	return strings.Join(items, ", ")
-}
