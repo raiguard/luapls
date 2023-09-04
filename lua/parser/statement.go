@@ -75,7 +75,7 @@ func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 func (p *Parser) parseDoStatement() *ast.DoStatement {
 	stmt := ast.DoStatement{Token: p.curToken}
 	p.nextToken()
-	stmt.Block = *p.ParseBlock()
+	stmt.Body = *p.ParseBlock()
 	return &stmt
 }
 
@@ -125,7 +125,7 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 	if block == nil {
 		return nil
 	}
-	stmt.Block = *block
+	stmt.Body = *block
 	if !p.curTokenIs(token.END) {
 		p.invalidTokenError(token.END, p.curToken.Type)
 		return nil
@@ -158,7 +158,7 @@ func (p *Parser) parseForInStatement() *ast.ForInStatement {
 	if block == nil {
 		return nil
 	}
-	stmt.Block = *block
+	stmt.Body = *block
 
 	if !p.curTokenIs(token.END) {
 		p.invalidTokenError(token.END, p.curToken.Type)
@@ -258,7 +258,7 @@ func (p *Parser) parseIfClause() *ast.IfClause {
 
 	clause := ast.IfClause{
 		Condition: condition,
-		Block:     *block,
+		Body:     *block,
 	}
 	return &clause
 }
@@ -297,7 +297,7 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 		Token: p.curToken,
 	}
 	p.nextToken()
-	stmt.Block = *p.ParseBlock()
+	stmt.Body = *p.ParseBlock()
 	if !p.curTokenIs(token.UNTIL) {
 		return nil
 	}
@@ -322,7 +322,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		return nil
 	}
 	p.nextToken()
-	stmt.Block = *p.ParseBlock()
+	stmt.Body = *p.ParseBlock()
 	return stmt
 }
 

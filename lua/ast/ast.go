@@ -49,12 +49,12 @@ func (bs *BreakStatement) String() string {
 
 type DoStatement struct {
 	Token token.Token
-	Block Block
+	Body  Block
 }
 
 func (ds *DoStatement) statementNode() {}
 func (ds *DoStatement) String() string {
-	return fmt.Sprintf("%s\n%s\nend", ds.Token.Literal, ds.Block.String())
+	return fmt.Sprintf("%s\n%s\nend", ds.Token.Literal, ds.Body.String())
 }
 
 type ForStatement struct {
@@ -62,7 +62,7 @@ type ForStatement struct {
 	Start Expression
 	End   Expression
 	Step  *Expression // Optional
-	Block Block
+	Body  Block
 }
 
 func (fs *ForStatement) statementNode() {}
@@ -74,7 +74,7 @@ func (fs *ForStatement) String() string {
 			fs.Start.String(),
 			fs.End.String(),
 			(*fs.Step).String(),
-			fs.Block.String(),
+			fs.Body.String(),
 		)
 	} else {
 		return fmt.Sprintf(
@@ -82,20 +82,20 @@ func (fs *ForStatement) String() string {
 			fs.Var.String(),
 			fs.Start.String(),
 			fs.End.String(),
-			fs.Block.String(),
+			fs.Body.String(),
 		)
 	}
 }
 
 type ForInStatement struct {
-	Vars  []Identifier
-	Exps  []Expression
-	Block Block
+	Vars []Identifier
+	Exps []Expression
+	Body Block
 }
 
 func (fs *ForInStatement) statementNode() {}
 func (fs *ForInStatement) String() string {
-	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Vars), nodeListToString(fs.Exps), fs.Block.String())
+	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Vars), nodeListToString(fs.Exps), fs.Body.String())
 }
 
 type FunctionStatement struct {
@@ -142,12 +142,12 @@ func (is *IfStatement) String() string {
 
 type IfClause struct {
 	Condition Expression
-	Block     Block
+	Body      Block
 }
 
 func (ic IfClause) statementNode() {}
 func (ic IfClause) String() string {
-	return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Block.String())
+	return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Body.String())
 }
 
 type LabelStatement struct {
@@ -173,13 +173,13 @@ func (ls *LocalStatement) String() string {
 
 type RepeatStatement struct {
 	Token     token.Token
-	Block     Block
+	Body      Block
 	Condition Expression
 }
 
 func (rs *RepeatStatement) statementNode() {}
 func (rs *RepeatStatement) String() string {
-	return fmt.Sprintf("%s\n%s\nuntil %s", rs.Token.Literal, rs.Block.String(), rs.Condition.String())
+	return fmt.Sprintf("%s\n%s\nuntil %s", rs.Token.Literal, rs.Body.String(), rs.Condition.String())
 }
 
 type ReturnStatement struct {
@@ -194,12 +194,12 @@ func (rs *ReturnStatement) String() string {
 type WhileStatement struct {
 	Token     token.Token
 	Condition Expression
-	Block     Block
+	Body      Block
 }
 
 func (ws *WhileStatement) statementNode() {}
 func (ws *WhileStatement) String() string {
-	return fmt.Sprintf("%s %s do\n%s\nend", ws.Token.Literal, ws.Condition.String(), ws.Block.String())
+	return fmt.Sprintf("%s %s do\n%s\nend", ws.Token.Literal, ws.Condition.String(), ws.Body.String())
 }
 
 type Expression interface {

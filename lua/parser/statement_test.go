@@ -32,7 +32,7 @@ func TestBreakStatement(t *testing.T) {
 
 func TestDoStatement(t *testing.T) {
 	testStatement(t, "do i = 1 end", func(stmt ast.DoStatement) {
-		require.Equal(t, 1, len(stmt.Block.Statements))
+		require.Equal(t, 1, len(stmt.Body.Statements))
 	})
 }
 
@@ -42,7 +42,7 @@ func TestForStatement(t *testing.T) {
 		require.Equal(t, "1", stmt.Start.String())
 		require.Equal(t, "100", stmt.End.String())
 		require.Nil(t, stmt.Step)
-		require.Equal(t, 1, len(stmt.Block.Statements))
+		require.Equal(t, 1, len(stmt.Body.Statements))
 	})
 }
 
@@ -53,7 +53,7 @@ func TestForInStatement(t *testing.T) {
 		require.Equal(t, "value", stmt.Vars[1].String())
 		require.Equal(t, 1, len(stmt.Exps))
 		require.Equal(t, "tbl", stmt.Exps[0].String())
-		require.Equal(t, 1, len(stmt.Block.Statements))
+		require.Equal(t, 1, len(stmt.Body.Statements))
 	})
 }
 
@@ -87,7 +87,7 @@ func TestIfStatement(t *testing.T) {
 		lit := requireTypeConversion[ast.Identifier](t, clause.Condition)
 		require.Equal(t, "foo", lit.String())
 
-		block := clause.Block
+		block := clause.Body
 		require.Equal(t, 2, len(block.Statements))
 	})
 
@@ -100,8 +100,8 @@ func TestIfStatement(t *testing.T) {
 	`
 	testStatement(t, input2, func(stmt ast.IfStatement) {
 		require.Equal(t, 2, len(stmt.Clauses))
-		require.Equal(t, 1, len(stmt.Clauses[0].Block.Statements))
-		require.Equal(t, 1, len(stmt.Clauses[1].Block.Statements))
+		require.Equal(t, 1, len(stmt.Clauses[0].Body.Statements))
+		require.Equal(t, 1, len(stmt.Clauses[1].Body.Statements))
 	})
 }
 
@@ -130,7 +130,7 @@ func TestLocalStatement(t *testing.T) {
 
 func TestRepeatStatement(t *testing.T) {
 	testStatement(t, "repeat i = i + 1 until i == 10", func(stmt ast.RepeatStatement) {
-		require.Equal(t, 1, len(stmt.Block.Statements))
+		require.Equal(t, 1, len(stmt.Body.Statements))
 		require.Equal(t, "(i == 10)", stmt.Condition.String())
 	})
 }
@@ -146,7 +146,7 @@ func TestReturnStatement(t *testing.T) {
 func TestWhileStatement(t *testing.T) {
 	testStatement(t, "while i < 10 do i = i + 1 end", func(stmt ast.WhileStatement) {
 		require.Equal(t, "(i < 10)", stmt.Condition.String())
-		require.Equal(t, 1, len(stmt.Block.Statements))
+		require.Equal(t, 1, len(stmt.Body.Statements))
 	})
 }
 
