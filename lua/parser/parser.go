@@ -43,20 +43,18 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) ParseBlock() *ast.Block {
-	block := &ast.Block{
-		Statements: []ast.Statement{},
-	}
+	block := ast.Block{}
 
 	// TODO: Remove the need for this dumbness
 	for !p.curTokenIs(token.EOF) && !p.curTokenIs(token.END) && !p.curTokenIs(token.UNTIL) && !p.curTokenIs(token.ELSEIF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
-			block.Statements = append(block.Statements, stmt)
+			block = append(block, stmt)
 		}
 		p.nextToken()
 	}
 
-	return block
+	return &block
 }
 
 func (p *Parser) curTokenIs(tokenType token.TokenType) bool {

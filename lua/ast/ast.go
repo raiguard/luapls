@@ -11,14 +11,11 @@ type Node interface {
 	String() string
 }
 
-type Block struct {
-	Node       `json:"-"`
-	Statements []Statement
-}
+type Block []Statement
 
 func (b *Block) String() string {
 	var out string
-	for _, stmt := range b.Statements {
+	for _, stmt := range *b {
 		out += stmt.String() + "\n"
 	}
 	return strings.TrimSpace(out)

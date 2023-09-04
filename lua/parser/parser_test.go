@@ -21,7 +21,7 @@ import (
 // 	p := New(l)
 
 // 	block := p.ParseBlock()
-// 	stmts := block.Statements
+// 	stmts := block
 
 // 	tests := []struct {
 // 		name string
@@ -70,7 +70,7 @@ func testStatements(t *testing.T, tests []statementTest) {
 
 		block := p.ParseBlock()
 		require.NotNil(t, block)
-		require.Equal(t, 1, len(block.Statements))
+		require.Equal(t, 1, len(*block))
 
 		require.Equal(t, test.expected, block.String())
 	}
