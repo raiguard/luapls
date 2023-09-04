@@ -18,7 +18,11 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	case token.HASH:
 		leftExp = p.parseUnaryExpression()
 	case token.IDENT:
-		leftExp = p.parseIdentifier()
+		if p.peekTokenIs(token.LPAREN) || p.peekTokenIs(token.STRING) {
+			leftExp = p.parseFunctionCall()
+		} else {
+			leftExp = p.parseIdentifier()
+		}
 	case token.LPAREN:
 		leftExp = p.parseSurroundingExpression(token.RPAREN)
 	case token.MINUS:

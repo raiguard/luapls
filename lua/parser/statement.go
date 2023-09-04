@@ -25,7 +25,11 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.GOTO:
 		stat = p.parseGotoStatement()
 	case token.IDENT:
-		stat = p.parseAssignmentStatement()
+		if p.peekTokenIs(token.ASSIGN) || p.peekTokenIs(token.COMMA) {
+			stat = p.parseAssignmentStatement()
+		} else if p.peekTokenIs(token.LPAREN) || p.peekTokenIs(token.STRING) {
+			stat = p.parseFunctionCall()
+		}
 	case token.IF:
 		stat = p.parseIfStatement()
 	case token.LABEL:

@@ -57,6 +57,32 @@ func (p *Parser) ParseBlock() *ast.Block {
 	return &block
 }
 
+func (p *Parser) parseFunctionCall() *ast.FunctionCall {
+	if !p.curTokenIs(token.IDENT) {
+		return nil
+	}
+	fc := ast.FunctionCall{Name: *p.parseIdentifier()}
+
+	if p.peekTokenIs(token.STRING) {
+		p.nextToken()
+		fc.Args = []ast.Expression{p.parseStringLiteral()}
+		return &fc
+	}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+	fc.Args = p.parseExpressionList()
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return &fc
+}
+
 func (p *Parser) curTokenIs(tokenType token.TokenType) bool {
 	return p.curToken.Type == tokenType
 }

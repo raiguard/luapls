@@ -260,3 +260,17 @@ type StringLiteral struct {
 
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) String() string  { return sl.Value }
+
+// Other
+
+// FunctionCall can be both a statement and an expression.
+type FunctionCall struct {
+	Name Identifier
+	Args []Expression
+}
+
+func (fc *FunctionCall) expressionNode() {}
+func (fc *FunctionCall) statementNode()  {}
+func (fc *FunctionCall) String() string {
+	return fmt.Sprintf("%s(%s)", fc.Name.String(), nodeListToString(fc.Args))
+}
