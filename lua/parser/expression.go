@@ -25,7 +25,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 			leftExp = p.parseIdentifier()
 		}
 	case token.LPAREN:
-		leftExp = p.parseSurroundingExpression(token.RPAREN)
+		leftExp = p.parseSurroundingExpression()
 	case token.MINUS:
 		leftExp = p.parseUnaryExpression()
 	case token.NOT:
@@ -120,10 +120,13 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 	return &exp
 }
 
-func (p *Parser) parseSurroundingExpression(end token.TokenType) ast.Expression {
+func (p *Parser) parseSurroundingExpression() ast.Expression {
+	if !p.curTokenIs(token.LPAREN) {
+		return nil
+	}
 	p.nextToken()
 	exp := p.parseExpression(LOWEST)
-	if !p.expectPeek(end) {
+	if !p.expectPeek(token.RPAREN) {
 		return nil
 	}
 	return exp
@@ -154,10 +157,10 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
-	lit := &ast.NumberLiteral{}
+	lit := &ast.NumberLiteral{Literal: p.curToken.Literal}
 
 	// TODO: Handle all kinds of number
-	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
 		p.errors = append(p.errors, msg)

@@ -258,11 +258,12 @@ func (i Identifier) expressionNode() {}
 func (i Identifier) String() string  { return i.Literal }
 
 type NumberLiteral struct {
-	Value float64
+	Literal string
+	Value   float64
 }
 
 func (nl *NumberLiteral) expressionNode() {}
-func (nl *NumberLiteral) String() string  { return fmt.Sprintf("%.f", nl.Value) }
+func (nl *NumberLiteral) String() string  { return nl.Literal }
 
 type StringLiteral struct {
 	Value string

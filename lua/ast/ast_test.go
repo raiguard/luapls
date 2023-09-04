@@ -13,7 +13,7 @@ func TestString(t *testing.T) {
 				{"foo"},
 			},
 			Exps: []Expression{
-				&NumberLiteral{123},
+				&NumberLiteral{"123", 123},
 			},
 		},
 	}
