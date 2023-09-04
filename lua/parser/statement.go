@@ -8,6 +8,9 @@ import (
 func (p *Parser) parseStatement() ast.Statement {
 	var stat ast.Statement
 	switch p.curToken.Type {
+	case token.SEMICOLON:
+		p.nextToken()
+		return nil
 	case token.BREAK:
 		stat = p.parseBreakStatement()
 	case token.DO:

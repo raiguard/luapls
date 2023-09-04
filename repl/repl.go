@@ -1,6 +1,7 @@
 package repl
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -42,6 +43,8 @@ func Run() {
 		if len(p.Errors()) > 0 {
 			continue
 		}
+		bytes, _ := json.Marshal(block)
+		fmt.Println(string(bytes))
 		fmt.Println(block.String())
 	}
 }
