@@ -3,7 +3,6 @@ package ast
 import (
 	"testing"
 
-	"github.com/raiguard/luapls/lua/token"
 	"github.com/stretchr/testify/require"
 )
 
@@ -12,11 +11,7 @@ func TestString(t *testing.T) {
 		Statements: []Statement{
 			&AssignmentStatement{
 				Vars: []Identifier{
-					{
-						Type:    token.IDENT,
-						Literal: "foo",
-						Range:   token.Range{StartCol: 6, StartRow: 0, EndCol: 9, EndRow: 3},
-					},
+					{"foo"},
 				},
 				Exps: []Expression{
 					&NumberLiteral{123},

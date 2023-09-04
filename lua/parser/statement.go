@@ -66,7 +66,7 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 }
 
 func (p *Parser) parseBreakStatement() *ast.BreakStatement {
-	stmt := ast.BreakStatement(p.curToken)
+	stmt := ast.BreakStatement{}
 	return &stmt
 }
 

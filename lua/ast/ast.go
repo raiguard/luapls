@@ -12,7 +12,7 @@ type Node interface {
 }
 
 type Block struct {
-	Node
+	Node       `json:"-"`
 	Statements []Statement
 }
 
@@ -39,11 +39,11 @@ func (as *AssignmentStatement) String() string {
 	return fmt.Sprintf("%s = %s", nodeListToString(as.Vars), nodeListToString(as.Exps))
 }
 
-type BreakStatement token.Token
+type BreakStatement struct{}
 
 func (bs *BreakStatement) statementNode() {}
 func (bs *BreakStatement) String() string {
-	return bs.Literal
+	return "break"
 }
 
 type DoStatement struct {
@@ -210,7 +210,9 @@ func (ie *BinaryExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator.String(), ie.Right.String())
 }
 
-type Identifier token.Token
+type Identifier struct {
+	Literal string
+}
 
 func (i Identifier) expressionNode() {}
 func (i Identifier) String() string  { return i.Literal }

@@ -102,7 +102,7 @@ func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	ident := ast.Identifier(p.curToken)
+	ident := ast.Identifier{p.curToken.Literal}
 	return &ident
 }
 
