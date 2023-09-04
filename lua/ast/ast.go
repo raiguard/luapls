@@ -255,11 +255,11 @@ func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) String() string  { return fmt.Sprintf("%.f", nl.Value) }
 
 type StringLiteral struct {
-	Value string // Without quotes
+	Value string
 }
 
 func (sl *StringLiteral) expressionNode() {}
-func (sl *StringLiteral) String() string  { return sl.Value }
+func (sl *StringLiteral) String() string  { return fmt.Sprintf("\"%s\"", sl.Value) }
 
 // Other
 

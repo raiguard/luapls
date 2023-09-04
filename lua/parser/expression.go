@@ -10,7 +10,6 @@ import (
 )
 
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
-	// TODO: Some of these should probably be separate AST types
 	var leftExp ast.Expression
 	switch p.curToken.Type {
 	case token.TRUE, token.FALSE:
