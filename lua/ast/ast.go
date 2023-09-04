@@ -219,6 +219,16 @@ func (ie *BinaryExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator.String(), ie.Right.String())
 }
 
+type FunctionExpression struct {
+	Params []Identifier
+	Body   Block
+}
+
+func (fe *FunctionExpression) expressionNode() {}
+func (fe *FunctionExpression) String() string {
+	return fmt.Sprintf("function(%s)\n%s\nend", nodeListToString(fe.Params), fe.Body.String())
+}
+
 type UnaryExpression struct {
 	Operator token.TokenType
 	Right    Expression

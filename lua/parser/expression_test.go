@@ -58,6 +58,15 @@ func TestBooleanLiteral(t *testing.T) {
 	}
 }
 
+func TestFunctionExpression(t *testing.T) {
+	testExpression(t, "function(a, b) print(a + b) end", func(exp ast.FunctionExpression) {
+		require.Equal(t, 2, len(exp.Params))
+		require.Equal(t, "a", exp.Params[0].String())
+		require.Equal(t, "b", exp.Params[1].String())
+		require.Equal(t, 1, len(exp.Body))
+	})
+}
+
 func TestOperatorPrecedence(t *testing.T) {
 	// TODO: Directly check parser output instead of String() output
 	testStatements(t, []statementTest{
@@ -66,4 +75,12 @@ func TestOperatorPrecedence(t *testing.T) {
 		{"i = 2 ^ 2 ^ 2", "i = (2 ^ (2 ^ 2))"},
 		{"i = 2 .. 2 .. 2", "i = (2 .. (2 .. 2))"},
 	})
+}
+
+func testExpression[T any](t *testing.T, input string, tester func(T)) {
+	l := lexer.New(input)
+	p := New(l)
+	stmt := p.parseExpression(LOWEST)
+	checkParserErrors(t, p)
+	tester(requireTypeConversion[T](t, stmt))
 }

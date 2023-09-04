@@ -12,6 +12,8 @@ import (
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	var leftExp ast.Expression
 	switch p.curToken.Type {
+	case token.FUNCTION:
+		leftExp = p.parseFunctionExpression()
 	case token.TRUE, token.FALSE:
 		leftExp = p.parseBooleanLiteral()
 	case token.HASH:
@@ -86,6 +88,36 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpressio
 	expression.Right = p.parseExpression(precedence)
 
 	return expression
+}
+
+func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
+	if !p.curTokenIs(token.FUNCTION) {
+		return nil
+	}
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+	// TODO: Varargs
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	exp := ast.FunctionExpression{
+		Params: parseNodeList(p, p.parseIdentifier),
+	}
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+	p.nextToken()
+	body := p.ParseBlock()
+	if body == nil {
+		return nil
+	}
+	exp.Body = *body
+	if !p.curTokenIs(token.END) {
+		return nil
+	}
+
+	return &exp
 }
 
 func (p *Parser) parseSurroundingExpression(end token.TokenType) ast.Expression {
