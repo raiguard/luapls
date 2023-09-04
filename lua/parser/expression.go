@@ -159,7 +159,6 @@ const (
 	PRODUCT
 	UNARY
 	POW
-	CALL
 )
 
 var precedences = map[token.TokenType]operatorPrecedence{
@@ -180,8 +179,6 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.NOT:     UNARY,
 	token.HASH:    UNARY,
 	token.CARET:   POW,
-	token.LPAREN:  CALL,
-	token.LBRACK:  CALL,
 }
 
 var binaryOperators = map[token.TokenType]bool{
