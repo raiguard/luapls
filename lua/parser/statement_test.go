@@ -57,6 +57,17 @@ func TestForInStatement(t *testing.T) {
 	})
 }
 
+func TestFunctionStatement(t *testing.T) {
+	testStatement(t, "function foo(key, value) end", func(stmt ast.FunctionStatement) {
+		require.Equal(t, "foo", stmt.Name.String())
+		require.Equal(t, 2, len(stmt.Params))
+		require.Equal(t, "key", stmt.Params[0].String())
+		require.Equal(t, "value", stmt.Params[1].String())
+		require.Equal(t, 0, len(stmt.Body.Statements))
+		require.Equal(t, false, stmt.IsLocal)
+	})
+}
+
 func TestGotoStatement(t *testing.T) {
 	testStatement(t, "goto continue", func(stmt ast.GotoStatement) {
 		require.Equal(t, "continue", stmt.Label.String())

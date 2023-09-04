@@ -13,12 +13,15 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.DO:
 		stat = p.parseDoStatement()
 	case token.FOR:
+		// TODO: Peek two tokens ahead instead of advancing here
 		p.nextToken()
 		if p.peekTokenIs(token.ASSIGN) {
 			stat = p.parseForStatement()
 		} else if p.peekTokenIs(token.COMMA) {
 			stat = p.parseForInStatement()
 		}
+	case token.FUNCTION:
+		stat = p.parseFunctionStatement()
 	case token.GOTO:
 		stat = p.parseGotoStatement()
 	case token.IDENT:
@@ -28,7 +31,11 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.LABEL:
 		stat = p.parseLabelStatement()
 	case token.LOCAL:
-		stat = p.parseLocalStatement()
+		if p.peekTokenIs(token.FUNCTION) {
+			stat = p.parseFunctionStatement()
+		} else {
+			stat = p.parseLocalStatement()
+		}
 	case token.REPEAT:
 		stat = p.parseRepeatStatement()
 	case token.WHILE:
@@ -153,6 +160,43 @@ func (p *Parser) parseForInStatement() *ast.ForInStatement {
 
 	if !p.curTokenIs(token.END) {
 		p.invalidTokenError(token.END, p.curToken.Type)
+		return nil
+	}
+
+	return &stmt
+}
+
+func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
+	stmt := ast.FunctionStatement{}
+	if p.curTokenIs(token.LOCAL) {
+		stmt.IsLocal = true
+		p.nextToken()
+	}
+	if !p.curTokenIs(token.FUNCTION) {
+		return nil
+	}
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt.Name = *p.parseIdentifier()
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+	// TODO: Varargs
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt.Params = parseNodeList(p, p.parseIdentifier)
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+	p.nextToken()
+	body := p.ParseBlock()
+	if body == nil {
+		return nil
+	}
+	stmt.Body = *body
+	if !p.curTokenIs(token.END) {
 		return nil
 	}
 

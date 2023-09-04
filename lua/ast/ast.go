@@ -98,6 +98,28 @@ func (fs *ForInStatement) String() string {
 	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Vars), nodeListToString(fs.Exps), fs.Block.String())
 }
 
+type FunctionStatement struct {
+	Name    Identifier
+	Params  []Identifier
+	Body   Block
+	IsLocal bool
+}
+
+func (fs *FunctionStatement) statementNode() {}
+func (fs *FunctionStatement) String() string {
+	localStr := ""
+	if fs.IsLocal {
+		localStr = "local "
+	}
+	return fmt.Sprintf(
+		"%sfunction %s(%s)\n%s\nend",
+		localStr,
+		fs.Name.String(),
+		nodeListToString(fs.Params),
+		fs.Body.String(),
+	)
+}
+
 type GotoStatement struct {
 	Token token.Token
 	Label Identifier
