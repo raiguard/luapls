@@ -1,6 +1,9 @@
 package token
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type TokenType int
 
@@ -78,6 +81,10 @@ const (
 
 func (t TokenType) String() string {
 	return TokenStr[t]
+}
+
+func (t *TokenType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.String())
 }
 
 type Token struct {
