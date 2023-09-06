@@ -162,7 +162,7 @@ func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 	// TODO: Handle all kinds of number
 	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		msg := fmt.Sprintf("could not parse %q", p.curToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
