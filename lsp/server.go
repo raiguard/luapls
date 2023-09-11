@@ -127,6 +127,7 @@ func textDocumentHover(ctc *glsp.Context, params *protocol.HoverParams) (*protoc
 }
 
 func lexFile(ctx *glsp.Context, filename, src string) {
+	files[filename] = []token.Token{}
 	logToEditor(ctx, fmt.Sprintf("Lexing %s", filename))
 	l := lexer.New(src)
 	for {
