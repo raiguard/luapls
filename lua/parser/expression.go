@@ -9,7 +9,7 @@ import (
 	"github.com/raiguard/luapls/lua/token"
 )
 
-func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
+func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) ast.Expression {
 	var left ast.Expression
 	switch p.tok.Type {
 	case token.FUNCTION:
@@ -48,6 +48,9 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		if precedence >= tokPrecedence {
 			break
 		}
+		if p.tokIs(token.LPAREN) && !allowCall {
+			break
+		}
 		switch p.tok.Type {
 		case token.LPAREN, token.LBRACE:
 			left = p.parseFunctionCall(left)
@@ -62,11 +65,11 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 }
 
 func (p *Parser) parseExpressionList() []ast.Expression {
-	exps := []ast.Expression{p.parseExpression(LOWEST)}
+	exps := []ast.Expression{p.parseExpression(LOWEST, true)}
 
 	for p.tokIs(token.COMMA) {
 		p.next()
-		exps = append(exps, p.parseExpression(LOWEST))
+		exps = append(exps, p.parseExpression(LOWEST, true))
 	}
 
 	return exps
@@ -99,7 +102,7 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpressio
 
 	precedence := p.tokPrecedence()
 	p.next()
-	expression.Right = p.parseExpression(precedence)
+	expression.Right = p.parseExpression(precedence, true)
 
 	return expression
 }
@@ -129,7 +132,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 
 	var inner ast.Expression
 	if isBrackets {
-		inner = p.parseExpression(LOWEST)
+		inner = p.parseExpression(LOWEST, true)
 		p.expect(token.RBRACK)
 	} else {
 		inner = p.parseIdentifier()
@@ -145,7 +148,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 
 func (p *Parser) parseSurroundingExpression() ast.Expression {
 	p.expect(token.LPAREN)
-	exp := p.parseExpression(LOWEST)
+	exp := p.parseExpression(LOWEST, true)
 	p.expect(token.RPAREN)
 	return exp
 }
@@ -153,7 +156,7 @@ func (p *Parser) parseSurroundingExpression() ast.Expression {
 func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
 	operator := p.tok.Type
 	p.next()
-	right := p.parseExpression(UNARY)
+	right := p.parseExpression(UNARY, true)
 	return &ast.UnaryExpression{Operator: operator, Right: right}
 }
 
@@ -234,7 +237,7 @@ func (p *Parser) parseTableField() *ast.TableField {
 		needClosingBracket = true
 		p.next()
 	}
-	leftExp = p.parseExpression(LOWEST)
+	leftExp = p.parseExpression(LOWEST, true)
 	if needClosingBracket {
 		p.expect(token.RBRACK)
 	}
@@ -243,7 +246,7 @@ func (p *Parser) parseTableField() *ast.TableField {
 		return &ast.TableField{Value: leftExp}
 	}
 	p.expect(token.ASSIGN)
-	rightExp := p.parseExpression(LOWEST)
+	rightExp := p.parseExpression(LOWEST, true)
 	return &ast.TableField{
 		Key:   leftExp,
 		Value: rightExp,

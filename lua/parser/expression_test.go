@@ -28,7 +28,7 @@ func TestInfixExpression(t *testing.T) {
 	for _, tt := range infixTests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		exp := p.parseExpression(LOWEST)
+		exp := p.parseExpression(LOWEST, true)
 		checkParserErrors(t, p)
 
 		binaryExp := requireTypeConversion[ast.BinaryExpression](t, exp)
@@ -116,7 +116,7 @@ func TestIndexExpression(t *testing.T) {
 func testExpression[T any](t *testing.T, input string, tester func(T)) {
 	l := lexer.New(input)
 	p := New(l)
-	stmt := p.parseExpression(LOWEST)
+	stmt := p.parseExpression(LOWEST, true)
 	checkParserErrors(t, p)
 	tester(requireTypeConversion[T](t, stmt))
 }

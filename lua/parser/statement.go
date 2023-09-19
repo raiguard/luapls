@@ -130,7 +130,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 
 func (p *Parser) parseFunctionStatement(isLocal bool) *ast.FunctionStatement {
 	p.expect(token.FUNCTION)
-	name := p.parseIdentifier()
+	left := p.parseExpression(LOWEST, false)
 	p.expect(token.LPAREN)
 	params := p.parseNameList()
 	p.expect(token.RPAREN)
@@ -138,7 +138,7 @@ func (p *Parser) parseFunctionStatement(isLocal bool) *ast.FunctionStatement {
 	p.expect(token.END)
 
 	return &ast.FunctionStatement{
-		Name:    name,
+		Left:    left,
 		Params:  params,
 		Body:    body,
 		IsLocal: isLocal,
@@ -172,7 +172,7 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 }
 
 func (p *Parser) parseIfClause() *ast.IfClause {
-	condition := p.parseExpression(LOWEST)
+	condition := p.parseExpression(LOWEST, true)
 	p.expect(token.THEN)
 	block := p.ParseBlock()
 	return &ast.IfClause{
@@ -207,7 +207,7 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 	p.expect(token.REPEAT)
 	body := p.ParseBlock()
 	p.expect(token.UNTIL)
-	condition := p.parseExpression(LOWEST)
+	condition := p.parseExpression(LOWEST, true)
 	return &ast.RepeatStatement{Body: body, Condition: condition}
 }
 
@@ -218,7 +218,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	p.expect(token.WHILE)
-	condition := p.parseExpression(LOWEST)
+	condition := p.parseExpression(LOWEST, true)
 	p.expect(token.DO)
 	body := p.ParseBlock()
 	return &ast.WhileStatement{

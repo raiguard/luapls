@@ -70,7 +70,7 @@ func TestFunctionCallStatement(t *testing.T) {
 
 func TestFunctionStatement(t *testing.T) {
 	testStatement(t, "function foo(key, value) end", func(stmt ast.FunctionStatement) {
-		require.Equal(t, "foo", stmt.Name.String())
+		require.Equal(t, "foo", stmt.Left.String())
 		require.Equal(t, 2, len(stmt.Params))
 		require.Equal(t, "key", stmt.Params[0].String())
 		require.Equal(t, "value", stmt.Params[1].String())

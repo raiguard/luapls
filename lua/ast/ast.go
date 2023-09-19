@@ -113,7 +113,7 @@ func (fs *ForInStatement) String() string {
 }
 
 type FunctionStatement struct {
-	Name    *Identifier
+	Left    Expression
 	Params  []*Identifier
 	Body    Block
 	IsLocal bool
@@ -128,7 +128,7 @@ func (fs *FunctionStatement) String() string {
 	return fmt.Sprintf(
 		"%sfunction %s(%s)\n%s\nend",
 		localStr,
-		fs.Name.String(),
+		fs.Left.String(),
 		nodeListToString(fs.Params),
 		fs.Body.String(),
 	)
