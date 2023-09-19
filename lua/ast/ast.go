@@ -272,6 +272,28 @@ type StringLiteral struct {
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) String() string  { return fmt.Sprintf("\"%s\"", sl.Value) }
 
+type TableLiteral struct {
+	Fields []TableField
+}
+
+func (tl *TableLiteral) expressionNode() {}
+func (tl *TableLiteral) String() string  { return fmt.Sprintf("{ %s }", nodeListToString(tl.Fields)) }
+
+type TableField struct {
+	Key   Expression
+	Value Expression
+}
+
+func (tf TableField) String() string {
+	if tf.Key == nil {
+		return tf.Value.String()
+	}
+	if ident, ok := tf.Key.(*Identifier); ok {
+		return fmt.Sprintf("%s = %s", ident.String(), tf.Value.String())
+	}
+	return fmt.Sprintf("[%s] = %s", tf.Key.String(), tf.Value.String())
+}
+
 // Other
 
 // FunctionCall can be both a statement and an expression.

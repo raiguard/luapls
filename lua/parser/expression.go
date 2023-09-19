@@ -34,6 +34,8 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		leftExp = p.parseNumberLiteral()
 	case token.STRING:
 		leftExp = p.parseStringLiteral()
+	case token.LBRACE:
+		leftExp = p.parseTableLiteral()
 	default:
 		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.curToken.String()))
 		return nil
@@ -177,6 +179,62 @@ func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 		Value: strings.Trim(p.curToken.Literal, "\"'"),
 	}
 	return lit
+}
+
+func (p *Parser) parseTableLiteral() *ast.TableLiteral {
+	p.expect(token.LBRACE)
+
+	fields := []ast.TableField{*p.parseTableField()}
+
+	for p.curTokenIs(token.COMMA) || p.curTokenIs(token.SEMICOLON) {
+		// TODO: This is a bad smell
+		if p.peekTokenIs(token.RBRACE) {
+			p.nextToken()
+			break
+		}
+		p.nextToken()
+		fields = append(fields, *p.parseTableField())
+	}
+
+	p.expect(token.RBRACE)
+
+	return &ast.TableLiteral{
+		Fields: fields,
+	}
+}
+
+func (p *Parser) parseTableField() *ast.TableField {
+	var leftExp ast.Expression
+	needClosingBracket := false
+	if p.curTokenIs(token.LBRACK) {
+		needClosingBracket = true
+		p.nextToken()
+	}
+	leftExp = p.parseExpression(LOWEST)
+	if leftExp == nil {
+		return nil
+	}
+	if needClosingBracket {
+		p.expectPeek(token.RBRACK)
+	}
+	if !needClosingBracket && p.peekTokenIs(token.COMMA) || p.peekTokenIs(token.SEMICOLON) || p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		return &ast.TableField{Value: leftExp}
+	}
+	p.expectPeek(token.ASSIGN)
+	p.nextToken()
+	rightExp := p.parseExpression(LOWEST)
+	if rightExp == nil {
+		return nil
+	}
+	// TODO: Having to do this is awful, let's just always end on the beginning of the next token
+	if p.peekTokenIs(token.COMMA) || p.peekTokenIs(token.SEMICOLON) || p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+	}
+	return &ast.TableField{
+		Key:   leftExp,
+		Value: rightExp,
+	}
 }
 
 type unaryParseFn func() ast.Expression

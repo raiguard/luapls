@@ -77,6 +77,15 @@ func TestOperatorPrecedence(t *testing.T) {
 	})
 }
 
+func TestTableLiteral(t *testing.T) {
+	input := "{ 'bar', baz, 2 + 2, foo = lorem, ['12345-54321'] = baz, }"
+	p := New(lexer.New(input))
+	tbl := p.parseTableLiteral()
+	checkParserErrors(t, p)
+	require.NotNil(t, tbl)
+	require.Equal(t, 5, len(tbl.Fields))
+}
+
 func testExpression[T any](t *testing.T, input string, tester func(T)) {
 	l := lexer.New(input)
 	p := New(l)

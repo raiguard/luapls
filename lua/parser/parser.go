@@ -17,7 +17,8 @@ type Parser struct {
 
 	errors []string
 
-	curToken  token.Token
+	curToken token.Token
+	// TODO: Remove this, it causes lots of smells
 	peekToken token.Token
 }
 
@@ -89,6 +90,15 @@ func (p *Parser) curTokenIs(tokenType token.TokenType) bool {
 
 func (p *Parser) peekTokenIs(tokenType token.TokenType) bool {
 	return p.peekToken.Type == tokenType
+}
+
+func (p *Parser) expect(tokenType token.TokenType) bool {
+	if p.curTokenIs(tokenType) {
+		p.nextToken()
+		return true
+	}
+	p.invalidTokenError(tokenType, p.curToken.Type)
+	return false
 }
 
 func (p *Parser) expectPeek(tokenType token.TokenType) bool {
