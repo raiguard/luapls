@@ -28,7 +28,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		left = p.parseUnaryExpression()
 	case token.NUMBER:
 		left = p.parseNumberLiteral()
-	case token.STRING:
+	case token.STRING, token.RAWSTRING:
 		left = p.parseStringLiteral()
 	case token.LBRACE:
 		left = p.parseTableLiteral()
