@@ -196,7 +196,14 @@ func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 	p.expect(token.LBRACE)
 
-	fields := []*ast.TableField{p.parseTableField()}
+	fields := []*ast.TableField{}
+
+	if p.tokIs(token.RBRACE) {
+		p.next()
+		return &ast.TableLiteral{Fields: fields}
+	}
+
+	fields = append(fields, p.parseTableField())
 
 	for tableSep[p.tok.Type] {
 		p.next()
