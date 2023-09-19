@@ -56,6 +56,13 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 		return &ast.FunctionCall{Left: left, Args: args}
 	}
 
+	if p.tokIs(token.LBRACE) {
+		return &ast.FunctionCall{
+			Left: left,
+			Args: []ast.Expression{p.parseTableLiteral()},
+		}
+	}
+
 	p.expect(token.LPAREN)
 
 	args := []ast.Expression{}

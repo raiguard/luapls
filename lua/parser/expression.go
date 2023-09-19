@@ -49,7 +49,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 			break
 		}
 		switch p.tok.Type {
-		case token.LPAREN:
+		case token.LPAREN, token.LBRACE:
 			left = p.parseFunctionCall(left)
 		case token.LBRACK, token.DOT, token.COLON:
 			left = p.parseIndexExpression(left)
@@ -300,6 +300,7 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.DOT:     INDEX,
 	token.LBRACK:  INDEX,
 	token.LPAREN:  INDEX,
+	token.LBRACE:  INDEX,
 }
 
 var binaryOperators = map[token.TokenType]bool{
@@ -322,6 +323,7 @@ var binaryOperators = map[token.TokenType]bool{
 	token.DOT:     true,
 	token.LBRACK:  true,
 	token.LPAREN:  true,
+	token.LBRACE:  true,
 }
 
 func isBinaryOperator(tok token.TokenType) bool {
