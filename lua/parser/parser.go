@@ -100,6 +100,7 @@ func (p *Parser) tokPrecedence() operatorPrecedence {
 
 var blockEnd = map[token.TokenType]bool{
 	token.ELSEIF: true,
+	token.ELSE:   true,
 	token.END:    true,
 	token.EOF:    true,
 	token.UNTIL:  true,

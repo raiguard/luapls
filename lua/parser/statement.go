@@ -161,6 +161,11 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 		clauses = append(clauses, p.parseIfClause())
 	}
 
+	if p.tokIs(token.ELSE) {
+		p.next()
+		clauses = append(clauses, &ast.IfClause{Body: p.ParseBlock()})
+	}
+
 	p.expect(token.END)
 
 	return &ast.IfStatement{Clauses: clauses}
