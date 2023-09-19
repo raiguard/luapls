@@ -10,37 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: Rewrite this test to be not-crap
-// func TestBlock(t *testing.T) {
-// 	input := `
-// 		foo = 123
-// 		bar = 456
-// 	`
-
-// 	l := lexer.New(input)
-// 	p := New(l)
-
-// 	block := p.ParseBlock()
-// 	stmts := block
-
-// 	tests := []struct {
-// 		name string
-// 		num  float64
-// 	}{
-// 		{"foo", 123},
-// 		{"bar", 456},
-// 	}
-
-// 	require.Equal(t, len(tests), len(stmts))
-// 	for i, test := range tests {
-// 		assnStmt := requireTypeConversion[ast.AssignmentStatement](t, stmts[i])
-// 		require.Equal(t, test.name, assnStmt.Name.String())
-// 		require.Equal(t, 1, len(assnStmt.Exps))
-// 		lit := requireTypeConversion[ast.NumberLiteral](t, assnStmt.Exps[0])
-// 		require.Equal(t, test.num, lit.Value)
-// 	}
-// }
-
 func checkParserErrors(t *testing.T, p *Parser) {
 	if len(p.errors) == 0 {
 		return

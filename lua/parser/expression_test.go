@@ -81,7 +81,6 @@ func TestFunctionCall(t *testing.T) {
 }
 
 func TestOperatorPrecedence(t *testing.T) {
-	// TODO: Directly check parser output instead of String() output
 	testStatements(t, []statementTest{
 		{"i = 1 + 2 - 3 * -4 / 5 % 6 ^ 7 .. 8", "i = (((1 + 2) - (((3 * (-4)) / 5) % (6 ^ 7))) .. 8)"},
 		{"i = 2 + 2 + 2", "i = ((2 + 2) + 2)"},
