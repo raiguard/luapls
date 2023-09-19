@@ -190,7 +190,14 @@ func (p *Parser) parseLabelStatement() *ast.LabelStatement {
 
 func (p *Parser) parseLocalStatement() *ast.LocalStatement {
 	names := p.parseNameList()
-	p.expect(token.ASSIGN)
+	if !p.tokIs(token.ASSIGN) {
+		return &ast.LocalStatement{
+			Names: names,
+			Exps:  []ast.Expression{},
+		}
+	}
+
+	p.next()
 	exps := p.parseExpressionList()
 
 	return &ast.LocalStatement{Names: names, Exps: exps}
