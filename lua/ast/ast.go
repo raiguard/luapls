@@ -252,6 +252,7 @@ type IndexExpression struct {
 	Left       Expression
 	Inner      Expression
 	IsBrackets bool
+	IsColon    bool
 }
 
 func (ie *IndexExpression) expressionNode() {}

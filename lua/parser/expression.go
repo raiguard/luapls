@@ -51,7 +51,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		switch p.tok.Type {
 		case token.LPAREN:
 			left = p.parseFunctionCall(left)
-		case token.LBRACK, token.DOT:
+		case token.LBRACK, token.DOT, token.COLON:
 			left = p.parseIndexExpression(left)
 		default:
 			left = p.parseBinaryExpression(left)
@@ -118,6 +118,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 
 func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression {
 	isBrackets := p.tokIs(token.LBRACK)
+	isColon := p.tokIs(token.COLON)
 	p.next()
 
 	var inner ast.Expression
@@ -132,6 +133,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 		Left:       left,
 		Inner:      inner,
 		IsBrackets: isBrackets,
+		IsColon:    isColon,
 	}
 }
 
@@ -288,6 +290,7 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.NOT:     UNARY,
 	token.HASH:    UNARY,
 	token.CARET:   POW,
+	token.COLON:   INDEX,
 	token.DOT:     INDEX,
 	token.LBRACK:  INDEX,
 	token.LPAREN:  INDEX,
@@ -309,6 +312,7 @@ var binaryOperators = map[token.TokenType]bool{
 	token.PLUS:    true,
 	token.SLASH:   true,
 	token.STAR:    true,
+	token.COLON:   true,
 	token.DOT:     true,
 	token.LBRACK:  true,
 	token.LPAREN:  true,
