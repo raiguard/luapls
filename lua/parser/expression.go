@@ -10,36 +10,32 @@ import (
 )
 
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
-	var leftExp ast.Expression
+	var left ast.Expression
 	switch p.tok.Type {
 	case token.FUNCTION:
-		leftExp = p.parseFunctionExpression()
+		left = p.parseFunctionExpression()
 	case token.TRUE, token.FALSE:
-		leftExp = p.parseBooleanLiteral()
+		left = p.parseBooleanLiteral()
 	case token.HASH:
-		leftExp = p.parseUnaryExpression()
+		left = p.parseUnaryExpression()
 	case token.IDENT:
-		leftExp = p.parseIdentifier()
+		left = p.parseIdentifier()
 	case token.LPAREN:
-		leftExp = p.parseSurroundingExpression()
+		left = p.parseSurroundingExpression()
 	case token.MINUS:
-		leftExp = p.parseUnaryExpression()
+		left = p.parseUnaryExpression()
 	case token.NOT:
-		leftExp = p.parseUnaryExpression()
+		left = p.parseUnaryExpression()
 	case token.NUMBER:
-		leftExp = p.parseNumberLiteral()
+		left = p.parseNumberLiteral()
 	case token.STRING:
-		leftExp = p.parseStringLiteral()
+		left = p.parseStringLiteral()
 	case token.LBRACE:
-		leftExp = p.parseTableLiteral()
+		left = p.parseTableLiteral()
 	default:
 		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.tok.String()))
 		p.next()
 		return nil
-	}
-
-	if p.tokIs(token.LPAREN) || p.tokIs(token.STRING) {
-		return p.parseFunctionCall(leftExp)
 	}
 
 	for isBinaryOperator(p.tok.Type) {
@@ -50,10 +46,14 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		if precedence >= tokPrecedence {
 			break
 		}
-		leftExp = p.parseBinaryExpression(leftExp)
+		left = p.parseBinaryExpression(left)
 	}
 
-	return leftExp
+	for p.tokIs(token.LPAREN) {
+		left = p.parseFunctionCall(left)
+	}
+
+	return left
 }
 
 func (p *Parser) parseExpressionList() []ast.Expression {

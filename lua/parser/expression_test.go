@@ -67,6 +67,19 @@ func TestFunctionExpression(t *testing.T) {
 	})
 }
 
+func TestFunctionCall(t *testing.T) {
+	testExpression(t, "print(foo)", func(exp ast.FunctionCall) {
+		require.Equal(t, "print", exp.Left.String())
+		require.Equal(t, 1, len(exp.Args))
+		require.Equal(t, "foo", exp.Args[0].String())
+	})
+	testExpression(t, "print(foo)(bar)", func(exp ast.FunctionCall) {
+		require.Equal(t, "print(foo)", exp.Left.String())
+		require.Equal(t, 1, len(exp.Args))
+		require.Equal(t, "bar", exp.Args[0].String())
+	})
+}
+
 func TestOperatorPrecedence(t *testing.T) {
 	// TODO: Directly check parser output instead of String() output
 	testStatements(t, []statementTest{
