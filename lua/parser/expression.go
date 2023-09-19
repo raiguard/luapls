@@ -74,7 +74,13 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 
 // Identical to parseExpressionList, but only for identifiers
 func (p *Parser) parseNameList() []*ast.Identifier {
-	list := []*ast.Identifier{p.parseIdentifier()}
+	list := []*ast.Identifier{}
+
+	if !p.tokIs(token.IDENT) {
+		return list
+	}
+
+	list = append(list, p.parseIdentifier())
 
 	for p.tokIs(token.COMMA) {
 		p.next()
