@@ -327,3 +327,8 @@ func (tf TableField) String() string {
 	}
 	return fmt.Sprintf("[%s] = %s", tf.Key.String(), tf.Value.String())
 }
+
+type Vararg struct{}
+
+func (va *Vararg) expressionNode() {}
+func (va *Vararg) String() string  { return token.TokenStr[token.VARARG] }

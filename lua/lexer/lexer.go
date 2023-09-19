@@ -103,7 +103,7 @@ tryAgain:
 	case '.':
 		if l.expectPeek('.') {
 			if l.expectPeek('.') {
-				tok = l.readNewToken(token.SPREAD)
+				tok = l.readNewToken(token.VARARG)
 			} else {
 				tok = l.readNewToken(token.CONCAT)
 			}

@@ -32,6 +32,8 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		left = p.parseStringLiteral()
 	case token.LBRACE:
 		left = p.parseTableLiteral()
+	case token.VARARG:
+		left = p.parseVararg()
 	default:
 		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.tok.String()))
 		p.next()
@@ -231,6 +233,11 @@ func (p *Parser) parseTableField() *ast.TableField {
 		Key:   leftExp,
 		Value: rightExp,
 	}
+}
+
+func (p *Parser) parseVararg() *ast.Vararg {
+	p.expect(token.VARARG)
+	return &ast.Vararg{}
 }
 
 var tableSep = map[token.TokenType]bool{

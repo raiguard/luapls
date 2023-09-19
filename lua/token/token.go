@@ -76,7 +76,7 @@ const (
 	COMMA
 	DOT
 	SEMICOLON
-	SPREAD
+	VARARG
 )
 
 func (t TokenType) String() string {
@@ -165,7 +165,7 @@ var TokenStr = map[TokenType]string{
 	CONCAT:    "..",
 	DOT:       ".",
 	SEMICOLON: ";",
-	SPREAD:    "...",
+	VARARG:    "...",
 }
 
 var Reserved = map[string]TokenType{
