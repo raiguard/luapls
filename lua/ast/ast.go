@@ -159,7 +159,12 @@ type IfClause struct {
 
 func (ic *IfClause) statementNode() {}
 func (ic *IfClause) String() string {
-	return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Body.String())
+	// TODO: elseif
+	if ic.Condition != nil {
+		return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Body.String())
+	} else {
+		return fmt.Sprintf("else\n%s\n", ic.Body.String())
+	}
 }
 
 type LabelStatement struct {
