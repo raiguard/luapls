@@ -48,14 +48,14 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		if precedence >= tokPrecedence {
 			break
 		}
-		left = p.parseBinaryExpression(left)
-	}
-
-	for p.tokIs(token.LBRACK) || p.tokIs(token.DOT) {
-		left = p.parseIndexExpression(left)
-	}
-	for p.tokIs(token.LPAREN) {
-		left = p.parseFunctionCall(left)
+		switch p.tok.Type {
+		case token.LPAREN:
+			left = p.parseFunctionCall(left)
+		case token.LBRACK, token.DOT:
+			left = p.parseIndexExpression(left)
+		default:
+			left = p.parseBinaryExpression(left)
+		}
 	}
 
 	return left
@@ -164,7 +164,7 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 	if p.tokIs(token.IDENT) {
 		ident = &ast.Identifier{Literal: p.tok.Literal}
 	} else {
-		p.invalidTokenError(token.IDENT, p.tok.Type)
+		p.invalidTokenError(token.IDENT)
 	}
 	p.next()
 	return ident
@@ -267,6 +267,7 @@ const (
 	PRODUCT
 	UNARY
 	POW
+	INDEX
 )
 
 var precedences = map[token.TokenType]operatorPrecedence{
@@ -287,6 +288,9 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.NOT:     UNARY,
 	token.HASH:    UNARY,
 	token.CARET:   POW,
+	token.DOT:     INDEX,
+	token.LBRACK:  INDEX,
+	token.LPAREN:  INDEX,
 }
 
 var binaryOperators = map[token.TokenType]bool{
@@ -305,6 +309,9 @@ var binaryOperators = map[token.TokenType]bool{
 	token.PLUS:    true,
 	token.SLASH:   true,
 	token.STAR:    true,
+	token.DOT:     true,
+	token.LBRACK:  true,
+	token.LPAREN:  true,
 }
 
 func isBinaryOperator(tok token.TokenType) bool {

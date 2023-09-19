@@ -58,7 +58,10 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 
 	p.expect(token.LPAREN)
 
-	args := p.parseExpressionList()
+	args := []ast.Expression{}
+	if !p.tokIs(token.RPAREN) {
+		args = p.parseExpressionList()
+	}
 
 	p.expect(token.RPAREN)
 
@@ -67,7 +70,7 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 
 func (p *Parser) expect(tokenType token.TokenType) {
 	if !p.tokIs(tokenType) {
-		p.invalidTokenError(tokenType, p.tok.Type)
+		p.invalidTokenError(tokenType)
 	}
 	p.next()
 }
@@ -75,15 +78,15 @@ func (p *Parser) expect(tokenType token.TokenType) {
 // Like expect, but doesn't advance
 func (p *Parser) expect0(tokenType token.TokenType) {
 	if !p.tokIs(tokenType) {
-		p.invalidTokenError(tokenType, p.tok.Type)
+		p.invalidTokenError(tokenType)
 	}
 }
 
-func (p *Parser) invalidTokenError(expected token.TokenType, got token.TokenType) {
+func (p *Parser) invalidTokenError(expected token.TokenType) {
 	p.errors = append(p.errors,
 		fmt.Sprintf("Invalid token: expected %s, got %s",
 			token.TokenStr[expected],
-			token.TokenStr[got]),
+			p.tok.String()),
 	)
 }
 
