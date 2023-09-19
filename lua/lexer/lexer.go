@@ -199,7 +199,10 @@ func (l *Lexer) curLiteral() string {
 
 func (l *Lexer) skipComment() bool {
 	if l.expectPeek('[') {
-		return l.readRawString()
+		if l.readRawString() {
+			l.readChar()
+			return true
+		}
 	}
 	for l.char != 0 && l.char != '\n' {
 		l.readChar()

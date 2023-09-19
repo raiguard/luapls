@@ -62,6 +62,6 @@ food
 --
 --
 -- foo bar [[ hello world ]]
-]=
+]=]
 
 ::continue::

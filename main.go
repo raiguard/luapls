@@ -57,9 +57,6 @@ func parseFile(filename string, printJson bool) {
 	for _, err := range p.Errors() {
 		fmt.Println(err)
 	}
-	if len(p.Errors()) > 0 {
-		return
-	}
 	if printJson {
 		bytes, err := json.MarshalIndent(block, "", "  ")
 		if err != nil {
