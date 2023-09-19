@@ -99,6 +99,21 @@ func TestTableLiteral(t *testing.T) {
 	require.Equal(t, 5, len(tbl.Fields))
 }
 
+func TestIndexExpression(t *testing.T) {
+	testExpression(t, "foo.bar[baz]", func(exp ast.IndexExpression) {
+		require.Equal(t, "foo.bar", exp.Left.String())
+		require.Equal(t, "baz", exp.Inner.String())
+		require.Equal(t, true, exp.IsBrackets)
+		require.Equal(t, false, exp.Left.(*ast.IndexExpression).IsBrackets)
+	})
+	testExpression(t, "foo[bar][baz]", func(exp ast.IndexExpression) {
+		require.Equal(t, "foo[bar]", exp.Left.String())
+		require.Equal(t, "baz", exp.Inner.String())
+		require.Equal(t, true, exp.IsBrackets)
+		require.Equal(t, true, exp.Left.(*ast.IndexExpression).IsBrackets)
+	})
+}
+
 func testExpression[T any](t *testing.T, input string, tester func(T)) {
 	l := lexer.New(input)
 	p := New(l)

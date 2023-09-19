@@ -49,6 +49,9 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		left = p.parseBinaryExpression(left)
 	}
 
+	for p.tokIs(token.LBRACK) || p.tokIs(token.DOT) {
+		left = p.parseIndexExpression(left)
+	}
 	for p.tokIs(token.LPAREN) {
 		left = p.parseFunctionCall(left)
 	}
@@ -108,6 +111,25 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 	return &ast.FunctionExpression{
 		Params: params,
 		Body:   body,
+	}
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression {
+	isBrackets := p.tokIs(token.LBRACK)
+	p.next()
+
+	var inner ast.Expression
+	if isBrackets {
+		inner = p.parseExpression(LOWEST)
+		p.expect(token.RBRACK)
+	} else {
+		inner = p.parseIdentifier()
+	}
+
+	return &ast.IndexExpression{
+		Left:       left,
+		Inner:      inner,
+		IsBrackets: isBrackets,
 	}
 }
 

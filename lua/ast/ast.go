@@ -248,6 +248,21 @@ func (fe *FunctionExpression) String() string {
 	return fmt.Sprintf("function(%s)\n%s\nend", nodeListToString(fe.Params), fe.Body.String())
 }
 
+type IndexExpression struct {
+	Left       Expression
+	Inner      Expression
+	IsBrackets bool
+}
+
+func (ie *IndexExpression) expressionNode() {}
+func (ie *IndexExpression) String() string {
+	if ie.IsBrackets {
+		return fmt.Sprintf("%s[%s]", ie.Left.String(), ie.Inner.String())
+	} else {
+		return fmt.Sprintf("%s.%s", ie.Left.String(), ie.Inner.String())
+	}
+}
+
 type UnaryExpression struct {
 	Operator token.TokenType
 	Right    Expression
