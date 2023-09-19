@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/raiguard/luapls/lsp"
 	"github.com/raiguard/luapls/lua/lexer"
@@ -47,6 +48,7 @@ func lexFile(filename string) {
 }
 
 func parseFile(filename string, printJson bool) {
+	before := time.Now()
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -54,6 +56,7 @@ func parseFile(filename string, printJson bool) {
 	l := lexer.New(string(src))
 	p := parser.New(l)
 	block := p.ParseBlock()
+	fmt.Printf("Time taken: %s\n", time.Since(before))
 	for _, err := range p.Errors() {
 		fmt.Println(err)
 	}
