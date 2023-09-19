@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
+	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -21,7 +23,7 @@ const lsName = "luapls"
 var version string = "0.0.1"
 var handler protocol.Handler
 
-var files = map[string][]token.Token{}
+var files = map[string]ast.Block{}
 var rootPath string = ""
 
 func Run() {
@@ -31,8 +33,6 @@ func Run() {
 	handler.SetTrace = setTrace
 	handler.TextDocumentDidOpen = textDocumentDidOpen
 	handler.TextDocumentDidChange = textDocumentDidChange
-	handler.TextDocumentDocumentHighlight = textDocumentHighlight
-	handler.TextDocumentHover = textDocumentHover
 
 	server := server.NewServer(&handler, lsName, true)
 
@@ -66,7 +66,7 @@ func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 		if err != nil {
 			return err
 		}
-		lexFile(ctx, path, string(src))
+		parseFile(ctx, path, string(src))
 	}
 	logToEditor(ctx, fmt.Sprint("Initial scan (", len(toParse), " files): ", time.Since(before)))
 	return nil
@@ -83,7 +83,7 @@ func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 }
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	lexFile(ctx, params.TextDocument.URI, params.TextDocument.Text)
+	parseFile(ctx, params.TextDocument.URI, params.TextDocument.Text)
 	return nil
 }
 
@@ -91,52 +91,23 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			before := time.Now()
-			lexFile(ctx, params.TextDocument.URI, change.Text)
+			parseFile(ctx, params.TextDocument.URI, change.Text)
 			logToEditor(ctx, fmt.Sprint("Rescan duration: ", time.Since(before)))
 		}
 	}
 	return nil
 }
 
-func textDocumentHighlight(ctc *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
-	if tokens, ok := files[params.TextDocument.URI]; ok {
-		for i := 0; i < len(tokens); i++ {
-			tok := &tokens[i]
-			if withinRange(&tok.Range, &params.Position) {
-				return []protocol.DocumentHighlight{{
-					Range: toProtocolRange(&tok.Range),
-				}}, nil
-			}
-		}
+func parseFile(ctx *glsp.Context, filename, src string) {
+	before := time.Now()
+	logToEditor(ctx, fmt.Sprintf("Parsing %s", filename))
+	p := parser.New(lexer.New(src))
+	block := p.ParseBlock()
+	logToEditor(ctx, fmt.Sprintf("Time: %s", time.Since(before)))
+	for _, err := range p.Errors() {
+		logToEditor(ctx, err)
 	}
-	return nil, nil
-}
-
-func textDocumentHover(ctc *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	if tokens, ok := files[params.TextDocument.URI]; ok {
-		for i := 0; i < len(tokens); i++ {
-			tok := &tokens[i]
-			if withinRange(&tok.Range, &params.Position) {
-				return &protocol.Hover{
-					Contents: tok.String(),
-				}, nil
-			}
-		}
-	}
-	return nil, nil
-}
-
-func lexFile(ctx *glsp.Context, filename, src string) {
-	files[filename] = []token.Token{}
-	logToEditor(ctx, fmt.Sprintf("Lexing %s", filename))
-	l := lexer.New(src)
-	for {
-		tok := l.NextToken()
-		if tok.Type == token.EOF || tok.Type == token.INVALID {
-			break
-		}
-		files[filename] = append(files[filename], tok)
-	}
+	files[filename] = block
 }
 
 func logToEditor(ctx *glsp.Context, msg string) {
