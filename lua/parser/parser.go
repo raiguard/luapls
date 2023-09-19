@@ -17,9 +17,7 @@ type Parser struct {
 
 	errors []string
 
-	curToken token.Token
-	// TODO: Remove this, it causes lots of smells
-	peekToken token.Token
+	tok token.Token
 }
 
 func New(lexer *lexer.Lexer) *Parser {
@@ -28,8 +26,7 @@ func New(lexer *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 
-	p.nextToken()
-	p.nextToken()
+	p.next()
 
 	return p
 }
@@ -38,76 +35,48 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
-func (p *Parser) nextToken() {
-	p.curToken = p.peekToken
-	p.peekToken = p.lexer.NextToken()
+func (p *Parser) next() {
+	p.tok = p.lexer.NextToken()
 }
 
-func (p *Parser) ParseBlock() *ast.Block {
+func (p *Parser) ParseBlock() ast.Block {
 	block := ast.Block{}
 
-	// TODO: Remove the need for this dumbness
-	for !p.curTokenIs(token.EOF) && !p.curTokenIs(token.END) && !p.curTokenIs(token.UNTIL) && !p.curTokenIs(token.ELSEIF) {
-		stmt := p.parseStatement()
-		if stmt != nil {
-			block = append(block, stmt)
-		}
-		p.nextToken()
+	for !blockEnd[p.tok.Type] {
+		block = append(block, p.parseStatement())
 	}
 
-	return &block
+	return block
 }
 
-func (p *Parser) parseFunctionCall() *ast.FunctionCall {
-	if !p.curTokenIs(token.IDENT) {
-		return nil
-	}
-	fc := ast.FunctionCall{Name: *p.parseIdentifier()}
-
-	if p.peekTokenIs(token.STRING) {
-		p.nextToken()
-		fc.Args = []ast.Expression{p.parseStringLiteral()}
-		return &fc
+func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
+	if p.tokIs(token.STRING) {
+		args := []ast.Expression{p.parseStringLiteral()}
+		p.next()
+		return &ast.FunctionCall{Left: left, Args: args}
 	}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
+	p.expect(token.LPAREN)
 
-	p.nextToken()
-	fc.Args = p.parseExpressionList()
+	args := p.parseExpressionList()
 
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
+	p.expect(token.RPAREN)
 
-	return &fc
+	return &ast.FunctionCall{Left: left, Args: args}
 }
 
-func (p *Parser) curTokenIs(tokenType token.TokenType) bool {
-	return p.curToken.Type == tokenType
-}
-
-func (p *Parser) peekTokenIs(tokenType token.TokenType) bool {
-	return p.peekToken.Type == tokenType
-}
-
-func (p *Parser) expect(tokenType token.TokenType) bool {
-	if p.curTokenIs(tokenType) {
-		p.nextToken()
-		return true
+func (p *Parser) expect(tokenType token.TokenType) {
+	if !p.tokIs(tokenType) {
+		p.invalidTokenError(tokenType, p.tok.Type)
 	}
-	p.invalidTokenError(tokenType, p.curToken.Type)
-	return false
+	p.next()
 }
 
-func (p *Parser) expectPeek(tokenType token.TokenType) bool {
-	if p.peekTokenIs(tokenType) {
-		p.nextToken()
-		return true
+// Like expect, but doesn't advance
+func (p *Parser) expect0(tokenType token.TokenType) {
+	if !p.tokIs(tokenType) {
+		p.invalidTokenError(tokenType, p.tok.Type)
 	}
-	p.invalidTokenError(tokenType, p.peekToken.Type)
-	return false
 }
 
 func (p *Parser) invalidTokenError(expected token.TokenType, got token.TokenType) {
@@ -118,16 +87,20 @@ func (p *Parser) invalidTokenError(expected token.TokenType, got token.TokenType
 	)
 }
 
-func (p *Parser) curPrecedence() operatorPrecedence {
-	if p, ok := precedences[p.curToken.Type]; ok {
+func (p *Parser) tokIs(tokenType token.TokenType) bool {
+	return p.tok.Type == tokenType
+}
+
+func (p *Parser) tokPrecedence() operatorPrecedence {
+	if p, ok := precedences[p.tok.Type]; ok {
 		return p
 	}
 	return LOWEST
 }
 
-func (p *Parser) peekPrecedence() operatorPrecedence {
-	if p, ok := precedences[p.peekToken.Type]; ok {
-		return p
-	}
-	return LOWEST
+var blockEnd = map[token.TokenType]bool{
+	token.ELSEIF: true,
+	token.END:    true,
+	token.EOF:    true,
+	token.UNTIL:  true,
 }

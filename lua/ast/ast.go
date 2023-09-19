@@ -37,7 +37,7 @@ type Statement interface {
 }
 
 type AssignmentStatement struct {
-	Vars []Identifier
+	Vars []Expression
 	Exps []Expression
 }
 
@@ -62,11 +62,20 @@ func (ds *DoStatement) String() string {
 	return fmt.Sprintf("do\n%s\nend", ds.Body.String())
 }
 
+type ExpressionStatement struct {
+	Exp Expression
+}
+
+func (es *ExpressionStatement) statementNode() {}
+func (es *ExpressionStatement) String() string {
+	return fmt.Sprintf("%s", es.Exp.String())
+}
+
 type ForStatement struct {
-	Var   Identifier
+	Name  *Identifier
 	Start Expression
 	End   Expression
-	Step  *Expression // Optional
+	Step  Expression
 	Body  Block
 }
 
@@ -75,16 +84,16 @@ func (fs *ForStatement) String() string {
 	if fs.Step != nil {
 		return fmt.Sprintf(
 			"for %s = %s, %s, %s do\n%s\nend",
-			fs.Var.String(),
+			fs.Name.String(),
 			fs.Start.String(),
 			fs.End.String(),
-			(*fs.Step).String(),
+			fs.Step.String(),
 			fs.Body.String(),
 		)
 	} else {
 		return fmt.Sprintf(
 			"for %s = %s, %s do\n%s\nend",
-			fs.Var.String(),
+			fs.Name.String(),
 			fs.Start.String(),
 			fs.End.String(),
 			fs.Body.String(),
@@ -93,19 +102,19 @@ func (fs *ForStatement) String() string {
 }
 
 type ForInStatement struct {
-	Vars []Identifier
-	Exps []Expression
-	Body Block
+	Names []*Identifier
+	Exps  []Expression
+	Body  Block
 }
 
 func (fs *ForInStatement) statementNode() {}
 func (fs *ForInStatement) String() string {
-	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Vars), nodeListToString(fs.Exps), fs.Body.String())
+	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Names), nodeListToString(fs.Exps), fs.Body.String())
 }
 
 type FunctionStatement struct {
-	Name    Identifier
-	Params  []Identifier
+	Name    *Identifier
+	Params  []*Identifier
 	Body    Block
 	IsLocal bool
 }
@@ -126,16 +135,16 @@ func (fs *FunctionStatement) String() string {
 }
 
 type GotoStatement struct {
-	Label Identifier
+	Name *Identifier
 }
 
 func (gs *GotoStatement) statementNode() {}
 func (gs *GotoStatement) String() string {
-	return fmt.Sprintf("goto %s", gs.Label.String())
+	return fmt.Sprintf("goto %s", gs.Name.String())
 }
 
 type IfStatement struct {
-	Clauses []IfClause
+	Clauses []*IfClause
 }
 
 func (is *IfStatement) statementNode() {}
@@ -148,22 +157,22 @@ type IfClause struct {
 	Body      Block
 }
 
-func (ic IfClause) statementNode() {}
-func (ic IfClause) String() string {
+func (ic *IfClause) statementNode() {}
+func (ic *IfClause) String() string {
 	return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Body.String())
 }
 
 type LabelStatement struct {
-	Label Identifier
+	Name *Identifier
 }
 
 func (ls *LabelStatement) statementNode() {}
 func (ls *LabelStatement) String() string {
-	return fmt.Sprintf("::%s::", ls.Label.String())
+	return fmt.Sprintf("::%s::", ls.Name.String())
 }
 
 type LocalStatement struct {
-	Names []Identifier
+	Names []*Identifier
 	Exps  []Expression
 }
 
@@ -219,8 +228,18 @@ func (ie *BinaryExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", ie.Left.String(), ie.Operator.String(), ie.Right.String())
 }
 
+type FunctionCall struct {
+	Left Expression
+	Args []Expression
+}
+
+func (fc *FunctionCall) expressionNode() {}
+func (fc *FunctionCall) String() string {
+	return fmt.Sprintf("%s(%s)", fc.Left.String(), nodeListToString(fc.Args))
+}
+
 type FunctionExpression struct {
-	Params []Identifier
+	Params []*Identifier
 	Body   Block
 }
 
@@ -254,8 +273,8 @@ type Identifier struct {
 	Literal string
 }
 
-func (i Identifier) expressionNode() {}
-func (i Identifier) String() string  { return i.Literal }
+func (i *Identifier) expressionNode() {}
+func (i *Identifier) String() string  { return i.Literal }
 
 type NumberLiteral struct {
 	Literal string
@@ -273,7 +292,7 @@ func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) String() string  { return fmt.Sprintf("\"%s\"", sl.Value) }
 
 type TableLiteral struct {
-	Fields []TableField
+	Fields []*TableField
 }
 
 func (tl *TableLiteral) expressionNode() {}
@@ -292,18 +311,4 @@ func (tf TableField) String() string {
 		return fmt.Sprintf("%s = %s", ident.String(), tf.Value.String())
 	}
 	return fmt.Sprintf("[%s] = %s", tf.Key.String(), tf.Value.String())
-}
-
-// Other
-
-// FunctionCall can be both a statement and an expression.
-type FunctionCall struct {
-	Name Identifier
-	Args []Expression
-}
-
-func (fc *FunctionCall) expressionNode() {}
-func (fc *FunctionCall) statementNode()  {}
-func (fc *FunctionCall) String() string {
-	return fmt.Sprintf("%s(%s)", fc.Name.String(), nodeListToString(fc.Args))
 }

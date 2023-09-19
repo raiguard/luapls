@@ -11,7 +11,7 @@ import (
 
 func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	var leftExp ast.Expression
-	switch p.curToken.Type {
+	switch p.tok.Type {
 	case token.FUNCTION:
 		leftExp = p.parseFunctionExpression()
 	case token.TRUE, token.FALSE:
@@ -19,11 +19,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	case token.HASH:
 		leftExp = p.parseUnaryExpression()
 	case token.IDENT:
-		if p.peekTokenIs(token.LPAREN) || p.peekTokenIs(token.STRING) {
-			leftExp = p.parseFunctionCall()
-		} else {
-			leftExp = p.parseIdentifier()
-		}
+		leftExp = p.parseIdentifier()
 	case token.LPAREN:
 		leftExp = p.parseSurroundingExpression()
 	case token.MINUS:
@@ -37,19 +33,22 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 	case token.LBRACE:
 		leftExp = p.parseTableLiteral()
 	default:
-		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.curToken.String()))
+		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.tok.String()))
 		return nil
 	}
 
-	for isBinaryOperator(p.peekToken.Type) {
-		peekPrecedence := p.peekPrecedence()
-		if isRightAssociative(p.peekToken.Type) {
-			peekPrecedence += 1
+	if p.tokIs(token.LPAREN) || p.tokIs(token.STRING) {
+		return p.parseFunctionCall(leftExp)
+	}
+
+	for isBinaryOperator(p.tok.Type) {
+		tokPrecedence := p.tokPrecedence()
+		if isRightAssociative(p.tok.Type) {
+			tokPrecedence += 1
 		}
-		if precedence >= peekPrecedence {
+		if precedence >= tokPrecedence {
 			break
 		}
-		p.nextToken()
 		leftExp = p.parseBinaryExpression(leftExp)
 	}
 
@@ -57,184 +56,164 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 }
 
 func (p *Parser) parseExpressionList() []ast.Expression {
-	exps := []ast.Expression{}
-	exp := p.parseExpression(LOWEST)
-	if exp == nil {
-		return nil
-	}
-	exps = append(exps, exp)
+	exps := []ast.Expression{p.parseExpression(LOWEST)}
 
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
-		p.nextToken()
-		exp = p.parseExpression(LOWEST)
-		if exp == nil {
-			// TODO: Error
-			return nil
-		}
-		exps = append(exps, exp)
+	for p.tokIs(token.COMMA) {
+		p.next()
+		exps = append(exps, p.parseExpression(LOWEST))
 	}
 
 	return exps
 }
 
+// Identical to parseExpressionList, but only for identifiers
+func (p *Parser) parseNameList() []*ast.Identifier {
+	list := []*ast.Identifier{p.parseIdentifier()}
+
+	for p.tokIs(token.COMMA) {
+		p.next()
+		list = append(list, p.parseIdentifier())
+	}
+
+	return list
+}
+
 func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpression {
 	expression := &ast.BinaryExpression{
 		Left:     left,
-		Operator: p.curToken.Type,
+		Operator: p.tok.Type,
 		Right:    nil,
 	}
 
-	precedence := p.curPrecedence()
-	p.nextToken()
+	precedence := p.tokPrecedence()
+	p.next()
 	expression.Right = p.parseExpression(precedence)
 
 	return expression
 }
 
 func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
-	if !p.curTokenIs(token.FUNCTION) {
-		return nil
-	}
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
-	// TODO: Varargs
-	if !p.expectPeek(token.IDENT) {
-		return nil
-	}
-	exp := ast.FunctionExpression{
-		Params: parseNodeList(p, p.parseIdentifier),
-	}
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
-	p.nextToken()
-	body := p.ParseBlock()
-	if body == nil {
-		return nil
-	}
-	exp.Body = *body
-	if !p.curTokenIs(token.END) {
-		return nil
-	}
+	p.expect(token.FUNCTION)
+	p.expect(token.LPAREN)
 
-	return &exp
+	params := p.parseNameList()
+
+	p.expect(token.RPAREN)
+
+	body := p.ParseBlock()
+
+	p.expect(token.END)
+
+	return &ast.FunctionExpression{
+		Params: params,
+		Body:   body,
+	}
 }
 
 func (p *Parser) parseSurroundingExpression() ast.Expression {
-	if !p.curTokenIs(token.LPAREN) {
-		return nil
-	}
-	p.nextToken()
+	p.expect(token.LPAREN)
 	exp := p.parseExpression(LOWEST)
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
+	p.expect(token.RPAREN)
 	return exp
 }
 
 func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
-	exp := &ast.UnaryExpression{
-		Operator: p.curToken.Type,
-	}
-	p.nextToken()
-	exp.Right = p.parseExpression(UNARY)
-	return exp
+	operator := p.tok.Type
+	p.next()
+	right := p.parseExpression(UNARY)
+	return &ast.UnaryExpression{Operator: operator, Right: right}
 }
 
 func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
 	// If this returns an error, something has gone VERY wrong, so just explode
-	value, err := strconv.ParseBool(p.curToken.Literal)
+	value, err := strconv.ParseBool(p.tok.Literal)
 	if err != nil {
 		panic(err)
 	}
-	lit := ast.BooleanLiteral{value}
-	return &lit
+	p.next()
+	return &ast.BooleanLiteral{Value: value}
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	ident := ast.Identifier{p.curToken.Literal}
-	return &ident
+	var ident *ast.Identifier
+	if p.tokIs(token.IDENT) {
+		ident = &ast.Identifier{Literal: p.tok.Literal}
+	} else {
+		p.invalidTokenError(token.IDENT, p.tok.Type)
+	}
+	p.next()
+	return ident
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
-	lit := &ast.NumberLiteral{Literal: p.curToken.Literal}
+	lit := p.tok.Literal
 
-	// TODO: Handle all kinds of number
-	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	// TODO: Do we even want to parse the numbers?
+	value, err := strconv.ParseFloat(p.tok.Literal, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q", p.curToken.Literal)
+		msg := fmt.Sprintf("could not parse %q", p.tok.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
 
-	lit.Value = float64(value)
+	p.next()
 
-	return lit
+	return &ast.NumberLiteral{Literal: lit, Value: float64(value)}
 }
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	lit := &ast.StringLiteral{
-		Value: strings.Trim(p.curToken.Literal, "\"'"),
+		Value: strings.Trim(p.tok.Literal, "\"'"),
 	}
+	p.next()
 	return lit
 }
 
 func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 	p.expect(token.LBRACE)
 
-	fields := []ast.TableField{*p.parseTableField()}
+	fields := []*ast.TableField{p.parseTableField()}
 
-	for p.curTokenIs(token.COMMA) || p.curTokenIs(token.SEMICOLON) {
-		// TODO: This is a bad smell
-		if p.peekTokenIs(token.RBRACE) {
-			p.nextToken()
+	for tableSep[p.tok.Type] {
+		p.next()
+		// Trailing separator
+		if p.tokIs(token.RBRACE) {
 			break
 		}
-		p.nextToken()
-		fields = append(fields, *p.parseTableField())
+		fields = append(fields, p.parseTableField())
 	}
 
 	p.expect(token.RBRACE)
 
-	return &ast.TableLiteral{
-		Fields: fields,
-	}
+	return &ast.TableLiteral{Fields: fields}
 }
 
 func (p *Parser) parseTableField() *ast.TableField {
 	var leftExp ast.Expression
 	needClosingBracket := false
-	if p.curTokenIs(token.LBRACK) {
+	if p.tokIs(token.LBRACK) {
 		needClosingBracket = true
-		p.nextToken()
+		p.next()
 	}
 	leftExp = p.parseExpression(LOWEST)
-	if leftExp == nil {
-		return nil
-	}
 	if needClosingBracket {
-		p.expectPeek(token.RBRACK)
+		p.expect(token.RBRACK)
 	}
-	if !needClosingBracket && p.peekTokenIs(token.COMMA) || p.peekTokenIs(token.SEMICOLON) || p.peekTokenIs(token.RBRACE) {
-		p.nextToken()
+	// If key is in brackets, value is required
+	if !needClosingBracket && (tableSep[p.tok.Type] || p.tokIs(token.RBRACE)) {
 		return &ast.TableField{Value: leftExp}
 	}
-	p.expectPeek(token.ASSIGN)
-	p.nextToken()
+	p.expect(token.ASSIGN)
 	rightExp := p.parseExpression(LOWEST)
-	if rightExp == nil {
-		return nil
-	}
-	// TODO: Having to do this is awful, let's just always end on the beginning of the next token
-	if p.peekTokenIs(token.COMMA) || p.peekTokenIs(token.SEMICOLON) || p.peekTokenIs(token.RBRACE) {
-		p.nextToken()
-	}
 	return &ast.TableField{
 		Key:   leftExp,
 		Value: rightExp,
 	}
+}
+
+var tableSep = map[token.TokenType]bool{
+	token.COMMA:     true,
+	token.SEMICOLON: true,
 }
 
 type unaryParseFn func() ast.Expression

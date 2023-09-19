@@ -38,7 +38,7 @@ func TestDoStatement(t *testing.T) {
 
 func TestForStatement(t *testing.T) {
 	testStatement(t, "for i = 1, 100 do j = j + i end", func(stmt ast.ForStatement) {
-		require.Equal(t, "i", stmt.Var.String())
+		require.Equal(t, "i", stmt.Name.String())
 		require.Equal(t, "1", stmt.Start.String())
 		require.Equal(t, "100", stmt.End.String())
 		require.Nil(t, stmt.Step)
@@ -48,9 +48,9 @@ func TestForStatement(t *testing.T) {
 
 func TestForInStatement(t *testing.T) {
 	testStatement(t, "for key, value in tbl do j = j + i end", func(stmt ast.ForInStatement) {
-		require.Equal(t, 2, len(stmt.Vars))
-		require.Equal(t, "key", stmt.Vars[0].String())
-		require.Equal(t, "value", stmt.Vars[1].String())
+		require.Equal(t, 2, len(stmt.Names))
+		require.Equal(t, "key", stmt.Names[0].String())
+		require.Equal(t, "value", stmt.Names[1].String())
 		require.Equal(t, 1, len(stmt.Exps))
 		require.Equal(t, "tbl", stmt.Exps[0].String())
 		require.Equal(t, 1, len(stmt.Body))
@@ -58,11 +58,13 @@ func TestForInStatement(t *testing.T) {
 }
 
 func TestFunctionCallStatement(t *testing.T) {
-	testStatement(t, "foo(1, 2)", func(stmt ast.FunctionCall) {
-		require.Equal(t, "foo", stmt.Name.String())
-		require.Equal(t, 2, len(stmt.Args))
-		require.Equal(t, "1", stmt.Args[0].String())
-		require.Equal(t, "2", stmt.Args[1].String())
+	testStatement(t, "foo(1, 2)", func(stmt ast.ExpressionStatement) {
+		fc, ok := stmt.Exp.(*ast.FunctionCall)
+		require.True(t, ok)
+		require.Equal(t, "foo", fc.Left.String())
+		require.Equal(t, 2, len(fc.Args))
+		require.Equal(t, "1", fc.Args[0].String())
+		require.Equal(t, "2", fc.Args[1].String())
 	})
 }
 
@@ -79,7 +81,7 @@ func TestFunctionStatement(t *testing.T) {
 
 func TestGotoStatement(t *testing.T) {
 	testStatement(t, "goto continue", func(stmt ast.GotoStatement) {
-		require.Equal(t, "continue", stmt.Label.String())
+		require.Equal(t, "continue", stmt.Name.String())
 	})
 }
 
@@ -116,7 +118,7 @@ func TestIfStatement(t *testing.T) {
 
 func TestLabelStatement(t *testing.T) {
 	testStatement(t, "::continue::", func(stmt ast.LabelStatement) {
-		require.Equal(t, "continue", stmt.Label.Literal)
+		require.Equal(t, "continue", stmt.Name.Literal)
 	})
 }
 

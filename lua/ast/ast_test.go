@@ -9,8 +9,8 @@ import (
 func TestString(t *testing.T) {
 	program := &Block{
 		&AssignmentStatement{
-			Vars: []Identifier{
-				{"foo"},
+			Vars: []Expression{
+				&Identifier{"foo"},
 			},
 			Exps: []Expression{
 				&NumberLiteral{"123", 123},
