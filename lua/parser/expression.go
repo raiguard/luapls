@@ -34,6 +34,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence) ast.Expression {
 		leftExp = p.parseTableLiteral()
 	default:
 		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.tok.String()))
+		p.next()
 		return nil
 	}
 
@@ -148,12 +149,11 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 	lit := p.tok.Literal
 
-	// TODO: Do we even want to parse the numbers?
+	// TODO: Parse all formats of number
 	value, err := strconv.ParseFloat(p.tok.Literal, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q", p.tok.Literal)
 		p.errors = append(p.errors, msg)
-		return nil
 	}
 
 	p.next()
