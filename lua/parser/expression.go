@@ -87,10 +87,22 @@ func (p *Parser) parseNameList() []*ast.Identifier {
 
 	for p.tokIs(token.COMMA) {
 		p.next()
-		list = append(list, p.parseIdentifier())
+		if !p.tokIs(token.VARARG) {
+			list = append(list, p.parseIdentifier())
+		}
 	}
 
 	return list
+}
+
+// Parses a namelist, then an optional vararg
+func (p *Parser) parseParameterList() ([]*ast.Identifier, bool) {
+	names := p.parseNameList()
+	vararg := p.tokIs(token.VARARG)
+	if vararg {
+		p.next()
+	}
+	return names, vararg
 }
 
 func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpression {
@@ -111,7 +123,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 	p.expect(token.FUNCTION)
 	p.expect(token.LPAREN)
 
-	params := p.parseNameList()
+	params, vararg := p.parseParameterList()
 
 	p.expect(token.RPAREN)
 
@@ -121,6 +133,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 
 	return &ast.FunctionExpression{
 		Params: params,
+		Vararg: vararg,
 		Body:   body,
 	}
 }

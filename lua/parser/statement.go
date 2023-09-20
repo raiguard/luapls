@@ -132,7 +132,7 @@ func (p *Parser) parseFunctionStatement(isLocal bool) *ast.FunctionStatement {
 	p.expect(token.FUNCTION)
 	left := p.parseExpression(LOWEST, false)
 	p.expect(token.LPAREN)
-	params := p.parseNameList()
+	params, vararg := p.parseParameterList()
 	p.expect(token.RPAREN)
 	body := p.ParseBlock()
 	p.expect(token.END)
@@ -140,6 +140,7 @@ func (p *Parser) parseFunctionStatement(isLocal bool) *ast.FunctionStatement {
 	return &ast.FunctionStatement{
 		Left:    left,
 		Params:  params,
+		Vararg:  vararg,
 		Body:    body,
 		IsLocal: isLocal,
 	}

@@ -115,6 +115,7 @@ func (fs *ForInStatement) String() string {
 type FunctionStatement struct {
 	Left    Expression
 	Params  []*Identifier
+	Vararg  bool
 	Body    Block
 	IsLocal bool
 }
@@ -245,6 +246,7 @@ func (fc *FunctionCall) String() string {
 
 type FunctionExpression struct {
 	Params []*Identifier
+	Vararg bool
 	Body   Block
 }
 
