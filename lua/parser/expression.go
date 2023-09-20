@@ -37,6 +37,18 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		return nil
 	}
 
+	for isSuffixOperator(p.tok.Type) {
+		switch p.tok.Type {
+		case token.LPAREN, token.LBRACE, token.STRING:
+			if !allowCall {
+				return left
+			}
+			left = p.parseFunctionCall(left)
+		case token.LBRACK, token.DOT, token.COLON:
+			left = p.parseIndexExpression(left)
+		}
+	}
+
 	for isBinaryOperator(p.tok.Type) {
 		tokPrecedence := p.tokPrecedence()
 		if isRightAssociative(p.tok.Type) {
@@ -45,17 +57,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		if precedence >= tokPrecedence {
 			break
 		}
-		if p.tokIs(token.LPAREN) && !allowCall {
-			break
-		}
-		switch p.tok.Type {
-		case token.LPAREN, token.LBRACE:
-			left = p.parseFunctionCall(left)
-		case token.LBRACK, token.DOT, token.COLON:
-			left = p.parseIndexExpression(left)
-		default:
-			left = p.parseBinaryExpression(left)
-		}
+		left = p.parseBinaryExpression(left)
 	}
 
 	return left
@@ -303,7 +305,6 @@ const (
 	PRODUCT
 	UNARY
 	POW
-	INDEX
 )
 
 var precedences = map[token.TokenType]operatorPrecedence{
@@ -324,34 +325,24 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.NOT:     UNARY,
 	token.LEN:     UNARY,
 	token.POW:     POW,
-	token.COLON:   INDEX,
-	token.DOT:     INDEX,
-	token.LBRACK:  INDEX,
-	token.LPAREN:  INDEX,
-	token.LBRACE:  INDEX,
 }
 
 var binaryOperators = map[token.TokenType]bool{
 	token.AND:     true,
-	token.POW:     true,
 	token.CONCAT:  true,
 	token.EQUAL:   true,
 	token.GEQ:     true,
 	token.GT:      true,
 	token.LEQ:     true,
 	token.LT:      true,
-	token.MINUS:   true, // Also a unary operator
+	token.MINUS:   true,
 	token.NEQ:     true,
 	token.OR:      true,
 	token.PERCENT: true,
 	token.PLUS:    true,
+	token.POW:     true,
 	token.SLASH:   true,
 	token.STAR:    true,
-	token.COLON:   true,
-	token.DOT:     true,
-	token.LBRACK:  true,
-	token.LPAREN:  true,
-	token.LBRACE:  true,
 }
 
 func isBinaryOperator(tok token.TokenType) bool {
@@ -360,4 +351,17 @@ func isBinaryOperator(tok token.TokenType) bool {
 
 func isRightAssociative(tok token.TokenType) bool {
 	return tok == token.POW || tok == token.CONCAT
+}
+
+var suffixOperators = map[token.TokenType]bool{
+	token.COLON:  true,
+	token.DOT:    true,
+	token.LBRACE: true,
+	token.LBRACK: true,
+	token.LPAREN: true,
+	token.STRING: true,
+}
+
+func isSuffixOperator(tok token.TokenType) bool {
+	return suffixOperators[tok]
 }

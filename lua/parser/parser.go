@@ -58,9 +58,8 @@ func (p *Parser) ParseBlock() ast.Block {
 
 func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 	if p.tokIs(token.STRING) {
-		args := []ast.Expression{p.parseStringLiteral()}
 		end := p.tok.End()
-		p.next()
+		args := []ast.Expression{p.parseStringLiteral()}
 		return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
 	}
 
