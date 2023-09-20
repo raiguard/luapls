@@ -14,8 +14,8 @@ type Node interface {
 }
 
 type Block struct {
-	Stmts []Statement
-	pos   token.Pos
+	Stmts    []Statement
+	StartPos token.Pos
 }
 
 func (b *Block) String() string {
@@ -26,13 +26,13 @@ func (b *Block) String() string {
 	return strings.TrimSpace(out)
 }
 func (b *Block) Pos() token.Pos {
-	return b.pos
+	return b.StartPos
 }
 func (b *Block) End() token.Pos {
 	if len(b.Stmts) > 0 {
-		return b.pos + b.Stmts[len(b.Stmts)-1].End()
+		return b.StartPos + b.Stmts[len(b.Stmts)-1].End()
 	}
-	return b.pos
+	return b.StartPos
 }
 
 func nodeListToString[T Node](nodes []T) string {
@@ -67,7 +67,7 @@ func (as *AssignmentStatement) End() token.Pos {
 }
 
 type BreakStatement struct {
-	pos token.Pos
+	StartPos token.Pos
 }
 
 func (bs *BreakStatement) statementNode() {}
@@ -75,16 +75,16 @@ func (bs *BreakStatement) String() string {
 	return token.BREAK.String()
 }
 func (bs *BreakStatement) Pos() token.Pos {
-	return bs.pos
+	return bs.StartPos
 }
 func (bs *BreakStatement) End() token.Pos {
-	return bs.pos + len(bs.String())
+	return bs.StartPos + len(bs.String())
 }
 
 type DoStatement struct {
-	Body Block
-	do   token.Pos
-	end  token.Pos
+	Body     Block
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (ds *DoStatement) statementNode() {}
@@ -92,10 +92,10 @@ func (ds *DoStatement) String() string {
 	return fmt.Sprintf("do\n%s\nend", ds.Body.String())
 }
 func (ds *DoStatement) Pos() token.Pos {
-	return ds.do
+	return ds.StartPos
 }
 func (ds *DoStatement) End() token.Pos {
-	return ds.end
+	return ds.EndPos
 }
 
 type ExpressionStatement struct {
@@ -114,13 +114,13 @@ func (es *ExpressionStatement) End() token.Pos {
 }
 
 type ForStatement struct {
-	Name   *Identifier
-	Start  Expression
-	Finish Expression
-	Step   Expression
-	Body   Block
-	pos    token.Pos
-	end    token.Pos
+	Name     *Identifier
+	Start    Expression
+	Finish   Expression
+	Step     Expression
+	Body     Block
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (fs *ForStatement) statementNode() {}
@@ -145,18 +145,18 @@ func (fs *ForStatement) String() string {
 	}
 }
 func (fs *ForStatement) Pos() token.Pos {
-	return fs.pos
+	return fs.StartPos
 }
 func (fs *ForStatement) End() token.Pos {
-	return fs.end
+	return fs.EndPos
 }
 
 type ForInStatement struct {
-	Names []*Identifier
-	Exps  []Expression
-	Body  Block
-	pos   token.Pos
-	end   token.Pos
+	Names    []*Identifier
+	Exps     []Expression
+	Body     Block
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (fs *ForInStatement) statementNode() {}
@@ -164,20 +164,20 @@ func (fs *ForInStatement) String() string {
 	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Names), nodeListToString(fs.Exps), fs.Body.String())
 }
 func (fs *ForInStatement) Pos() token.Pos {
-	return fs.pos
+	return fs.StartPos
 }
 func (fs *ForInStatement) End() token.Pos {
-	return fs.end
+	return fs.EndPos
 }
 
 type FunctionStatement struct {
-	Left    Expression
-	Params  []*Identifier
-	Vararg  bool
-	Body    Block
-	IsLocal bool
-	pos     token.Pos
-	end     token.Pos
+	Left     Expression
+	Params   []*Identifier
+	Vararg   bool
+	Body     Block
+	IsLocal  bool
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (fs *FunctionStatement) statementNode() {}
@@ -195,15 +195,15 @@ func (fs *FunctionStatement) String() string {
 	)
 }
 func (fs *FunctionStatement) Pos() token.Pos {
-	return fs.pos
+	return fs.StartPos
 }
 func (fs *FunctionStatement) End() token.Pos {
-	return fs.end
+	return fs.EndPos
 }
 
 type GotoStatement struct {
-	Name *Identifier
-	pos  token.Pos
+	Name     *Identifier
+	StartPos token.Pos
 }
 
 func (gs *GotoStatement) statementNode() {}
@@ -211,7 +211,7 @@ func (gs *GotoStatement) String() string {
 	return fmt.Sprintf("goto %s", gs.Name.String())
 }
 func (gs *GotoStatement) Pos() token.Pos {
-	return gs.pos
+	return gs.StartPos
 }
 func (gs *GotoStatement) End() token.Pos {
 	return gs.Name.End()
@@ -235,8 +235,8 @@ func (is *IfStatement) End() token.Pos {
 type IfClause struct {
 	Condition Expression
 	Body      Block
-	pos       token.Pos
-	end       token.Pos
+	StartPos  token.Pos
+	EndPos    token.Pos
 }
 
 func (ic *IfClause) statementNode() {}
@@ -249,16 +249,16 @@ func (ic *IfClause) String() string {
 	}
 }
 func (ic *IfClause) Pos() token.Pos {
-	return ic.pos
+	return ic.StartPos
 }
 func (ic *IfClause) End() token.Pos {
-	return ic.end
+	return ic.EndPos
 }
 
 type LabelStatement struct {
-	Name *Identifier
-	pos  token.Pos
-	end  token.Pos
+	Name     *Identifier
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (ls *LabelStatement) statementNode() {}
@@ -266,16 +266,16 @@ func (ls *LabelStatement) String() string {
 	return fmt.Sprintf("::%s::", ls.Name.String())
 }
 func (ls *LabelStatement) Pos() token.Pos {
-	return ls.pos
+	return ls.StartPos
 }
 func (ls *LabelStatement) End() token.Pos {
-	return ls.end
+	return ls.EndPos
 }
 
 type LocalStatement struct {
-	Names []*Identifier
-	Exps  []Expression
-	pos   token.Pos
+	Names    []*Identifier
+	Exps     []Expression
+	StartPos token.Pos
 }
 
 func (ls *LocalStatement) statementNode() {}
@@ -283,7 +283,7 @@ func (ls *LocalStatement) String() string {
 	return fmt.Sprintf("local %s = %s", nodeListToString(ls.Names), nodeListToString(ls.Exps))
 }
 func (ls *LocalStatement) Pos() token.Pos {
-	return ls.pos
+	return ls.StartPos
 }
 func (ls *LocalStatement) End() token.Pos {
 	if len(ls.Exps) > 0 {
@@ -295,7 +295,7 @@ func (ls *LocalStatement) End() token.Pos {
 type RepeatStatement struct {
 	Body      Block
 	Condition Expression
-	pos       token.Pos
+	StartPos  token.Pos
 }
 
 func (rs *RepeatStatement) statementNode() {}
@@ -303,15 +303,15 @@ func (rs *RepeatStatement) String() string {
 	return fmt.Sprintf("repeat\n%s\nuntil %s", rs.Body.String(), rs.Condition.String())
 }
 func (rs *RepeatStatement) Pos() token.Pos {
-	return rs.pos
+	return rs.StartPos
 }
 func (rs *RepeatStatement) End() token.Pos {
 	return rs.Condition.End()
 }
 
 type ReturnStatement struct {
-	Exps []Expression
-	pos  token.Pos
+	Exps     []Expression
+	StartPos token.Pos
 }
 
 func (rs *ReturnStatement) statementNode() {}
@@ -319,20 +319,20 @@ func (rs *ReturnStatement) String() string {
 	return fmt.Sprintf("return %s", nodeListToString(rs.Exps))
 }
 func (rs *ReturnStatement) Pos() token.Pos {
-	return rs.pos
+	return rs.StartPos
 }
 func (rs *ReturnStatement) End() token.Pos {
 	if len(rs.Exps) > 0 {
 		return rs.Exps[len(rs.Exps)-1].End()
 	}
-	return rs.pos + len(token.RETURN.String())
+	return rs.StartPos + len(token.RETURN.String())
 }
 
 type WhileStatement struct {
 	Condition Expression
 	Body      Block
-	pos       token.Pos
-	end       token.Pos
+	StartPos  token.Pos
+	EndPos    token.Pos
 }
 
 func (ws *WhileStatement) statementNode() {}
@@ -340,10 +340,10 @@ func (ws *WhileStatement) String() string {
 	return fmt.Sprintf("while %s do\n%s\nend", ws.Condition.String(), ws.Body.String())
 }
 func (ws *WhileStatement) Pos() token.Pos {
-	return ws.pos
+	return ws.StartPos
 }
 func (ws *WhileStatement) End() token.Pos {
-	return ws.end
+	return ws.EndPos
 }
 
 // Expressions
@@ -371,9 +371,9 @@ func (be *BinaryExpression) End() token.Pos {
 }
 
 type FunctionCall struct {
-	Left Expression
-	Args []Expression
-	end  token.Pos
+	Left   Expression
+	Args   []Expression
+	EndPos token.Pos
 }
 
 func (fc *FunctionCall) expressionNode() {}
@@ -384,15 +384,15 @@ func (fc *FunctionCall) Pos() token.Pos {
 	return fc.Left.Pos()
 }
 func (fc *FunctionCall) End() token.Pos {
-	return fc.end
+	return fc.EndPos
 }
 
 type FunctionExpression struct {
-	Params []*Identifier
-	Vararg bool
-	Body   Block
-	pos    token.Pos
-	end    token.Pos
+	Params   []*Identifier
+	Vararg   bool
+	Body     Block
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (fe *FunctionExpression) expressionNode() {}
@@ -400,10 +400,10 @@ func (fe *FunctionExpression) String() string {
 	return fmt.Sprintf("function(%s)\n%s\nend", nodeListToString(fe.Params), fe.Body.String())
 }
 func (fe *FunctionExpression) Pos() token.Pos {
-	return fe.pos
+	return fe.StartPos
 }
 func (fe *FunctionExpression) End() token.Pos {
-	return fe.end
+	return fe.EndPos
 }
 
 type IndexExpression struct {
@@ -411,7 +411,7 @@ type IndexExpression struct {
 	Inner      Expression
 	IsBrackets bool
 	IsColon    bool
-	end        token.Pos
+	EndPos     token.Pos
 }
 
 func (ie *IndexExpression) expressionNode() {}
@@ -426,13 +426,13 @@ func (ie *IndexExpression) Pos() token.Pos {
 	return ie.Left.Pos()
 }
 func (ie *IndexExpression) End() token.Pos {
-	return ie.end
+	return ie.EndPos
 }
 
 type UnaryExpression struct {
 	Operator token.TokenType
 	Right    Expression
-	pos      token.Pos
+	StartPos token.Pos
 }
 
 func (ue *UnaryExpression) expressionNode() {}
@@ -440,7 +440,7 @@ func (ue *UnaryExpression) String() string {
 	return fmt.Sprintf("(%s%s)", ue.Operator, ue.Right.String())
 }
 func (ue *UnaryExpression) Pos() token.Pos {
-	return ue.pos
+	return ue.StartPos
 }
 func (ue *UnaryExpression) End() token.Pos {
 	return ue.Right.End()
@@ -449,8 +449,8 @@ func (ue *UnaryExpression) End() token.Pos {
 // Literals (also expressions)
 
 type BooleanLiteral struct {
-	Value bool
-	pos   token.Pos
+	Value    bool
+	StartPos token.Pos
 }
 
 func (bl *BooleanLiteral) expressionNode() {}
@@ -458,74 +458,74 @@ func (bl *BooleanLiteral) String() string {
 	return fmt.Sprintf("%t", bl.Value)
 }
 func (bl *BooleanLiteral) Pos() token.Pos {
-	return bl.pos
+	return bl.StartPos
 }
 func (bl *BooleanLiteral) End() token.Pos {
-	return bl.pos + len(bl.String())
+	return bl.StartPos + len(bl.String())
 }
 
 type Identifier struct {
-	Literal string
-	pos     token.Pos
+	Literal  string
+	StartPos token.Pos
 }
 
 func (i *Identifier) expressionNode() {}
 func (i *Identifier) String() string  { return i.Literal }
 func (i *Identifier) Pos() token.Pos {
-	return i.pos
+	return i.StartPos
 }
 func (i *Identifier) End() token.Pos {
-	return i.pos + len(i.String())
+	return i.StartPos + len(i.String())
 }
 
 type NumberLiteral struct {
-	Literal string
-	Value   float64
-	pos     token.Pos
+	Literal  string
+	Value    float64
+	StartPos token.Pos
 }
 
 func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) String() string  { return nl.Literal }
 func (nl *NumberLiteral) Pos() token.Pos {
-	return nl.pos
+	return nl.StartPos
 }
 func (nl *NumberLiteral) End() token.Pos {
-	return nl.pos + len(nl.String())
+	return nl.StartPos + len(nl.String())
 }
 
 type StringLiteral struct {
-	Value string
-	pos   token.Pos
+	Value    string
+	StartPos token.Pos
 }
 
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) String() string  { return fmt.Sprintf("\"%s\"", sl.Value) }
 func (sl *StringLiteral) Pos() token.Pos {
-	return sl.pos
+	return sl.StartPos
 }
 func (sl *StringLiteral) End() token.Pos {
-	return sl.pos + len(sl.String())
+	return sl.StartPos + len(sl.String())
 }
 
 type TableLiteral struct {
-	Fields []*TableField
-	pos    token.Pos
-	end    token.Pos
+	Fields   []*TableField
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (tl *TableLiteral) expressionNode() {}
 func (tl *TableLiteral) String() string  { return fmt.Sprintf("{ %s }", nodeListToString(tl.Fields)) }
 func (tl *TableLiteral) Pos() token.Pos {
-	return tl.pos
+	return tl.StartPos
 }
 func (tl *TableLiteral) End() token.Pos {
-	return tl.end
+	return tl.EndPos
 }
 
 type TableField struct {
-	Key   Expression
-	Value Expression
-	pos   token.Pos // Needed in case of bracketed keys
+	Key      Expression
+	Value    Expression
+	StartPos token.Pos // Needed in case of bracketed keys
 }
 
 func (tf TableField) String() string {
@@ -538,21 +538,21 @@ func (tf TableField) String() string {
 	return fmt.Sprintf("[%s] = %s", tf.Key.String(), tf.Value.String())
 }
 func (rf *TableField) Pos() token.Pos {
-	return rf.pos
+	return rf.StartPos
 }
 func (rf *TableField) End() token.Pos {
 	return rf.Value.End()
 }
 
 type Vararg struct {
-	pos token.Pos
+	StartPos token.Pos
 }
 
 func (va *Vararg) expressionNode() {}
 func (va *Vararg) String() string  { return token.TokenStr[token.VARARG] }
 func (va *Vararg) Pos() token.Pos {
-	return va.pos
+	return va.StartPos
 }
 func (va *Vararg) End() token.Pos {
-	return va.pos + len(token.VARARG.String())
+	return va.StartPos + len(token.VARARG.String())
 }

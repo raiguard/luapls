@@ -16,7 +16,7 @@ func TestString(t *testing.T) {
 				&NumberLiteral{"123", 123, 4},
 			},
 		}},
-		pos: 0,
+		StartPos: 0,
 	}
 
 	require.Equal(t, program.String(), "foo = 123")
