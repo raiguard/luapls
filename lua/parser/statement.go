@@ -213,7 +213,13 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.expect(token.RETURN)
-	return &ast.ReturnStatement{Exps: p.parseExpressionList()}
+	if !blockEnd[p.tok.Type] {
+		return &ast.ReturnStatement{Exps: p.parseExpressionList()}
+	} else {
+		return &ast.ReturnStatement{
+			Exps: []ast.Expression{},
+		}
+	}
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {
