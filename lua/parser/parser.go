@@ -37,6 +37,10 @@ func (p *Parser) Errors() []string {
 
 func (p *Parser) next() {
 	p.tok = p.lexer.NextToken()
+	// TODO: Parse type annotations
+	for p.tokIs(token.COMMENT) {
+		p.tok = p.lexer.NextToken()
+	}
 }
 
 func (p *Parser) ParseBlock() ast.Block {

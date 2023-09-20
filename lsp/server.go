@@ -3,7 +3,6 @@ package lsp
 import (
 	"fmt"
 	"io/fs"
-	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +11,6 @@ import (
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
-	"github.com/raiguard/luapls/lua/token"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 	"github.com/tliron/glsp/server"
@@ -68,7 +66,7 @@ func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 		}
 		parseFile(ctx, path, string(src))
 	}
-	logToEditor(ctx, fmt.Sprint("Initial scan (", len(toParse), " files): ", time.Since(before)))
+	logToEditor(ctx, fmt.Sprint("Initial parse (", len(toParse), " files): ", time.Since(before)))
 	return nil
 }
 
@@ -92,7 +90,7 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			before := time.Now()
 			parseFile(ctx, params.TextDocument.URI, change.Text)
-			logToEditor(ctx, fmt.Sprint("Rescan duration: ", time.Since(before)))
+			logToEditor(ctx, fmt.Sprint("Reparse duration: ", time.Since(before)))
 		}
 	}
 	return nil
@@ -115,25 +113,4 @@ func logToEditor(ctx *glsp.Context, msg string) {
 		protocol.ServerWindowLogMessage,
 		protocol.LogMessageParams{Type: protocol.MessageTypeLog, Message: msg},
 	)
-}
-
-func withinRange(rng *token.Range, pos *protocol.Position) bool {
-	startCol, endCol := rng.StartCol, rng.EndCol
-	startRow, endRow := rng.StartRow, rng.EndRow
-	if startRow < pos.Line {
-		startCol = 0
-		startRow = pos.Line
-	}
-	if endRow > pos.Line {
-		endCol = math.MaxUint32
-		endRow = pos.Line
-	}
-	return startRow == pos.Line && endRow == pos.Line && startCol <= pos.Character && endCol > pos.Character
-}
-
-func toProtocolRange(rng *token.Range) protocol.Range {
-	return protocol.Range{
-		Start: protocol.Position{Line: rng.StartRow, Character: rng.StartCol},
-		End:   protocol.Position{Line: rng.EndRow, Character: rng.EndCol},
-	}
 }

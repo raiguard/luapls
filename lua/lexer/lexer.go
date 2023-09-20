@@ -6,208 +6,179 @@ import (
 
 // TODO: Support unicode
 type Lexer struct {
-	input        string
-	position     int
-	readPosition int
-	char         byte
-	col, row     int
+	input string
+	pos   int
+	char  byte
 
-	savedCol, savedRow, savedPos uint32
+	lineBreaks []int
 }
 
 func New(input string) *Lexer {
-	l := &Lexer{input: input, col: -1}
+	l := &Lexer{input: input, pos: -1}
 	l.readChar()
 	return l
 }
 
 func (l *Lexer) NextToken() token.Token {
-	var tok token.Token
-
-tryAgain:
 	l.skipWhitespace()
-	l.savePosition()
+
+	pos := l.pos
+	tok := token.EOF
 
 	switch l.char {
 	case 0:
-		return l.newToken(token.EOF)
 	case '=':
-		if l.expectPeek('=') {
-			tok = l.readNewToken(token.EQUAL)
+		l.readChar()
+		if l.char == '=' {
+			tok = token.EQUAL
+			l.readChar()
 		} else {
-			tok = l.readNewToken(token.ASSIGN)
+			tok = token.ASSIGN
 		}
 	case '^':
-		tok = l.readNewToken(token.CARET)
+		tok = token.POW
+		l.readChar()
 	case '>':
-		if l.expectPeek('=') {
-			tok = l.readNewToken(token.GEQ)
+		l.readChar()
+		if l.char == '=' {
+			tok = token.GEQ
+			l.readChar()
 		} else {
-			tok = l.readNewToken(token.GT)
+			tok = token.GT
+		}
+	case '<':
+		l.readChar()
+		if l.char == '=' {
+			tok = token.LEQ
+			l.readChar()
+		} else {
+			tok = token.LT
 		}
 	case '#':
-		tok = l.readNewToken(token.HASH)
-	case '<':
-		if l.expectPeek('=') {
-			tok = l.readNewToken(token.LEQ)
-		} else {
-			tok = l.readNewToken(token.LT)
-		}
+		l.readChar()
+		tok = token.HASH
 	case '-':
-		if l.expectPeek('-') {
-			if l.skipComment() {
-				// TODO: This sucks
-				goto tryAgain
-			}
+		l.readChar()
+		if l.char == '-' {
+			tok = token.COMMENT
+			l.readChar()
+			l.readComment()
 		} else {
-			tok = l.readNewToken(token.MINUS)
+			tok = token.MINUS
 		}
 	case '%':
-		tok = l.readNewToken(token.PERCENT)
+		l.readChar()
+		tok = token.PERCENT
 	case '+':
-		tok = l.readNewToken(token.PLUS)
+		l.readChar()
+		tok = token.PLUS
 	case '/':
-		tok = l.readNewToken(token.SLASH)
+		l.readChar()
+		tok = token.SLASH
 	case '*':
-		tok = l.readNewToken(token.STAR)
+		l.readChar()
+		tok = token.STAR
 	case '~':
-		if l.expectPeek('=') {
-			tok = l.readNewToken(token.NEQ)
+		l.readChar()
+		if l.char == '=' {
+			l.readChar()
+			tok = token.NEQ
 		}
 	case '(':
-		tok = l.readNewToken(token.LPAREN)
+		l.readChar()
+		tok = token.LPAREN
 	case ')':
-		tok = l.readNewToken(token.RPAREN)
+		l.readChar()
+		tok = token.RPAREN
 	case '[':
-		if l.peekChar() == '[' || l.peekChar() == '=' {
-			if l.readRawString() {
-				tok = l.readNewToken(token.RAWSTRING)
-			}
+		if l.readRawString() {
+			tok = token.RAWSTRING
 		} else {
-			tok = l.readNewToken(token.LBRACK)
+			tok = token.LBRACK
 		}
 	case ']':
-		tok = l.readNewToken(token.RBRACK)
+		l.readChar()
+		tok = token.RBRACK
 	case '{':
-		tok = l.readNewToken(token.LBRACE)
+		l.readChar()
+		tok = token.LBRACE
 	case '}':
-		tok = l.readNewToken(token.RBRACE)
+		l.readChar()
+		tok = token.RBRACE
 	case ':':
-		if l.expectPeek(':') {
-			tok = l.readNewToken(token.LABEL)
+		l.readChar()
+		if l.char == ':' {
+			l.readChar()
+			tok = token.LABEL
 		} else {
-			tok = l.readNewToken(token.COLON)
+			tok = token.COLON
 		}
 	case ',':
-		tok = l.readNewToken(token.COMMA)
+		l.readChar()
+		tok = token.COMMA
 	case '.':
-		if l.expectPeek('.') {
-			if l.expectPeek('.') {
-				tok = l.readNewToken(token.VARARG)
+		l.readChar()
+		if l.char == '.' {
+			l.readChar()
+			if l.char == '.' {
+				l.readChar()
+				tok = token.VARARG
 			} else {
-				tok = l.readNewToken(token.CONCAT)
+				tok = token.CONCAT
 			}
 		} else {
-			tok = l.readNewToken(token.DOT)
+			tok = token.DOT
 		}
 	case ';':
-		tok = l.readNewToken(token.SEMICOLON)
+		l.readChar()
+		tok = token.SEMICOLON
 	case '\'', '"':
-		if l.readString(l.char) {
-			tok = l.readNewToken(token.STRING)
+		if l.readString() {
+			tok = token.STRING
 		}
 	default:
-		if isDigit(l.char) {
-			if l.readNumber() {
-				tok = l.newToken(token.NUMBER)
-			}
-			tok.Literal = l.curLiteral()
-			break
-		} else if isIdentifier(l.char) {
-			lit := l.readIdentifier()
+		if l.readNumber() {
+			tok = token.NUMBER
+		} else if l.readIdentifier() {
+			lit := l.input[pos:l.pos]
 			if keyword, ok := token.Reserved[lit]; ok {
-				tok = l.newToken(keyword)
+				tok = keyword
 			} else {
-				tok = l.newToken(token.IDENT)
+				tok = token.IDENT
 			}
 		} else {
 			l.readChar()
 		}
 	}
 
-	return tok
+	return token.Token{
+		Type:    tok,
+		Literal: l.input[pos:l.pos],
+		Pos:     pos,
+	}
 }
 
 func (l *Lexer) readChar() {
-	if l.char == '\n' {
-		l.col = 0
-		l.row++
-	} else {
-		l.col++
-	}
-	if l.readPosition >= len(l.input) {
+	l.pos += 1
+	if l.pos >= len(l.input) {
 		l.char = 0
-	} else {
-		l.char = l.input[l.readPosition]
+		return
 	}
-	l.position = l.readPosition
-	l.readPosition++
-}
-
-func (l *Lexer) peekChar() byte {
-	if l.readPosition >= len(l.input) {
-		return 0
-	}
-	return l.input[l.readPosition]
-}
-
-func (l *Lexer) expectPeek(expected byte) bool {
-	if l.peekChar() == expected {
-		l.readChar()
-		return true
-	}
-	return false
-}
-
-func (l *Lexer) savePosition() {
-	l.savedCol = uint32(l.col)
-	l.savedRow = uint32(l.row)
-	l.savedPos = uint32(l.position)
-}
-
-func (l *Lexer) newToken(tokType token.TokenType) token.Token {
-	return token.Token{
-		Type:    tokType,
-		Literal: l.curLiteral(),
-		Range: token.Range{
-			StartCol: l.savedCol,
-			StartRow: l.savedRow,
-			EndCol:   uint32(l.col),
-			EndRow:   uint32(l.row),
-		},
+	l.char = l.input[l.pos]
+	if l.char == '\n' {
+		l.lineBreaks = append(l.lineBreaks, l.pos)
 	}
 }
 
-func (l *Lexer) readNewToken(tokType token.TokenType) token.Token {
-	l.readChar()
-	return l.newToken(tokType)
-}
-
-func (l *Lexer) curLiteral() string {
-	return l.input[l.savedPos:l.position]
-}
-
-func (l *Lexer) skipComment() bool {
-	if l.expectPeek('[') {
-		if l.readRawString() {
-			l.readChar()
-			return true
-		}
+// TODO: Type annotations
+func (l *Lexer) readComment() {
+	if l.char == '[' && l.readRawString() {
+		return
 	}
 	for l.char != 0 && l.char != '\n' {
 		l.readChar()
 	}
-	return true
+	return
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -217,28 +188,32 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) readNumber() bool {
+	if !isDigit(l.char) {
+		return false
+	}
+
+	isZero := l.char == '0'
+
 	inExponent := false
 	inDecimal := false
 	hexNum := false
 
-	if l.peekChar() == 'x' || l.peekChar() == 'X' {
-		if l.char != '0' {
+	l.readChar()
+	if l.char == 'x' || l.char == 'X' {
+		if !isZero {
 			return false
 		}
 		hexNum = true
 		l.readChar()
-		if !isHex(l.peekChar()) {
-			return false
-		}
 	}
 
 	for {
-		l.readChar()
 		if l.char == '.' {
 			if inDecimal {
 				return false
 			}
 			inDecimal = true
+			l.readChar()
 			continue
 		}
 
@@ -247,7 +222,8 @@ func (l *Lexer) readNumber() bool {
 				return false
 			}
 			inExponent = true
-			if l.peekChar() == '+' || l.peekChar() == '-' {
+			l.readChar()
+			if l.char == '+' || l.char == '-' {
 				l.readChar()
 			}
 			continue
@@ -256,39 +232,54 @@ func (l *Lexer) readNumber() bool {
 		if !isNumberLiteral(l.char, hexNum) {
 			break
 		}
+		l.readChar()
 	}
 
 	return true
 }
 
-func (l *Lexer) readIdentifier() string {
+func (l *Lexer) readIdentifier() bool {
+	if !isIdentifier(l.char) {
+		return false
+	}
 	for isIdentifier(l.char) {
 		l.readChar()
 	}
-
-	return l.curLiteral()
+	return true
 }
 
-func (l *Lexer) readString(quote byte) bool {
+// TODO: Other escape sequences
+func (l *Lexer) readString() bool {
+	quote := l.char
 	for {
-		if l.peekChar() == '\n' {
-			break
-		}
-		if l.peekChar() == quote && l.char != '\\' {
-			break
-		}
 		l.readChar()
+		if l.char == '\n' {
+			return false
+		}
+		if l.char == '\\' {
+			l.readChar()
+			if l.char == quote {
+				continue
+			}
+		}
+		if l.char == quote {
+			break
+		}
 	}
 	l.readChar()
-	return l.char == quote
+	return true
 }
 
 func (l *Lexer) readRawString() bool {
-	level := 0
-	for l.expectPeek('=') {
-		level += 1
+	if l.char != '[' {
+		return false
 	}
+	level := 0
 	l.readChar()
+	for l.char == '=' {
+		level += 1
+		l.readChar()
+	}
 	if l.char != '[' {
 		return false
 	}
@@ -300,15 +291,19 @@ func (l *Lexer) readRawString() bool {
 			l.readChar()
 		}
 		thisLevel := 0
-		for l.expectPeek('=') {
+		l.readChar()
+		for l.char == '=' {
 			thisLevel += 1
+			l.readChar()
 		}
-		if thisLevel == level && l.expectPeek(']') {
+		if l.char != ']' {
+			continue
+		}
+		if thisLevel == level {
 			break
 		}
-		l.readChar()
 	}
-
+	l.readChar()
 	return true
 }
 

@@ -10,6 +10,7 @@ type TokenType int
 const (
 	INVALID TokenType = iota
 	EOF
+	COMMENT
 
 	// Variable
 	IDENT
@@ -44,7 +45,7 @@ const (
 	// Operators
 	AND
 	ASSIGN
-	CARET
+	POW
 	CONCAT
 	EQUAL
 	GEQ
@@ -62,14 +63,12 @@ const (
 	STAR
 
 	// Structure
-	structStart
 	LPAREN
 	RPAREN
 	LBRACK
 	RBRACK
 	LBRACE
 	RBRACE
-	structEnd
 
 	// Grammar
 	COLON
@@ -90,21 +89,23 @@ func (t *TokenType) MarshalJSON() ([]byte, error) {
 type Token struct {
 	Type    TokenType
 	Literal string
-	Range   Range
+	Pos     int
+}
+
+func (t Token) End() int {
+	return t.Pos + len(t.Literal)
 }
 
 func (t Token) String() string {
-	return fmt.Sprintf("[%s] %s %v", TokenStr[t.Type], t.Literal, t.Range)
-}
-
-type Range struct {
-	StartCol, StartRow uint32
-	EndCol, EndRow     uint32
+	return fmt.Sprintf("[%s] %s %v", TokenStr[t.Type], t.Literal, t.Pos)
 }
 
 var TokenStr = map[TokenType]string{
-	IDENT: "identifier",
-	LABEL: "label",
+	INVALID: "invalid",
+	EOF:     "eof",
+	IDENT:   "identifier",
+	LABEL:   "label",
+	COMMENT: "comment",
 
 	// Keywords
 	BREAK:    "break",
@@ -135,7 +136,7 @@ var TokenStr = map[TokenType]string{
 	// Operators
 	AND:     "and",
 	ASSIGN:  "=",
-	CARET:   "^",
+	POW:     "^",
 	EQUAL:   "==",
 	GEQ:     ">=",
 	GT:      ">",

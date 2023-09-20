@@ -298,7 +298,7 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.PERCENT: PRODUCT,
 	token.NOT:     UNARY,
 	token.HASH:    UNARY,
-	token.CARET:   POW,
+	token.POW:     POW,
 	token.COLON:   INDEX,
 	token.DOT:     INDEX,
 	token.LBRACK:  INDEX,
@@ -308,7 +308,7 @@ var precedences = map[token.TokenType]operatorPrecedence{
 
 var binaryOperators = map[token.TokenType]bool{
 	token.AND:     true,
-	token.CARET:   true,
+	token.POW:     true,
 	token.CONCAT:  true,
 	token.EQUAL:   true,
 	token.GEQ:     true,
@@ -334,5 +334,5 @@ func isBinaryOperator(tok token.TokenType) bool {
 }
 
 func isRightAssociative(tok token.TokenType) bool {
-	return tok == token.CARET || tok == token.CONCAT
+	return tok == token.POW || tok == token.CONCAT
 }
