@@ -63,7 +63,7 @@ func TestFunctionExpression(t *testing.T) {
 		require.Equal(t, 2, len(exp.Params))
 		require.Equal(t, "a", exp.Params[0].String())
 		require.Equal(t, "b", exp.Params[1].String())
-		require.Equal(t, 1, len(exp.Body))
+		require.Equal(t, 1, len(exp.Body.Stmts))
 	})
 }
 

@@ -32,7 +32,7 @@ func TestBreakStatement(t *testing.T) {
 
 func TestDoStatement(t *testing.T) {
 	testStatement(t, "do i = 1 end", func(stmt ast.DoStatement) {
-		require.Equal(t, 1, len(stmt.Body))
+		require.Equal(t, 1, len(stmt.Body.Stmts))
 	})
 }
 
@@ -40,9 +40,9 @@ func TestForStatement(t *testing.T) {
 	testStatement(t, "for i = 1, 100 do j = j + i end", func(stmt ast.ForStatement) {
 		require.Equal(t, "i", stmt.Name.String())
 		require.Equal(t, "1", stmt.Start.String())
-		require.Equal(t, "100", stmt.End.String())
+		require.Equal(t, "100", stmt.Finish.String())
 		require.Nil(t, stmt.Step)
-		require.Equal(t, 1, len(stmt.Body))
+		require.Equal(t, 1, len(stmt.Body.Stmts))
 	})
 }
 
@@ -53,7 +53,7 @@ func TestForInStatement(t *testing.T) {
 		require.Equal(t, "value", stmt.Names[1].String())
 		require.Equal(t, 1, len(stmt.Exps))
 		require.Equal(t, "tbl", stmt.Exps[0].String())
-		require.Equal(t, 1, len(stmt.Body))
+		require.Equal(t, 1, len(stmt.Body.Stmts))
 	})
 }
 
@@ -74,7 +74,7 @@ func TestFunctionStatement(t *testing.T) {
 		require.Equal(t, 2, len(stmt.Params))
 		require.Equal(t, "key", stmt.Params[0].String())
 		require.Equal(t, "value", stmt.Params[1].String())
-		require.Equal(t, 0, len(stmt.Body))
+		require.Equal(t, 0, len(stmt.Body.Stmts))
 		require.Equal(t, false, stmt.IsLocal)
 	})
 }
@@ -99,7 +99,7 @@ func TestIfStatement(t *testing.T) {
 		require.Equal(t, "foo", lit.String())
 
 		block := clause.Body
-		require.Equal(t, 2, len(block))
+		require.Equal(t, 2, len(block.Stmts))
 	})
 
 	input2 := `
@@ -111,8 +111,8 @@ func TestIfStatement(t *testing.T) {
 	`
 	testStatement(t, input2, func(stmt ast.IfStatement) {
 		require.Equal(t, 2, len(stmt.Clauses))
-		require.Equal(t, 1, len(stmt.Clauses[0].Body))
-		require.Equal(t, 1, len(stmt.Clauses[1].Body))
+		require.Equal(t, 1, len(stmt.Clauses[0].Body.Stmts))
+		require.Equal(t, 1, len(stmt.Clauses[1].Body.Stmts))
 	})
 }
 
@@ -141,7 +141,7 @@ func TestLocalStatement(t *testing.T) {
 
 func TestRepeatStatement(t *testing.T) {
 	testStatement(t, "repeat i = i + 1 until i == 10", func(stmt ast.RepeatStatement) {
-		require.Equal(t, 1, len(stmt.Body))
+		require.Equal(t, 1, len(stmt.Body.Stmts))
 		require.Equal(t, "(i == 10)", stmt.Condition.String())
 	})
 }
@@ -157,7 +157,7 @@ func TestReturnStatement(t *testing.T) {
 func TestWhileStatement(t *testing.T) {
 	testStatement(t, "while i < 10 do i = i + 1 end", func(stmt ast.WhileStatement) {
 		require.Equal(t, "(i < 10)", stmt.Condition.String())
-		require.Equal(t, 1, len(stmt.Body))
+		require.Equal(t, 1, len(stmt.Body.Stmts))
 	})
 }
 

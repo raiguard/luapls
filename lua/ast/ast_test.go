@@ -8,14 +8,15 @@ import (
 
 func TestString(t *testing.T) {
 	program := &Block{
-		&AssignmentStatement{
+		Stmts: []Statement{&AssignmentStatement{
 			Vars: []Expression{
-				&Identifier{"foo"},
+				&Identifier{"foo", 0},
 			},
 			Exps: []Expression{
-				&NumberLiteral{"123", 123},
+				&NumberLiteral{"123", 123, 4},
 			},
-		},
+		}},
+		pos: 0,
 	}
 
 	require.Equal(t, program.String(), "foo = 123")

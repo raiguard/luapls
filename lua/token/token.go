@@ -89,8 +89,10 @@ func (t *TokenType) MarshalJSON() ([]byte, error) {
 type Token struct {
 	Type    TokenType
 	Literal string
-	Pos     int
+	Pos     Pos
 }
+
+type Pos = int
 
 func (t Token) End() int {
 	return t.Pos + len(t.Literal)

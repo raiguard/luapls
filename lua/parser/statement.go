@@ -115,7 +115,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 		return &ast.ForStatement{
 			Name:  names[0],
 			Start: start,
-			End:   end,
+			Finish:   end,
 			Step:  step,
 			Body:  body,
 		}

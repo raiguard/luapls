@@ -44,10 +44,10 @@ func (p *Parser) next() {
 }
 
 func (p *Parser) ParseBlock() ast.Block {
-	block := ast.Block{}
+	block := ast.Block{Stmts: []ast.Statement{}}
 
 	for !blockEnd[p.tok.Type] {
-		block = append(block, p.parseStatement())
+		block.Stmts = append(block.Stmts, p.parseStatement())
 	}
 
 	return block

@@ -39,7 +39,7 @@ func testStatements(t *testing.T, tests []statementTest) {
 
 		block := p.ParseBlock()
 		require.NotNil(t, block)
-		require.Equal(t, 1, len(block))
+		require.Equal(t, 1, len(block.Stmts))
 
 		require.Equal(t, test.expected, block.String())
 	}
