@@ -88,9 +88,7 @@ func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocument
 func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
-			before := time.Now()
 			parseFile(ctx, params.TextDocument.URI, change.Text)
-			logToEditor(ctx, fmt.Sprint("Reparse duration: ", time.Since(before)))
 		}
 	}
 	return nil
