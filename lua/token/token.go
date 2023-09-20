@@ -50,7 +50,7 @@ const (
 	EQUAL
 	GEQ
 	GT
-	HASH
+	LEN
 	LEQ
 	LT
 	MINUS
@@ -142,7 +142,7 @@ var TokenStr = map[TokenType]string{
 	EQUAL:   "==",
 	GEQ:     ">=",
 	GT:      ">",
-	HASH:    "#",
+	LEN:     "#",
 	LEQ:     "<=",
 	LT:      "<",
 	MINUS:   "-",
@@ -178,6 +178,7 @@ var Reserved = map[string]TokenType{
 	"else":     ELSE,
 	"elseif":   ELSEIF,
 	"end":      END,
+	"false":    FALSE,
 	"for":      FOR,
 	"function": FUNCTION,
 	"goto":     GOTO,
@@ -189,6 +190,7 @@ var Reserved = map[string]TokenType{
 	"repeat":   REPEAT,
 	"return":   RETURN,
 	"then":     THEN,
+	"true":     TRUE,
 	"until":    UNTIL,
 	"while":    WHILE,
 }

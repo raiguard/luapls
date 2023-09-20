@@ -154,6 +154,7 @@ func (nl *NumberLiteral) End() token.Pos {
 type StringLiteral struct {
 	Value    string
 	StartPos token.Pos
+	// TODO: Store type of quote
 }
 
 func (sl *StringLiteral) expressionNode() {}

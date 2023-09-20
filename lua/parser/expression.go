@@ -14,27 +14,24 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	switch p.tok.Type {
 	case token.FUNCTION:
 		left = p.parseFunctionExpression()
-	case token.TRUE, token.FALSE:
-		left = p.parseBooleanLiteral()
-	case token.HASH:
-		left = p.parseUnaryExpression()
 	case token.IDENT:
 		left = p.parseIdentifier()
+	case token.LBRACE:
+		left = p.parseTableLiteral()
+	case token.LEN, token.MINUS, token.NOT:
+		left = p.parseUnaryExpression()
 	case token.LPAREN:
 		left = p.parseSurroundingExpression()
-	case token.MINUS:
-		left = p.parseUnaryExpression()
-	case token.NOT:
-		left = p.parseUnaryExpression()
 	case token.NUMBER:
 		left = p.parseNumberLiteral()
 	case token.STRING, token.RAWSTRING:
 		left = p.parseStringLiteral()
-	case token.LBRACE:
-		left = p.parseTableLiteral()
+	case token.TRUE, token.FALSE:
+		left = p.parseBooleanLiteral()
 	case token.VARARG:
 		left = p.parseVararg()
 	default:
+		// TODO: "Invalid" node
 		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.tok.String()))
 		p.next()
 		return nil
@@ -120,6 +117,7 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpressio
 }
 
 func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
+	pos := p.tok.Pos
 	p.expect(token.FUNCTION)
 	p.expect(token.LPAREN)
 
@@ -129,12 +127,15 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 
 	body := p.ParseBlock()
 
+	end := p.tok.Pos
 	p.expect(token.END)
 
 	return &ast.FunctionExpression{
-		Params: params,
-		Vararg: vararg,
-		Body:   body,
+		Params:   params,
+		Vararg:   vararg,
+		Body:     body,
+		StartPos: pos,
+		EndPos:   end,
 	}
 }
 
@@ -143,12 +144,15 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 	isColon := p.tokIs(token.COLON)
 	p.next()
 
+	var end token.Pos
 	var inner ast.Expression
 	if isBrackets {
 		inner = p.parseExpression(LOWEST, true)
+		end = p.tok.Pos
 		p.expect(token.RBRACK)
 	} else {
 		inner = p.parseIdentifier()
+		end = inner.End()
 	}
 
 	return &ast.IndexExpression{
@@ -156,6 +160,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 		Inner:      inner,
 		IsBrackets: isBrackets,
 		IsColon:    isColon,
+		EndPos:     end,
 	}
 }
 
@@ -168,63 +173,66 @@ func (p *Parser) parseSurroundingExpression() ast.Expression {
 
 func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
 	operator := p.tok.Type
+	pos := p.tok.Pos
 	p.next()
 	right := p.parseExpression(UNARY, true)
-	return &ast.UnaryExpression{Operator: operator, Right: right}
+	return &ast.UnaryExpression{Operator: operator, Right: right, StartPos: pos}
 }
 
 func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
-	// If this returns an error, something has gone VERY wrong, so just explode
-	value, err := strconv.ParseBool(p.tok.Literal)
-	if err != nil {
-		panic(err)
-	}
+	value := p.tokIs(token.TRUE)
+	pos := p.tok.Pos
 	p.next()
-	return &ast.BooleanLiteral{Value: value}
+	return &ast.BooleanLiteral{Value: value, StartPos: pos}
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	var ident *ast.Identifier
+	ident := ast.Identifier{StartPos: p.tok.Pos}
 	if p.tokIs(token.IDENT) {
-		ident = &ast.Identifier{Literal: p.tok.Literal}
+		ident.Literal = p.tok.Literal
 	} else {
 		p.invalidTokenError(token.IDENT)
 	}
 	p.next()
-	return ident
+	return &ident
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 	lit := p.tok.Literal
+	pos := p.tok.Pos
 
 	// TODO: Parse all formats of number
 	value, err := strconv.ParseFloat(p.tok.Literal, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q", p.tok.Literal)
-		p.errors = append(p.errors, msg)
+		// msg := fmt.Sprintf("could not parse %q", p.tok.Literal)
+		// p.errors = append(p.errors, msg)
 	}
 
 	p.next()
 
-	return &ast.NumberLiteral{Literal: lit, Value: float64(value)}
+	return &ast.NumberLiteral{Literal: lit, Value: float64(value), StartPos: pos}
 }
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	lit := &ast.StringLiteral{
-		Value: strings.Trim(p.tok.Literal, "\"'"),
+		Value:    strings.Trim(p.tok.Literal, "\"'"),
+		StartPos: p.tok.Pos,
 	}
 	p.next()
 	return lit
 }
 
 func (p *Parser) parseTableLiteral() *ast.TableLiteral {
+	pos := p.tok.Pos
+
 	p.expect(token.LBRACE)
 
 	fields := []*ast.TableField{}
 
 	if p.tokIs(token.RBRACE) {
+		end := p.tok.Pos
 		p.next()
-		return &ast.TableLiteral{Fields: fields}
+		return &ast.TableLiteral{Fields: fields, StartPos: pos, EndPos: end}
 	}
 
 	fields = append(fields, p.parseTableField())
@@ -238,14 +246,16 @@ func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 		fields = append(fields, p.parseTableField())
 	}
 
+	end := p.tok.Pos
 	p.expect(token.RBRACE)
 
-	return &ast.TableLiteral{Fields: fields}
+	return &ast.TableLiteral{Fields: fields, StartPos: pos, EndPos: end}
 }
 
 func (p *Parser) parseTableField() *ast.TableField {
 	var leftExp ast.Expression
 	needClosingBracket := false
+	pos := p.tok.Pos
 	if p.tokIs(token.LBRACK) {
 		needClosingBracket = true
 		p.next()
@@ -261,14 +271,16 @@ func (p *Parser) parseTableField() *ast.TableField {
 	p.expect(token.ASSIGN)
 	rightExp := p.parseExpression(LOWEST, true)
 	return &ast.TableField{
-		Key:   leftExp,
-		Value: rightExp,
+		Key:      leftExp,
+		Value:    rightExp,
+		StartPos: pos,
 	}
 }
 
 func (p *Parser) parseVararg() *ast.Vararg {
+	pos := p.tok.Pos
 	p.expect(token.VARARG)
-	return &ast.Vararg{}
+	return &ast.Vararg{StartPos: pos}
 }
 
 var tableSep = map[token.TokenType]bool{
@@ -310,7 +322,7 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.SLASH:   PRODUCT,
 	token.PERCENT: PRODUCT,
 	token.NOT:     UNARY,
-	token.HASH:    UNARY,
+	token.LEN:     UNARY,
 	token.POW:     POW,
 	token.COLON:   INDEX,
 	token.DOT:     INDEX,

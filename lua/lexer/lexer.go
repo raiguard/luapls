@@ -56,7 +56,7 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case '#':
 		l.readChar()
-		tok = token.HASH
+		tok = token.LEN
 	case '-':
 		l.readChar()
 		if l.char == '-' {
@@ -141,8 +141,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok = token.NUMBER
 		} else if l.readIdentifier() {
 			lit := l.input[pos:l.pos]
-			if keyword, ok := token.Reserved[lit]; ok {
-				tok = keyword
+			if reserved, ok := token.Reserved[lit]; ok {
+				tok = reserved
 			} else {
 				tok = token.IDENT
 			}

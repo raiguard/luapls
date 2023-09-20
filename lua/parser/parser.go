@@ -44,7 +44,10 @@ func (p *Parser) next() {
 }
 
 func (p *Parser) ParseBlock() ast.Block {
-	block := ast.Block{Stmts: []ast.Statement{}}
+	block := ast.Block{
+		Stmts:    []ast.Statement{},
+		StartPos: p.tok.Pos,
+	}
 
 	for !blockEnd[p.tok.Type] {
 		block.Stmts = append(block.Stmts, p.parseStatement())
@@ -56,14 +59,17 @@ func (p *Parser) ParseBlock() ast.Block {
 func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 	if p.tokIs(token.STRING) {
 		args := []ast.Expression{p.parseStringLiteral()}
+		end := p.tok.End()
 		p.next()
-		return &ast.FunctionCall{Left: left, Args: args}
+		return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
 	}
 
 	if p.tokIs(token.LBRACE) {
+		lit := p.parseTableLiteral()
 		return &ast.FunctionCall{
-			Left: left,
-			Args: []ast.Expression{p.parseTableLiteral()},
+			Left:   left,
+			Args:   []ast.Expression{lit},
+			EndPos: lit.End(),
 		}
 	}
 
@@ -74,9 +80,11 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 		args = p.parseExpressionList()
 	}
 
+	end := p.tok.Pos
+
 	p.expect(token.RPAREN)
 
-	return &ast.FunctionCall{Left: left, Args: args}
+	return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
 }
 
 func (p *Parser) expect(tokenType token.TokenType) {
@@ -84,13 +92,6 @@ func (p *Parser) expect(tokenType token.TokenType) {
 		p.invalidTokenError(tokenType)
 	}
 	p.next()
-}
-
-// Like expect, but doesn't advance
-func (p *Parser) expect0(tokenType token.TokenType) {
-	if !p.tokIs(tokenType) {
-		p.invalidTokenError(tokenType)
-	}
 }
 
 func (p *Parser) invalidTokenError(expected token.TokenType) {

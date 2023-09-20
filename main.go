@@ -56,9 +56,11 @@ func parseFile(filename string, printJson bool) {
 	l := lexer.New(string(src))
 	p := parser.New(l)
 	block := p.ParseBlock()
-	fmt.Printf("Time taken: %s\n", time.Since(before))
-	for _, err := range p.Errors() {
-		fmt.Println(err)
+	if !printJson {
+		fmt.Printf("Time taken: %s\n", time.Since(before))
+		for _, err := range p.Errors() {
+			fmt.Println(err)
+		}
 	}
 	if printJson {
 		bytes, err := json.MarshalIndent(block, "", "  ")

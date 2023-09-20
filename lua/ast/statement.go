@@ -178,7 +178,9 @@ func (gs *GotoStatement) End() token.Pos {
 }
 
 type IfStatement struct {
-	Clauses []*IfClause
+	Clauses  []*IfClause
+	StartPos token.Pos
+	EndPos   token.Pos
 }
 
 func (is *IfStatement) statementNode() {}
@@ -186,10 +188,10 @@ func (is *IfStatement) String() string {
 	return fmt.Sprintf("%send", nodeListToString(is.Clauses))
 }
 func (is *IfStatement) Pos() token.Pos {
-	return is.Clauses[0].Pos()
+	return is.StartPos
 }
 func (is *IfStatement) End() token.Pos {
-	return is.Clauses[len(is.Clauses)-1].End()
+	return is.EndPos
 }
 
 type IfClause struct {
