@@ -126,6 +126,9 @@ func (l *Lexer) NextToken() token.Token {
 			} else {
 				tok = token.CONCAT
 			}
+		} else if isDigit(l.char) {
+			l.readNumber(true)
+			tok = token.NUMBER
 		} else {
 			tok = token.DOT
 		}
@@ -137,8 +140,10 @@ func (l *Lexer) NextToken() token.Token {
 			tok = token.STRING
 		}
 	default:
-		if l.readNumber() {
-			tok = token.NUMBER
+		if isDigit(l.char) {
+			if l.readNumber(false) {
+				tok = token.NUMBER
+			}
 		} else if l.readIdentifier() {
 			lit := l.input[pos:l.pos]
 			if reserved, ok := token.Reserved[lit]; ok {
@@ -187,27 +192,22 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-func (l *Lexer) readNumber() bool {
-	if !isDigit(l.char) {
-		return false
-	}
-
-	isZero := l.char == '0'
+func (l *Lexer) readNumber(inDecimal bool) bool {
+	isZero := !inDecimal && l.char == '0'
 
 	inExponent := false
-	inDecimal := false
 	hexNum := false
 
-	l.readChar()
-	if l.char == 'x' || l.char == 'X' {
-		if !isZero {
-			return false
-		}
-		hexNum = true
-		l.readChar()
-	}
-
 	for {
+		l.readChar()
+		if l.char == 'x' || l.char == 'X' {
+			if hexNum || !isZero {
+				return false
+			}
+			hexNum = true
+			continue
+		}
+
 		if l.char == '.' {
 			if inDecimal {
 				return false
@@ -232,7 +232,6 @@ func (l *Lexer) readNumber() bool {
 		if !isNumberLiteral(l.char, hexNum) {
 			break
 		}
-		l.readChar()
 	}
 
 	return true
@@ -248,7 +247,18 @@ func (l *Lexer) readIdentifier() bool {
 	return true
 }
 
-// TODO: Other escape sequences
+var escapes = map[byte]bool{
+	'a':  true,
+	'b':  true,
+	'f':  true,
+	'n':  true,
+	'r':  true,
+	't':  true,
+	'v':  true,
+	'z':  true,
+	'\n': true,
+}
+
 func (l *Lexer) readString() bool {
 	quote := l.char
 	for {
@@ -258,7 +268,12 @@ func (l *Lexer) readString() bool {
 		}
 		if l.char == '\\' {
 			l.readChar()
-			if l.char == quote {
+			if l.char == 'z' {
+				l.readChar()
+				l.skipWhitespace()
+				continue
+			}
+			if l.char == quote || escapes[l.char] {
 				continue
 			}
 		}
