@@ -15,12 +15,12 @@ import (
 
 func main() {
 	args := os.Args
-	if len(args) == 1 {
-		fmt.Println("No argument provided, expected 'lsp' or 'repl'")
-		os.Exit(1)
+	task := "lsp"
+	if len(args) > 1 {
+		task = args[1]
 	}
 
-	switch args[1] {
+	switch task {
 	case "lex":
 		lexFile(args[2])
 	case "lsp":
