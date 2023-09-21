@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/raiguard/luapls/lua/ast"
@@ -21,7 +22,25 @@ const lsName = "luapls"
 var version string = "0.0.1"
 var handler protocol.Handler
 
-var files = map[string]ast.Block{}
+// Go doesn't have a generics-based mutex yet, so let's roll our own!
+type Mutex[T any] struct {
+	inner T
+	mu    sync.Mutex
+}
+
+func (m *Mutex[T]) Lock() T {
+	m.mu.Lock()
+	return m.inner
+}
+
+func (m *Mutex[T]) Unlock() {
+	m.mu.Unlock()
+}
+
+var files = Mutex[map[string]ast.Block]{
+	inner: map[string]ast.Block{},
+	mu:    sync.Mutex{},
+}
 var rootPath string = ""
 
 func Run() {
@@ -59,14 +78,21 @@ func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 		return nil
 	})
 	before := time.Now()
+	var parseWg sync.WaitGroup
 	for _, path := range toParse {
 		src, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			logToEditor(ctx, "%s", err)
+			continue
 		}
-		parseFile(ctx, path, string(src))
+		parseWg.Add(1)
+		go func(path string) {
+			parseFile(ctx, path, string(src))
+			parseWg.Done()
+		}(path)
 	}
-	logToEditor(ctx, fmt.Sprint("Initial parse (", len(toParse), " files): ", time.Since(before)))
+	parseWg.Wait()
+	logToEditor(ctx, "Initial parse (%d files): %s", len(toParse), time.Since(before))
 	return nil
 }
 
@@ -98,17 +124,18 @@ func parseFile(ctx *glsp.Context, filename, src string) {
 	p := parser.New(lexer.New(src))
 	block := p.ParseBlock()
 	if len(p.Errors()) > 0 {
-		logToEditor(ctx, fmt.Sprintf("Errors parsing %s:", filename))
+		logToEditor(ctx, "Errors parsing %s:", filename)
 		for _, err := range p.Errors() {
-			logToEditor(ctx, err)
+			logToEditor(ctx, "%s", err)
 		}
 	}
-	files[filename] = block
+	files.Lock()[filename] = block
+	files.Unlock()
 }
 
-func logToEditor(ctx *glsp.Context, msg string) {
+func logToEditor(ctx *glsp.Context, format string, args ...any) {
 	ctx.Notify(
 		protocol.ServerWindowLogMessage,
-		protocol.LogMessageParams{Type: protocol.MessageTypeLog, Message: msg},
+		protocol.LogMessageParams{Type: protocol.MessageTypeLog, Message: fmt.Sprintf(format, args...)},
 	)
 }
