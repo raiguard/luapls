@@ -95,13 +95,13 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 }
 
 func parseFile(ctx *glsp.Context, filename, src string) {
-	before := time.Now()
-	logToEditor(ctx, fmt.Sprintf("Parsing %s", filename))
 	p := parser.New(lexer.New(src))
 	block := p.ParseBlock()
-	logToEditor(ctx, fmt.Sprintf("Time: %s", time.Since(before)))
-	for _, err := range p.Errors() {
-		logToEditor(ctx, err)
+	if len(p.Errors()) > 0 {
+		logToEditor(ctx, fmt.Sprintf("Errors parsing %s:", filename))
+		for _, err := range p.Errors() {
+			logToEditor(ctx, err)
+		}
 	}
 	files[filename] = block
 }
