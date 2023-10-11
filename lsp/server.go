@@ -150,8 +150,18 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 	}
 	rng := toProtocolRange(file, node)
 	return &protocol.Hover{
-		Contents: fmt.Sprintf("```lua\n%+v\n```", node),
-		Range:    &rng,
+		Contents: fmt.Sprintf(
+			"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`\n\n```lua\n%+v\n```",
+			node,
+			toProtocolRange(file, node).Start.Line,
+			toProtocolRange(file, node).Start.Character,
+			node.Pos(),
+			toProtocolRange(file, node).End.Line,
+			toProtocolRange(file, node).End.Character,
+			node.End(),
+			node,
+		),
+		Range: &rng,
 	}, nil
 }
 
