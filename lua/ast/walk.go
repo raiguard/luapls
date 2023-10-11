@@ -2,7 +2,6 @@ package ast
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type Visitor func(n Node) bool
@@ -120,7 +119,7 @@ func Walk(n Node, v Visitor) {
 		Walk(&n.(*WhileStatement).Body, v)
 
 	default:
-		panic(fmt.Sprint("Walk unimplemented for", reflect.TypeOf(n).Name()))
+		panic(fmt.Sprintf("Walk unimplemented for %T", n))
 	}
 }
 
