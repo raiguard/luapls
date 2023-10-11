@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
@@ -29,7 +30,7 @@ func Run() {
 
 		fmt.Println("TOKENS:")
 		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
+			fmt.Printf("%#v\n", tok)
 		}
 
 		fmt.Println("AST:")
@@ -46,5 +47,10 @@ func Run() {
 		bytes, _ := json.Marshal(block)
 		fmt.Println(string(bytes))
 		fmt.Println(block.String())
+
+		ast.Walk(&block, func(n ast.Node) bool {
+			fmt.Printf("%T: {%d, %d}\n", n, n.Pos(), n.End())
+			return true
+		})
 	}
 }
