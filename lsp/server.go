@@ -12,6 +12,7 @@ import (
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
+	"github.com/raiguard/luapls/lua/token"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 	"github.com/tliron/glsp/server"
@@ -127,16 +128,25 @@ func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlight
 	if file == nil {
 		return nil, nil
 	}
-	pos := file.ToPos(params.Position)
-	for _, stmt := range file.Block.Stmts {
-		if stmt.Pos() <= pos && pos < stmt.End() {
-			kind := protocol.DocumentHighlightKindText
-			return []protocol.DocumentHighlight{
-				{Kind: &kind, Range: toProtocolRange(file, stmt)},
-			}, nil
-		}
+	node := getInnermostNode(file, file.ToPos(params.Position))
+	if node == nil {
+		return nil, nil
 	}
-	return nil, nil
+	return []protocol.DocumentHighlight{
+		{Range: toProtocolRange(file, node)},
+	}, nil
+}
+
+func getInnermostNode(n ast.Node, pos token.Pos) ast.Node {
+	var node ast.Node
+	ast.Walk(n, func(n ast.Node) bool {
+		if n.Pos() <= pos && pos < n.End() {
+			node = n
+			return true
+		}
+		return false
+	})
+	return node
 }
 
 func toProtocolRange(file *ast.File, node ast.Node) protocol.Range {

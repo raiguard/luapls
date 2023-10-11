@@ -20,6 +20,16 @@ type File struct {
 	// TODO: Global exports, etc.
 }
 
+func (f *File) String() string {
+	return f.Block.String()
+}
+func (f *File) Pos() token.Pos {
+	return f.Block.Pos()
+}
+func (f *File) End() token.Pos {
+	return f.Block.End()
+}
+
 func (f *File) ToPos(position protocol.Position) token.Pos {
 	line := int(position.Line)
 	col := int(position.Character)

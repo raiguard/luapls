@@ -38,6 +38,8 @@ end
 
 i = num_1 and 4 or 5
 
+local bar = (1 + 2) * 3 - 4 ^ (5 .. 6)
+
 for i = 1, #double_string do
   print(double_string[i])
   goto continue
