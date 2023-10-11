@@ -214,7 +214,7 @@ func (p *Parser) parseLabelStatement() *ast.LabelStatement {
 	pos := p.tok.Pos
 	p.expect(token.LABEL)
 	name := p.parseIdentifier()
-	end := p.tok.Pos
+	end := p.tok.End()
 	p.expect(token.LABEL)
 	return &ast.LabelStatement{Name: name, StartPos: pos, EndPos: end}
 }

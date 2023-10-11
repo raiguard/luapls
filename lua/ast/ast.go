@@ -88,7 +88,7 @@ func (b *Block) Pos() token.Pos {
 }
 func (b *Block) End() token.Pos {
 	if len(b.Stmts) > 0 {
-		return b.StartPos + b.Stmts[len(b.Stmts)-1].End()
+		return b.Stmts[len(b.Stmts)-1].End()
 	}
 	return b.StartPos
 }
@@ -113,6 +113,11 @@ func (rf *TableField) Pos() token.Pos {
 }
 func (rf *TableField) End() token.Pos {
 	return rf.Value.End()
+}
+
+// A Leaf node has no children and is interactable in the editor.
+type LeafNode interface {
+	leaf()
 }
 
 func nodeListToString[T Node](nodes []T) string {

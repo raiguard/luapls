@@ -233,6 +233,7 @@ func (ls *LabelStatement) Pos() token.Pos {
 func (ls *LabelStatement) End() token.Pos {
 	return ls.EndPos
 }
+func (ls *LabelStatement) leaf() {}
 
 type LocalStatement struct {
 	Names    []*Identifier

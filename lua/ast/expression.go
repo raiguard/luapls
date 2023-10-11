@@ -106,10 +106,6 @@ func (ue *UnaryExpression) End() token.Pos {
 
 // Literals (also expressions)
 
-type LeafNode interface {
-	leaf()
-}
-
 type BooleanLiteral struct {
 	Value    bool
 	StartPos token.Pos

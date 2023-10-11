@@ -86,7 +86,7 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 		args = p.parseExpressionList()
 	}
 
-	end := p.tok.Pos
+	end := p.tok.End()
 
 	p.expect(token.RPAREN)
 

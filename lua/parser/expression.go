@@ -129,7 +129,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 
 	body := p.ParseBlock()
 
-	end := p.tok.Pos
+	end := p.tok.End()
 	p.expect(token.END)
 
 	return &ast.FunctionExpression{
@@ -232,7 +232,7 @@ func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 	fields := []*ast.TableField{}
 
 	if p.tokIs(token.RBRACE) {
-		end := p.tok.Pos
+		end := p.tok.End()
 		p.next()
 		return &ast.TableLiteral{Fields: fields, StartPos: pos, EndPos: end}
 	}
@@ -248,7 +248,7 @@ func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 		fields = append(fields, p.parseTableField())
 	}
 
-	end := p.tok.Pos
+	end := p.tok.End()
 	p.expect(token.RBRACE)
 
 	return &ast.TableLiteral{Fields: fields, StartPos: pos, EndPos: end}
