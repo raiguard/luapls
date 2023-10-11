@@ -37,9 +37,6 @@ func Walk(n Node, v Visitor) {
 	case *ExpressionStatement:
 		Walk(n.(*ExpressionStatement).Exp, v)
 
-	case *File:
-		Walk(&n.(*File).Block, v)
-
 	case *ForInStatement:
 		WalkList(n.(*ForInStatement).Names, v)
 		WalkList(n.(*ForInStatement).Exps, v)

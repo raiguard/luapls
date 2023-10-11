@@ -12,18 +12,23 @@ import (
 	"github.com/raiguard/luapls/lua/token"
 )
 
+type ParserError struct {
+	Message string
+	Range   token.Range
+}
+
 type Parser struct {
 	lexer *lexer.Lexer
 
-	errors []string
+	errors []ParserError
 
 	tok token.Token
 }
 
-func New(lexer *lexer.Lexer) *Parser {
+func New(input string) *Parser {
 	p := &Parser{
-		lexer:  lexer,
-		errors: []string{},
+		lexer:  lexer.New(input),
+		errors: []ParserError{},
 	}
 
 	p.next()
@@ -31,7 +36,7 @@ func New(lexer *lexer.Lexer) *Parser {
 	return p
 }
 
-func (p *Parser) Errors() []string {
+func (p *Parser) Errors() []ParserError {
 	return p.errors
 }
 
@@ -43,13 +48,15 @@ func (p *Parser) next() {
 	}
 }
 
-func (p *Parser) ParseFile() ast.File {
-	return ast.File{
+func (p *Parser) ParseFile() File {
+	return File{
 		Block:      p.ParseBlock(),
+		Errors:     p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
 	}
 }
 
+// TODO: Make private
 func (p *Parser) ParseBlock() ast.Block {
 	block := ast.Block{
 		Stmts:    []ast.Statement{},
@@ -93,19 +100,29 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 	return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
 }
 
-func (p *Parser) expect(tokenType token.TokenType) {
+func (p *Parser) expect(tokenType token.TokenType) token.Token {
 	if !p.tokIs(tokenType) {
-		p.invalidTokenError(tokenType)
+		p.expectedTokenError(tokenType)
 	}
+	current := p.tok
 	p.next()
+	return current
 }
 
-func (p *Parser) invalidTokenError(expected token.TokenType) {
-	p.errors = append(p.errors,
-		fmt.Sprintf("Invalid token: expected %s, got %s",
+func (p *Parser) expectedTokenError(expected token.TokenType) {
+	p.addError(
+		fmt.Sprintf("Expected '%s', got '%s'",
 			token.TokenStr[expected],
-			p.tok.String()),
+			token.TokenStr[p.tok.Type]),
 	)
+}
+
+func (p *Parser) invalidTokenError() {
+	p.addError(fmt.Sprintf("Unexpected '%s'", token.TokenStr[p.tok.Type]))
+}
+
+func (p *Parser) addError(message string) {
+	p.errors = append(p.errors, ParserError{Range: p.tok.Range(), Message: message})
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {

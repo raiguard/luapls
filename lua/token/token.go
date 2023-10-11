@@ -100,9 +100,15 @@ func (t Token) End() int {
 	return t.Pos + len(t.Literal)
 }
 
-func (t Token) String() string {
+func (t *Token) Range() Range {
+	return Range{t.Pos, t.End()}
+}
+
+func (t *Token) String() string {
 	return fmt.Sprintf("[%s] %s %v", TokenStr[t.Type], t.Literal, t.Pos)
 }
+
+type Range = [2]Pos
 
 var TokenStr = map[TokenType]string{
 	INVALID: "invalid",

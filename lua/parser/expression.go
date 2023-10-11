@@ -31,8 +31,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	case token.VARARG:
 		left = p.parseVararg()
 	default:
-		// TODO: "Invalid" node
-		p.errors = append(p.errors, fmt.Sprintf("unable to parse unary expression for token: %s", p.tok.String()))
+		p.addError(fmt.Sprintf("Unable to parse unary expression for token: %s", p.tok.String()))
 		p.next()
 		return nil
 	}
@@ -193,7 +192,7 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 	if p.tokIs(token.IDENT) {
 		ident.Literal = p.tok.Literal
 	} else {
-		p.invalidTokenError(token.IDENT)
+		p.expectedTokenError(token.IDENT)
 	}
 	p.next()
 	return &ident

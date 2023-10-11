@@ -55,8 +55,7 @@ func parseFile(filename string, printJson bool) {
 	if err != nil {
 		panic(err)
 	}
-	l := lexer.New(string(src))
-	p := parser.New(l)
+	p := parser.New(string(src))
 	file := p.ParseFile()
 	after := time.Now()
 	if printJson {
@@ -66,7 +65,7 @@ func parseFile(filename string, printJson bool) {
 		}
 		fmt.Println(string(bytes))
 	} else {
-		ast.Walk(&file, func(n ast.Node) bool {
+		ast.Walk(&file.Block, func(n ast.Node) bool {
 			fmt.Printf("%T: {%d, %d}\n", n, n.Pos(), n.End())
 			return true
 		})

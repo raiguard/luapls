@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,8 +25,7 @@ func TestInfixExpression(t *testing.T) {
 	}
 
 	for _, tt := range infixTests {
-		l := lexer.New(tt.input)
-		p := New(l)
+		p := New(tt.input)
 		exp := p.parseExpression(LOWEST, true)
 		checkParserErrors(t, p)
 
@@ -50,8 +48,7 @@ func TestBooleanLiteral(t *testing.T) {
 		{"true", true},
 	}
 	for _, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		lit := p.parseBooleanLiteral()
 		checkParserErrors(t, p)
 		require.Equal(t, test.expected, lit.Value)
@@ -91,7 +88,7 @@ func TestOperatorPrecedence(t *testing.T) {
 
 func TestTableLiteral(t *testing.T) {
 	input := "{ 'bar', baz, 2 + 2, foo = lorem, ['12345-54321'] = baz, }"
-	p := New(lexer.New(input))
+	p := New(input)
 	tbl := p.parseTableLiteral()
 	checkParserErrors(t, p)
 	require.NotNil(t, tbl)
@@ -114,8 +111,7 @@ func TestIndexExpression(t *testing.T) {
 }
 
 func testExpression[T any](t *testing.T, input string, tester func(T)) {
-	l := lexer.New(input)
-	p := New(l)
+	p := New(input)
 	stmt := p.parseExpression(LOWEST, true)
 	checkParserErrors(t, p)
 	tester(requireTypeConversion[T](t, stmt))

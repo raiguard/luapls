@@ -35,8 +35,7 @@ func Run() {
 
 		fmt.Println("AST:")
 
-		l = lexer.New(line)
-		p := parser.New(l)
+		p := parser.New(line)
 		block := p.ParseBlock()
 		for _, err := range p.Errors() {
 			fmt.Fprintln(os.Stderr, err)

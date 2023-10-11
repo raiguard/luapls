@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
 )
@@ -50,7 +48,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		} else if len(exps) == 1 {
 			stat = &ast.ExpressionStatement{Exp: exps[0]}
 		} else {
-			p.errors = append(p.errors, fmt.Sprintf("Invalid token: %s", p.tok.Type))
+			p.invalidTokenError()
 		}
 	}
 	for p.tokIs(token.SEMICOLON) {
@@ -95,11 +93,8 @@ func (p *Parser) parseForStatement() ast.Statement {
 	p.expect(token.FOR)
 	names := p.parseNameList()
 
-	bareLoop := p.tokIs(token.ASSIGN)
+	bareLoop := len(names) == 1 && p.tokIs(token.ASSIGN)
 	if bareLoop {
-		if len(names) != 1 {
-			p.errors = append(p.errors, "Expected 1 identifier")
-		}
 		p.next()
 	} else {
 		p.expect(token.IN)
@@ -117,7 +112,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 	if bareLoop {
 		var start, finish, step ast.Expression
 		if len(exps) < 1 || len(exps) > 3 {
-			p.errors = append(p.errors, "Expected 1 to 3 expressions")
+			p.addError("Expected 1 to 3 expressions")
 		}
 		start = exps[0]
 		if len(exps) > 1 {

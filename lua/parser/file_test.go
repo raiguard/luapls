@@ -3,8 +3,6 @@ package parser
 import (
 	"testing"
 
-	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/stretchr/testify/assert"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -17,7 +15,7 @@ local function bar(baz)
 end
 bar(i)
 `
-	p := New(lexer.New(input))
+	p := New(input)
 	file := p.ParseFile()
 	checkParserErrors(t, p)
 	assertSlicesEqual(t, []int{9, 33, 46, 50, 57}, file.LineBreaks)
@@ -36,7 +34,7 @@ func assertSlicesEqual[T comparable](t *testing.T, expected []T, actual []T) {
 	}
 }
 
-func assertPositionsMatch(t *testing.T, file *ast.File, position protocol.Position, pos token.Pos) {
+func assertPositionsMatch(t *testing.T, file *File, position protocol.Position, pos token.Pos) {
 	protocolPos := file.ToProtocolPos(pos)
 	assert.Equal(t, protocolPos.Line, position.Line)
 	assert.Equal(t, protocolPos.Character, position.Character)

@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/lexer"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,8 +32,7 @@ type statementTest struct {
 
 func testStatements(t *testing.T, tests []statementTest) {
 	for _, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 
 		block := p.ParseBlock()
 		require.NotNil(t, block)

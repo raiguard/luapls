@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/tliron/glsp"
@@ -38,8 +37,8 @@ func (m *Mutex[T]) Unlock() {
 	m.mu.Unlock()
 }
 
-var files = Mutex[map[string]*ast.File]{
-	inner: map[string]*ast.File{},
+var files = Mutex[map[string]*parser.File]{
+	inner: map[string]*parser.File{},
 	mu:    sync.Mutex{},
 }
 var rootPath string = ""
@@ -128,6 +127,7 @@ func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	parseFile(ctx, params.TextDocument.URI, params.TextDocument.Text)
+	publishDiagnostics(ctx, params.TextDocument.URI)
 	return nil
 }
 
@@ -135,6 +135,7 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			parseFile(ctx, params.TextDocument.URI, change.Text)
+			publishDiagnostics(ctx, params.TextDocument.URI)
 		}
 	}
 	return nil
@@ -146,12 +147,12 @@ func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlight
 	if file == nil {
 		return nil, nil
 	}
-	node := getInnermostNode(file, file.ToPos(params.Position))
+	node := getInnermostNode(&file.Block, file.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
 	return []protocol.DocumentHighlight{
-		{Range: toProtocolRange(file, node)},
+		{Range: file.ToProtocolRange(ast.Range(node))},
 	}, nil
 }
 
@@ -161,23 +162,22 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 	if file == nil {
 		return nil, nil
 	}
-	node := getInnermostNode(file, file.ToPos(params.Position))
+	node := getInnermostNode(&file.Block, file.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
 	return &protocol.Hover{
 		Contents: fmt.Sprintf(
-			"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`\n\n```lua\n%+v\n```",
+			"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`",
 			node,
-			toProtocolRange(file, node).Start.Line,
-			toProtocolRange(file, node).Start.Character,
+			file.ToProtocolRange(ast.Range(node)).Start.Line,
+			file.ToProtocolRange(ast.Range(node)).Start.Character,
 			node.Pos(),
-			toProtocolRange(file, node).End.Line,
-			toProtocolRange(file, node).End.Character,
+			file.ToProtocolRange(ast.Range(node)).End.Line,
+			file.ToProtocolRange(ast.Range(node)).End.Character,
 			node.End(),
-			node,
 		),
-		Range: ptr(toProtocolRange(file, node)),
+		Range: ptr(file.ToProtocolRange(ast.Range(node))),
 	}, nil
 }
 
@@ -185,19 +185,25 @@ func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionPa
 	return reserved, nil
 }
 
-// func publishDiagnostics(ctx *glsp.Context, textDocument *protocol.TextDocumentIdentifier) {
-// 	severity := protocol.DiagnosticSeverityError
-// 	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-// 		URI: textDocument.URI,
-// 		Diagnostics: []protocol.Diagnostic{
-// 			{
-// 				Range:    protocol.Range{Start: protocol.Position{Line: 0, Character: 0}, End: protocol.Position{Line: 0, Character: 5}},
-// 				Severity: &severity,
-// 				Message:  "Demo diagnostic",
-// 			}},
-// 	})
-
-// }
+func publishDiagnostics(ctx *glsp.Context, uri protocol.URI) {
+	file := files.Lock()[uri]
+	defer files.Unlock()
+	if file == nil {
+		return
+	}
+	diagnostics := []protocol.Diagnostic{}
+	for _, err := range file.Errors {
+		diagnostics = append(diagnostics, protocol.Diagnostic{
+			Range:    file.ToProtocolRange(err.Range),
+			Severity: ptr(protocol.DiagnosticSeverityError),
+			Message:  err.Message,
+		})
+	}
+	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+		URI:         uri,
+		Diagnostics: diagnostics,
+	})
+}
 
 func getInnermostNode(n ast.Node, pos token.Pos) ast.Node {
 	var node ast.Node
@@ -211,22 +217,8 @@ func getInnermostNode(n ast.Node, pos token.Pos) ast.Node {
 	return node
 }
 
-func toProtocolRange(file *ast.File, node ast.Node) protocol.Range {
-	return protocol.Range{
-		Start: file.ToProtocolPos(node.Pos()),
-		End:   file.ToProtocolPos(node.End()),
-	}
-}
-
 func parseFile(ctx *glsp.Context, filename, src string) {
-	p := parser.New(lexer.New(src))
-	file := p.ParseFile()
-	if len(p.Errors()) > 0 {
-		logToEditor(ctx, "Errors parsing %s:", filename)
-		for _, err := range p.Errors() {
-			logToEditor(ctx, "%s", err)
-		}
-	}
+	file := parser.New(src).ParseFile()
 	files.Lock()[filename] = &file
 	files.Unlock()
 }

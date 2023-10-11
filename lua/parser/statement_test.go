@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/stretchr/testify/require"
 )
 
@@ -162,8 +161,7 @@ func TestWhileStatement(t *testing.T) {
 }
 
 func testStatement[T any](t *testing.T, input string, tester func(T)) {
-	l := lexer.New(input)
-	p := New(l)
+	p := New(input)
 	stmt := p.parseStatement()
 	checkParserErrors(t, p)
 	tester(requireTypeConversion[T](t, stmt))
