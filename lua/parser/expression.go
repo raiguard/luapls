@@ -52,7 +52,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	for isBinaryOperator(p.tok.Type) {
 		tokPrecedence := p.tokPrecedence()
 		if isRightAssociative(p.tok.Type) {
-			tokPrecedence += 1
+			tokPrecedence++
 		}
 		if precedence >= tokPrecedence {
 			break

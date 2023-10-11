@@ -94,6 +94,8 @@ type Token struct {
 
 type Pos = int
 
+var InvalidPos = Pos(-1)
+
 func (t Token) End() int {
 	return t.Pos + len(t.Literal)
 }

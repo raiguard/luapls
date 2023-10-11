@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/raiguard/luapls/lua/token"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type Node interface {
@@ -17,6 +18,47 @@ type File struct {
 	Block      Block
 	LineBreaks []int
 	// TODO: Global exports, etc.
+}
+
+func (f *File) toPos(position protocol.Position) token.Pos {
+	line := int(position.Line)
+	col := int(position.Character)
+	if line > len(f.LineBreaks) {
+		return token.InvalidPos
+	}
+	lineStart := 0
+	if line > 0 {
+		lineStart = f.LineBreaks[line-1] + 1
+	}
+	lineEnd := f.LineBreaks[line]
+	if col > lineEnd-lineStart {
+		return token.InvalidPos
+	}
+	return lineStart + col
+}
+
+func (f *File) toProtocolPos(pos token.Pos) protocol.Position {
+	if len(f.LineBreaks) == 0 {
+		return protocol.Position{
+			Line:      0,
+			Character: uint32(pos),
+		}
+	}
+	line := 0
+	lineStart := 0
+	lineEnd := -1
+	for i := 0; i < len(f.LineBreaks); i++ {
+		lineStart = lineEnd + 1
+		lineEnd = f.LineBreaks[i]
+		if lineStart <= pos && lineEnd >= pos {
+			line = i
+			break
+		}
+	}
+	return protocol.Position{
+		Line:      uint32(line),
+		Character: uint32(pos - lineStart),
+	}
 }
 
 type Block struct {

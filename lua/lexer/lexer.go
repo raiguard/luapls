@@ -168,7 +168,7 @@ func (l *Lexer) GetLineBreaks() []int {
 }
 
 func (l *Lexer) readChar() {
-	l.pos += 1
+	l.pos++
 	if l.pos >= len(l.input) {
 		l.char = 0
 		return
@@ -296,7 +296,7 @@ func (l *Lexer) readRawString() bool {
 	level := 0
 	l.readChar()
 	for l.char == '=' {
-		level += 1
+		level++
 		l.readChar()
 	}
 	if l.char != '[' {
@@ -312,7 +312,7 @@ func (l *Lexer) readRawString() bool {
 		thisLevel := 0
 		l.readChar()
 		for l.char == '=' {
-			thisLevel += 1
+			thisLevel++
 			l.readChar()
 		}
 		if l.char != ']' {
