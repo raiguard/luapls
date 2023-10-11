@@ -58,12 +58,7 @@ func parseFile(filename string, printJson bool) {
 	l := lexer.New(string(src))
 	p := parser.New(l)
 	file := p.ParseFile()
-	if !printJson {
-		fmt.Printf("Time taken: %s\n", time.Since(before))
-		for _, err := range p.Errors() {
-			fmt.Println(err)
-		}
-	}
+	after := time.Now()
 	if printJson {
 		bytes, err := json.MarshalIndent(file, "", "  ")
 		if err != nil {
@@ -71,10 +66,15 @@ func parseFile(filename string, printJson bool) {
 		}
 		fmt.Println(string(bytes))
 	} else {
-		fmt.Println(file.String())
 		ast.Walk(&file, func(n ast.Node) bool {
 			fmt.Printf("%T: {%d, %d}\n", n, n.Pos(), n.End())
 			return true
 		})
+	}
+	if !printJson {
+		fmt.Printf("Time taken: %s\n", after.Sub(before))
+		for _, err := range p.Errors() {
+			fmt.Println(err)
+		}
 	}
 }
