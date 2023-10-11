@@ -50,7 +50,17 @@ func ptr[T any](value T) *T {
 	return &inner
 }
 
+var reserved []protocol.CompletionItem
+
 func Run() {
+	reserved = []protocol.CompletionItem{}
+	for literal := range token.Reserved {
+		reserved = append(reserved, protocol.CompletionItem{
+			Label: literal,
+			Kind:  ptr(protocol.CompletionItemKindKeyword),
+		})
+	}
+
 	handler.Initialize = initialize
 	handler.Initialized = initialized
 	handler.Shutdown = shutdown
@@ -59,6 +69,7 @@ func Run() {
 	handler.TextDocumentDidChange = textDocumentDidChange
 	handler.TextDocumentDocumentHighlight = textDocumentHighlight
 	handler.TextDocumentHover = textDocumentHover
+	handler.TextDocumentCompletion = textDocumentCompletion
 
 	server := server.NewServer(&handler, lsName, true)
 
@@ -168,6 +179,10 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 		),
 		Range: ptr(toProtocolRange(file, node)),
 	}, nil
+}
+
+func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
+	return reserved, nil
 }
 
 // func publishDiagnostics(ctx *glsp.Context, textDocument *protocol.TextDocumentIdentifier) {
