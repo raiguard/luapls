@@ -44,6 +44,12 @@ var files = Mutex[map[string]*ast.File]{
 }
 var rootPath string = ""
 
+// ptr returns a pointer to the given value.
+func ptr[T any](value T) *T {
+	inner := value
+	return &inner
+}
+
 func Run() {
 	handler.Initialize = initialize
 	handler.Initialized = initialized
@@ -148,7 +154,6 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 	if node == nil {
 		return nil, nil
 	}
-	rng := toProtocolRange(file, node)
 	return &protocol.Hover{
 		Contents: fmt.Sprintf(
 			"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`\n\n```lua\n%+v\n```",
@@ -161,7 +166,7 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 			node.End(),
 			node,
 		),
-		Range: &rng,
+		Range: ptr(toProtocolRange(file, node)),
 	}, nil
 }
 
