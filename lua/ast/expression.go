@@ -106,6 +106,10 @@ func (ue *UnaryExpression) End() token.Pos {
 
 // Literals (also expressions)
 
+type LeafNode interface {
+	leaf()
+}
+
 type BooleanLiteral struct {
 	Value    bool
 	StartPos token.Pos
@@ -121,6 +125,7 @@ func (bl *BooleanLiteral) Pos() token.Pos {
 func (bl *BooleanLiteral) End() token.Pos {
 	return bl.StartPos + len(bl.String())
 }
+func (bl *BooleanLiteral) leaf() {}
 
 type Identifier struct {
 	Literal  string
@@ -135,6 +140,7 @@ func (i *Identifier) Pos() token.Pos {
 func (i *Identifier) End() token.Pos {
 	return i.StartPos + len(i.String())
 }
+func (i *Identifier) leaf() {}
 
 type NumberLiteral struct {
 	Literal  string
@@ -150,6 +156,7 @@ func (nl *NumberLiteral) Pos() token.Pos {
 func (nl *NumberLiteral) End() token.Pos {
 	return nl.StartPos + len(nl.String())
 }
+func (nl *NumberLiteral) leaf() {}
 
 type StringLiteral struct {
 	Value    string
@@ -165,6 +172,7 @@ func (sl *StringLiteral) Pos() token.Pos {
 func (sl *StringLiteral) End() token.Pos {
 	return sl.StartPos + len(sl.String())
 }
+func (sl *StringLiteral) leaf() {}
 
 type TableLiteral struct {
 	Fields   []*TableField
@@ -193,3 +201,4 @@ func (va *Vararg) Pos() token.Pos {
 func (va *Vararg) End() token.Pos {
 	return va.StartPos + len(token.VARARG.String())
 }
+func (va *Vararg) leaf() {}
