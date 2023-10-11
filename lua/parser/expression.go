@@ -268,7 +268,7 @@ func (p *Parser) parseTableField() *ast.TableField {
 	}
 	// If key is in brackets, value is required
 	if !needClosingBracket && (tableSep[p.tok.Type] || p.tokIs(token.RBRACE)) {
-		return &ast.TableField{Value: leftExp}
+		return &ast.TableField{Value: leftExp, StartPos: leftExp.Pos()}
 	}
 	p.expect(token.ASSIGN)
 	rightExp := p.parseExpression(LOWEST, true)
