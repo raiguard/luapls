@@ -37,8 +37,8 @@ func (m *Mutex[T]) Unlock() {
 	m.mu.Unlock()
 }
 
-var files = Mutex[map[string]ast.Block]{
-	inner: map[string]ast.Block{},
+var files = Mutex[map[string]ast.File]{
+	inner: map[string]ast.File{},
 	mu:    sync.Mutex{},
 }
 var rootPath string = ""
@@ -122,14 +122,14 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 
 func parseFile(ctx *glsp.Context, filename, src string) {
 	p := parser.New(lexer.New(src))
-	block := p.ParseBlock()
+	file := p.ParseFile()
 	if len(p.Errors()) > 0 {
 		logToEditor(ctx, "Errors parsing %s:", filename)
 		for _, err := range p.Errors() {
 			logToEditor(ctx, "%s", err)
 		}
 	}
-	files.Lock()[filename] = block
+	files.Lock()[filename] = file
 	files.Unlock()
 }
 

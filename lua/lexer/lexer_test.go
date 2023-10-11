@@ -1,10 +1,13 @@
 package lexer
 
 import (
-	"github.com/raiguard/luapls/lua/token"
+	"slices"
 	"testing"
 
+	"github.com/raiguard/luapls/lua/token"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOperators(t *testing.T) {
@@ -89,13 +92,19 @@ func TestStrings(t *testing.T) {
 func TestRawStrings(t *testing.T) {
 	input := `[====[asdkflasdkfjs]===]
   19"38'44'"al]====]
-[===[[[==[=]]==]====][=[]=]===]`
+[===[[[==[=]]==]====][=[]=]===]
+`
 	tokens := []token.Token{
 		{Type: token.RAWSTRING, Literal: "[====[asdkflasdkfjs]===]\n  19\"38'44'\"al]====]", Pos: 0},
 		{Type: token.RAWSTRING, Literal: "[===[[[==[=]]==]====][=[]=]===]", Pos: 46},
-		{Type: token.EOF, Literal: "", Pos: 77},
+		{Type: token.EOF, Literal: "", Pos: 78},
 	}
 	testLexer(t, input, tokens)
+
+	l := New(input)
+	for l.NextToken().Type != token.EOF {
+	}
+	require.Equal(t, 0, slices.Compare(l.GetLineBreaks(), []int{24, 45, 77}))
 }
 
 func TestLabel(t *testing.T) {

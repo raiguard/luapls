@@ -45,6 +45,7 @@ func lexFile(filename string) {
 		}
 		fmt.Println(tok.String())
 	}
+	fmt.Println(l.GetLineBreaks())
 }
 
 func parseFile(filename string, printJson bool) {

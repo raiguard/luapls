@@ -163,6 +163,10 @@ func (l *Lexer) NextToken() token.Token {
 	}
 }
 
+func (l *Lexer) GetLineBreaks() []int {
+	return l.lineBreaks
+}
+
 func (l *Lexer) readChar() {
 	l.pos += 1
 	if l.pos >= len(l.input) {

@@ -43,6 +43,13 @@ func (p *Parser) next() {
 	}
 }
 
+func (p *Parser) ParseFile() ast.File {
+	return ast.File{
+		Block:      p.ParseBlock(),
+		LineBreaks: p.lexer.GetLineBreaks(),
+	}
+}
+
 func (p *Parser) ParseBlock() ast.Block {
 	block := ast.Block{
 		Stmts:    []ast.Statement{},

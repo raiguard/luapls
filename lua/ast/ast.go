@@ -13,6 +13,12 @@ type Node interface {
 	End() token.Pos
 }
 
+type File struct {
+	Block      Block
+	LineBreaks []int
+	// TODO: Global exports, etc.
+}
+
 type Block struct {
 	Stmts    []Statement
 	StartPos token.Pos
