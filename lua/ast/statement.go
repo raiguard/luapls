@@ -23,7 +23,7 @@ func (as *AssignmentStatement) Pos() token.Pos {
 	return as.Vars[0].Pos()
 }
 func (as *AssignmentStatement) End() token.Pos {
-	return as.Exps[len(as.Exps)-1].Pos()
+	return as.Exps[len(as.Exps)-1].End()
 }
 
 type BreakStatement struct {
