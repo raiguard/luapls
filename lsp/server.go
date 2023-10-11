@@ -52,6 +52,7 @@ func Run() {
 	handler.TextDocumentDidOpen = textDocumentDidOpen
 	handler.TextDocumentDidChange = textDocumentDidChange
 	handler.TextDocumentDocumentHighlight = textDocumentHighlight
+	handler.TextDocumentHover = textDocumentHover
 
 	server := server.NewServer(&handler, lsName, true)
 
@@ -134,6 +135,23 @@ func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlight
 	}
 	return []protocol.DocumentHighlight{
 		{Range: toProtocolRange(file, node)},
+	}, nil
+}
+
+func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+	file := files.Lock()[params.TextDocument.URI]
+	defer files.Unlock()
+	if file == nil {
+		return nil, nil
+	}
+	node := getInnermostNode(file, file.ToPos(params.Position))
+	if node == nil {
+		return nil, nil
+	}
+	rng := toProtocolRange(file, node)
+	return &protocol.Hover{
+		Contents: fmt.Sprintf("```lua\n%+v\n```", node),
+		Range:    &rng,
 	}, nil
 }
 
