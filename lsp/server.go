@@ -165,6 +165,20 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 	}, nil
 }
 
+// func publishDiagnostics(ctx *glsp.Context, textDocument *protocol.TextDocumentIdentifier) {
+// 	severity := protocol.DiagnosticSeverityError
+// 	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+// 		URI: textDocument.URI,
+// 		Diagnostics: []protocol.Diagnostic{
+// 			{
+// 				Range:    protocol.Range{Start: protocol.Position{Line: 0, Character: 0}, End: protocol.Position{Line: 0, Character: 5}},
+// 				Severity: &severity,
+// 				Message:  "Demo diagnostic",
+// 			}},
+// 	})
+
+// }
+
 func getInnermostNode(n ast.Node, pos token.Pos) ast.Node {
 	var node ast.Node
 	ast.Walk(n, func(n ast.Node) bool {
