@@ -20,7 +20,7 @@ type File struct {
 	// TODO: Global exports, etc.
 }
 
-func (f *File) toPos(position protocol.Position) token.Pos {
+func (f *File) ToPos(position protocol.Position) token.Pos {
 	line := int(position.Line)
 	col := int(position.Character)
 	if line > len(f.LineBreaks) {
@@ -37,7 +37,7 @@ func (f *File) toPos(position protocol.Position) token.Pos {
 	return lineStart + col
 }
 
-func (f *File) toProtocolPos(pos token.Pos) protocol.Position {
+func (f *File) ToProtocolPos(pos token.Pos) protocol.Position {
 	if len(f.LineBreaks) == 0 {
 		return protocol.Position{
 			Line:      0,

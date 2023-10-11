@@ -37,8 +37,8 @@ func (m *Mutex[T]) Unlock() {
 	m.mu.Unlock()
 }
 
-var files = Mutex[map[string]ast.File]{
-	inner: map[string]ast.File{},
+var files = Mutex[map[string]*ast.File]{
+	inner: map[string]*ast.File{},
 	mu:    sync.Mutex{},
 }
 var rootPath string = ""
@@ -50,6 +50,7 @@ func Run() {
 	handler.SetTrace = setTrace
 	handler.TextDocumentDidOpen = textDocumentDidOpen
 	handler.TextDocumentDidChange = textDocumentDidChange
+	handler.TextDocumentDocumentHighlight = textDocumentHighlight
 
 	server := server.NewServer(&handler, lsName, true)
 
@@ -120,6 +121,31 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 	return nil
 }
 
+func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
+	file := files.Lock()[params.TextDocument.URI]
+	defer files.Unlock()
+	if file == nil {
+		return nil, nil
+	}
+	pos := file.ToPos(params.Position)
+	for _, stmt := range file.Block.Stmts {
+		if stmt.Pos() <= pos && pos < stmt.End() {
+			kind := protocol.DocumentHighlightKindText
+			return []protocol.DocumentHighlight{
+				{Kind: &kind, Range: toProtocolRange(file, stmt)},
+			}, nil
+		}
+	}
+	return nil, nil
+}
+
+func toProtocolRange(file *ast.File, node ast.Node) protocol.Range {
+	return protocol.Range{
+		Start: file.ToProtocolPos(node.Pos()),
+		End:   file.ToProtocolPos(node.End()),
+	}
+}
+
 func parseFile(ctx *glsp.Context, filename, src string) {
 	p := parser.New(lexer.New(src))
 	file := p.ParseFile()
@@ -129,7 +155,7 @@ func parseFile(ctx *glsp.Context, filename, src string) {
 			logToEditor(ctx, "%s", err)
 		}
 	}
-	files.Lock()[filename] = file
+	files.Lock()[filename] = &file
 	files.Unlock()
 }
 
