@@ -17,7 +17,7 @@ func TestOperators(t *testing.T) {
 		{Type: token.MINUS, Literal: "-", Pos: 1},
 		{Type: token.PLUS, Literal: "+", Pos: 2},
 		{Type: token.PLUS, Literal: "+", Pos: 3},
-		{Type: token.PERCENT, Literal: "%", Pos: 4},
+		{Type: token.MOD, Literal: "%", Pos: 4},
 		{Type: token.POW, Literal: "^", Pos: 5},
 		{Type: token.ASSIGN, Literal: "=", Pos: 6},
 		{Type: token.SLASH, Literal: "/", Pos: 7},

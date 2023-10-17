@@ -31,7 +31,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	case token.VARARG:
 		left = p.parseVararg()
 	default:
-		p.addError(fmt.Sprintf("Unable to parse unary expression for token: %s", p.tok.String()))
+		p.addError(fmt.Sprintf("Expected expression, got %s", token.TokenStr[p.tok.Type]))
 		p.next()
 		return nil
 	}
@@ -318,9 +318,9 @@ var precedences = map[token.TokenType]operatorPrecedence{
 	token.CONCAT:  CONCAT,
 	token.PLUS:    SUM,
 	token.MINUS:   SUM,
-	token.STAR:    PRODUCT,
+	token.MUL:    PRODUCT,
 	token.SLASH:   PRODUCT,
-	token.PERCENT: PRODUCT,
+	token.MOD: PRODUCT,
 	token.NOT:     UNARY,
 	token.LEN:     UNARY,
 	token.POW:     POW,
@@ -337,11 +337,11 @@ var binaryOperators = map[token.TokenType]bool{
 	token.MINUS:   true,
 	token.NEQ:     true,
 	token.OR:      true,
-	token.PERCENT: true,
+	token.MOD: true,
 	token.PLUS:    true,
 	token.POW:     true,
 	token.SLASH:   true,
-	token.STAR:    true,
+	token.MUL:    true,
 }
 
 func isBinaryOperator(tok token.TokenType) bool {

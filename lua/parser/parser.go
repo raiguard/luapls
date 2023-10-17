@@ -2,6 +2,8 @@
 // heavily based on "Writing an Interpreter in Go" by Thorston Ball.
 // https://interpreterbook.com/
 
+// Error recovery: https://supunsetunga.medium.com/writing-a-parser-syntax-error-handling-b71b67a8ac66
+
 package parser
 
 import (
@@ -111,14 +113,14 @@ func (p *Parser) expect(tokenType token.TokenType) token.Token {
 
 func (p *Parser) expectedTokenError(expected token.TokenType) {
 	p.addError(
-		fmt.Sprintf("Expected '%s', got '%s'",
+		fmt.Sprintf("Expected %s, got %s",
 			token.TokenStr[expected],
 			token.TokenStr[p.tok.Type]),
 	)
 }
 
 func (p *Parser) invalidTokenError() {
-	p.addError(fmt.Sprintf("Unexpected '%s'", token.TokenStr[p.tok.Type]))
+	p.addError(fmt.Sprintf("Unexpected %s", token.TokenStr[p.tok.Type]))
 }
 
 func (p *Parser) addError(message string) {

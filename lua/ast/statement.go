@@ -67,9 +67,15 @@ func (es *ExpressionStatement) String() string {
 	return fmt.Sprintf("%s", es.Exp.String())
 }
 func (es *ExpressionStatement) Pos() token.Pos {
+	if es.Exp == nil {
+		return token.InvalidPos
+	}
 	return es.Exp.Pos()
 }
 func (es *ExpressionStatement) End() token.Pos {
+	if es.Exp == nil {
+		return token.InvalidPos
+	}
 	return es.Exp.End()
 }
 

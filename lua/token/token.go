@@ -57,10 +57,10 @@ const (
 	NEQ
 	NOT
 	OR
-	PERCENT
+	MOD
 	PLUS
 	SLASH
-	STAR
+	MUL
 
 	// Structure
 	LPAREN
@@ -144,39 +144,39 @@ var TokenStr = map[TokenType]string{
 	TRUE:      "true",
 
 	// Operators
-	AND:     "and",
-	ASSIGN:  "=",
-	POW:     "^",
-	EQUAL:   "==",
-	GEQ:     ">=",
-	GT:      ">",
-	LEN:     "#",
-	LEQ:     "<=",
-	LT:      "<",
-	MINUS:   "-",
-	NEQ:     "~=",
-	NOT:     "not",
-	OR:      "or",
-	PERCENT: "%",
-	PLUS:    "+",
-	SLASH:   "/",
-	STAR:    "*",
+	AND:    "and",
+	ASSIGN: "assign",
+	POW:    "pow",
+	EQUAL:  "equal",
+	GEQ:    "geq",
+	GT:     "gt",
+	LEN:    "len",
+	LEQ:    "leq",
+	LT:     "lt",
+	MINUS:  "minus",
+	NEQ:    "neq",
+	NOT:    "not",
+	OR:     "or",
+	MOD:    "mod",
+	PLUS:   "plus",
+	SLASH:  "slash",
+	MUL:    "mul",
 
 	// Structure
-	LPAREN: "(",
-	RPAREN: ")",
-	LBRACK: "[",
-	RBRACK: "]",
-	LBRACE: "{",
-	RBRACE: "}",
+	LPAREN: "left paren",
+	RPAREN: "right paren",
+	LBRACK: "left bracket",
+	RBRACK: "right bracket",
+	LBRACE: "left brace",
+	RBRACE: "right brace",
 
 	// Grammar
-	COLON:     ":",
-	COMMA:     ",",
-	CONCAT:    "..",
-	DOT:       ".",
-	SEMICOLON: ";",
-	VARARG:    "...",
+	COLON:     "colon",
+	COMMA:     "comma",
+	CONCAT:    "concat",
+	DOT:       "dot",
+	SEMICOLON: "semicolon",
+	VARARG:    "vararg",
 }
 
 var Reserved = map[string]TokenType{

@@ -68,7 +68,7 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case '%':
 		l.readChar()
-		tok = token.PERCENT
+		tok = token.MOD
 	case '+':
 		l.readChar()
 		tok = token.PLUS
@@ -77,7 +77,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.SLASH
 	case '*':
 		l.readChar()
-		tok = token.STAR
+		tok = token.MUL
 	case '~':
 		l.readChar()
 		if l.char == '=' {
