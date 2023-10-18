@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/tliron/glsp"
@@ -17,8 +18,10 @@ func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocument
 func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
+			before := time.Now()
 			parseFile(ctx, params.TextDocument.URI, change.Text)
 			publishDiagnostics(ctx, params.TextDocument.URI)
+			logToEditor(ctx, fmt.Sprint("Reparse duration:", time.Since(before).String()))
 		}
 	}
 	return nil
