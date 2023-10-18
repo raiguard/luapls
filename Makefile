@@ -1,3 +1,6 @@
+PREFIX = $(DESTDIR)/usr/local
+BINDIR = $(PREFIX)/bin
+
 all: luapls
 
 luapls:
@@ -9,4 +12,10 @@ clean:
 test: *.go
 	@go test ./...
 
-.PHONY: clean luapls test
+install:
+	install -Dpm 0755 luapls $(BINDIR)/luapls
+
+uninstall:
+	rm -f $(BINDIR)/luapls
+
+.PHONY: clean luapls test install uninstall
