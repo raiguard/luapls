@@ -11,23 +11,6 @@ type Expression interface {
 	expressionNode()
 }
 
-type BinaryExpression struct {
-	Left     Expression
-	Operator token.TokenType
-	Right    Expression
-}
-
-func (be *BinaryExpression) expressionNode() {}
-func (be *BinaryExpression) String() string {
-	return fmt.Sprintf("(%s %s %s)", be.Left.String(), be.Operator.String(), be.Right.String())
-}
-func (be *BinaryExpression) Pos() token.Pos {
-	return be.Left.Pos()
-}
-func (be *BinaryExpression) End() token.Pos {
-	return be.Right.End()
-}
-
 type FunctionCall struct {
 	Left   Expression
 	Args   []Expression
@@ -87,21 +70,38 @@ func (ie *IndexExpression) End() token.Pos {
 	return ie.EndPos
 }
 
-type UnaryExpression struct {
+type InfixExpression struct {
+	Left     Expression
+	Operator token.TokenType
+	Right    Expression
+}
+
+func (be *InfixExpression) expressionNode() {}
+func (be *InfixExpression) String() string {
+	return fmt.Sprintf("(%s %s %s)", be.Left.String(), be.Operator.String(), be.Right.String())
+}
+func (be *InfixExpression) Pos() token.Pos {
+	return be.Left.Pos()
+}
+func (be *InfixExpression) End() token.Pos {
+	return be.Right.End()
+}
+
+type PrefixExpression struct {
 	Operator token.TokenType
 	Right    Expression
 	StartPos token.Pos `json:"-"`
 }
 
-func (ue *UnaryExpression) expressionNode() {}
-func (ue *UnaryExpression) String() string {
-	return fmt.Sprintf("(%s%s)", ue.Operator, ue.Right.String())
+func (pe *PrefixExpression) expressionNode() {}
+func (pe *PrefixExpression) String() string {
+	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
 }
-func (ue *UnaryExpression) Pos() token.Pos {
-	return ue.StartPos
+func (pe *PrefixExpression) Pos() token.Pos {
+	return pe.StartPos
 }
-func (ue *UnaryExpression) End() token.Pos {
-	return ue.Right.End()
+func (pe *PrefixExpression) End() token.Pos {
+	return pe.Right.End()
 }
 
 // Literals (also expressions)

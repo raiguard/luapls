@@ -29,13 +29,13 @@ func TestInfixExpression(t *testing.T) {
 		exp := p.parseExpression(LOWEST, true)
 		checkParserErrors(t, p)
 
-		binaryExp := requireTypeConversion[ast.BinaryExpression](t, exp)
+		infixExp := requireTypeConversion[ast.InfixExpression](t, exp)
 
-		testNumberLiteral(t, binaryExp.Left, tt.leftValue)
+		testNumberLiteral(t, infixExp.Left, tt.leftValue)
 
-		require.Equal(t, tt.operator, binaryExp.Operator.String())
+		require.Equal(t, tt.operator, infixExp.Operator.String())
 
-		testNumberLiteral(t, binaryExp.Right, tt.rightValue)
+		testNumberLiteral(t, infixExp.Right, tt.rightValue)
 	}
 }
 

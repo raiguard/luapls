@@ -19,7 +19,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	case token.LBRACE:
 		left = p.parseTableLiteral()
 	case token.LEN, token.MINUS, token.NOT:
-		left = p.parseUnaryExpression()
+		left = p.parsePrefixExpression()
 	case token.LPAREN:
 		left = p.parseSurroundingExpression()
 	case token.NUMBER:
@@ -48,7 +48,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		}
 	}
 
-	for isBinaryOperator(p.tok.Type) {
+	for isInfixOperator(p.tok.Type) {
 		tokPrecedence := p.tokPrecedence()
 		if isRightAssociative(p.tok.Type) {
 			tokPrecedence++
@@ -56,7 +56,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		if precedence >= tokPrecedence {
 			break
 		}
-		left = p.parseBinaryExpression(left)
+		left = p.parseInfixExpression(left)
 	}
 
 	return left
@@ -101,20 +101,6 @@ func (p *Parser) parseParameterList() ([]*ast.Identifier, bool) {
 		p.next()
 	}
 	return names, vararg
-}
-
-func (p *Parser) parseBinaryExpression(left ast.Expression) *ast.BinaryExpression {
-	expression := &ast.BinaryExpression{
-		Left:     left,
-		Operator: p.tok.Type,
-		Right:    nil,
-	}
-
-	precedence := p.tokPrecedence()
-	p.next()
-	expression.Right = p.parseExpression(precedence, true)
-
-	return expression
 }
 
 func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
@@ -165,6 +151,20 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 	}
 }
 
+func (p *Parser) parseInfixExpression(left ast.Expression) *ast.InfixExpression {
+	expression := &ast.InfixExpression{
+		Left:     left,
+		Operator: p.tok.Type,
+		Right:    nil,
+	}
+
+	precedence := p.tokPrecedence()
+	p.next()
+	expression.Right = p.parseExpression(precedence, true)
+
+	return expression
+}
+
 func (p *Parser) parseSurroundingExpression() ast.Expression {
 	p.expect(token.LPAREN)
 	exp := p.parseExpression(LOWEST, true)
@@ -172,12 +172,12 @@ func (p *Parser) parseSurroundingExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseUnaryExpression() *ast.UnaryExpression {
+func (p *Parser) parsePrefixExpression() *ast.PrefixExpression {
 	operator := p.tok.Type
 	pos := p.tok.Pos
 	p.next()
-	right := p.parseExpression(UNARY, true)
-	return &ast.UnaryExpression{Operator: operator, Right: right, StartPos: pos}
+	right := p.parseExpression(PREFIX, true)
+	return &ast.PrefixExpression{Operator: operator, Right: right, StartPos: pos}
 }
 
 func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
@@ -289,7 +289,7 @@ var tableSep = map[token.TokenType]bool{
 	token.SEMICOLON: true,
 }
 
-type unaryParseFn func() ast.Expression
+type prefixParseFn func() ast.Expression
 
 type operatorPrecedence int
 
@@ -302,50 +302,50 @@ const (
 	CONCAT
 	SUM
 	PRODUCT
-	UNARY
+	PREFIX
 	POW
 )
 
 var precedences = map[token.TokenType]operatorPrecedence{
-	token.OR:      OR,
-	token.AND:     AND,
-	token.LT:      CMP,
-	token.GT:      CMP,
-	token.LEQ:     CMP,
-	token.GEQ:     CMP,
-	token.NEQ:     CMP,
-	token.EQUAL:   CMP,
-	token.CONCAT:  CONCAT,
-	token.PLUS:    SUM,
-	token.MINUS:   SUM,
+	token.OR:     OR,
+	token.AND:    AND,
+	token.LT:     CMP,
+	token.GT:     CMP,
+	token.LEQ:    CMP,
+	token.GEQ:    CMP,
+	token.NEQ:    CMP,
+	token.EQUAL:  CMP,
+	token.CONCAT: CONCAT,
+	token.PLUS:   SUM,
+	token.MINUS:  SUM,
 	token.MUL:    PRODUCT,
-	token.SLASH:   PRODUCT,
-	token.MOD: PRODUCT,
-	token.NOT:     UNARY,
-	token.LEN:     UNARY,
-	token.POW:     POW,
+	token.SLASH:  PRODUCT,
+	token.MOD:    PRODUCT,
+	token.NOT:    PREFIX,
+	token.LEN:    PREFIX,
+	token.POW:    POW,
 }
 
-var binaryOperators = map[token.TokenType]bool{
-	token.AND:     true,
-	token.CONCAT:  true,
-	token.EQUAL:   true,
-	token.GEQ:     true,
-	token.GT:      true,
-	token.LEQ:     true,
-	token.LT:      true,
-	token.MINUS:   true,
-	token.NEQ:     true,
-	token.OR:      true,
-	token.MOD: true,
-	token.PLUS:    true,
-	token.POW:     true,
-	token.SLASH:   true,
+var infixOperators = map[token.TokenType]bool{
+	token.AND:    true,
+	token.CONCAT: true,
+	token.EQUAL:  true,
+	token.GEQ:    true,
+	token.GT:     true,
+	token.LEQ:    true,
+	token.LT:     true,
+	token.MINUS:  true,
+	token.NEQ:    true,
+	token.OR:     true,
+	token.MOD:    true,
+	token.PLUS:   true,
+	token.POW:    true,
+	token.SLASH:  true,
 	token.MUL:    true,
 }
 
-func isBinaryOperator(tok token.TokenType) bool {
-	return binaryOperators[tok]
+func isInfixOperator(tok token.TokenType) bool {
+	return infixOperators[tok]
 }
 
 func isRightAssociative(tok token.TokenType) bool {

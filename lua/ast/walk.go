@@ -18,10 +18,6 @@ func Walk(n Node, v Visitor) {
 		WalkList(n.(*AssignmentStatement).Vars, v)
 		WalkList(n.(*AssignmentStatement).Exps, v)
 
-	case *BinaryExpression:
-		Walk(n.(*BinaryExpression).Left, v)
-		Walk(n.(*BinaryExpression).Right, v)
-
 	case *Block:
 		WalkList(n.(*Block).Stmts, v)
 
@@ -78,6 +74,10 @@ func Walk(n Node, v Visitor) {
 		Walk(n.(*IndexExpression).Left, v)
 		Walk(n.(*IndexExpression).Inner, v)
 
+	case *InfixExpression:
+		Walk(n.(*InfixExpression).Left, v)
+		Walk(n.(*InfixExpression).Right, v)
+
 	case *LabelStatement:
 		// Leaf
 
@@ -87,6 +87,9 @@ func Walk(n Node, v Visitor) {
 
 	case *NumberLiteral:
 		// Leaf
+
+	case *PrefixExpression:
+		Walk(n.(*PrefixExpression).Right, v)
 
 	case *RepeatStatement:
 		Walk(&n.(*RepeatStatement).Body, v)
@@ -104,9 +107,6 @@ func Walk(n Node, v Visitor) {
 
 	case *TableLiteral:
 		WalkList(n.(*TableLiteral).Fields, v)
-
-	case *UnaryExpression:
-		Walk(n.(*UnaryExpression).Right, v)
 
 	case *Vararg:
 		// Leaf

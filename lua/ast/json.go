@@ -19,19 +19,6 @@ func (node *AssignmentStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (node *BinaryExpression) MarshalJSON() ([]byte, error) {
-	type Alias BinaryExpression
-	return json.Marshal(&struct {
-		NodeKind string
-		Range    token.Range
-		*Alias
-	}{
-		NodeKind: "BinaryExpression",
-		Range:    token.Range{node.Pos(), node.End()},
-		Alias:    (*Alias)(node),
-	})
-}
-
 // If we use a pointer receiver then it doesn't do it on the parser.File object
 func (node Block) MarshalJSON() ([]byte, error) {
 	type Alias Block
@@ -241,6 +228,19 @@ func (node *IndexExpression) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (node *InfixExpression) MarshalJSON() ([]byte, error) {
+	type Alias InfixExpression
+	return json.Marshal(&struct {
+		NodeKind string
+		Range    token.Range
+		*Alias
+	}{
+		NodeKind: "InfixExpression",
+		Range:    token.Range{node.Pos(), node.End()},
+		Alias:    (*Alias)(node),
+	})
+}
+
 func (node *LabelStatement) MarshalJSON() ([]byte, error) {
 	type Alias LabelStatement
 	return json.Marshal(&struct {
@@ -275,6 +275,19 @@ func (node *NumberLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		NodeKind: "NumberLiteral",
+		Range:    token.Range{node.Pos(), node.End()},
+		Alias:    (*Alias)(node),
+	})
+}
+
+func (node *PrefixExpression) MarshalJSON() ([]byte, error) {
+	type Alias PrefixExpression
+	return json.Marshal(&struct {
+		NodeKind string
+		Range    token.Range
+		*Alias
+	}{
+		NodeKind: "PrefixExpression",
 		Range:    token.Range{node.Pos(), node.End()},
 		Alias:    (*Alias)(node),
 	})
@@ -340,19 +353,6 @@ func (node *TableLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		NodeKind: "TableLiteral",
-		Range:    token.Range{node.Pos(), node.End()},
-		Alias:    (*Alias)(node),
-	})
-}
-
-func (node *UnaryExpression) MarshalJSON() ([]byte, error) {
-	type Alias UnaryExpression
-	return json.Marshal(&struct {
-		NodeKind string
-		Range    token.Range
-		*Alias
-	}{
-		NodeKind: "UnaryExpression",
 		Range:    token.Range{node.Pos(), node.End()},
 		Alias:    (*Alias)(node),
 	})
