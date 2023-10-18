@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/raiguard/luapls/lsp"
-	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
@@ -23,11 +22,19 @@ func main() {
 
 	switch task {
 	case "lex":
+		if len(args) < 2 {
+			fmt.Println("Did not provide a filename")
+			os.Exit(1)
+		}
 		lexFile(args[2])
 	case "lsp":
 		lsp.Run()
 	case "parse":
-		parseFile(args[2], len(args) > 3 && args[3] == "json")
+		if len(args) < 2 {
+			fmt.Println("Did not provide a filename")
+			os.Exit(1)
+		}
+		parseFile(args[2])
 	case "repl":
 		repl.Run()
 	}
@@ -49,29 +56,25 @@ func lexFile(filename string) {
 	fmt.Println(l.GetLineBreaks())
 }
 
-func parseFile(filename string, printJson bool) {
+func parseFile(filename string) {
 	before := time.Now()
 	src, err := os.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	p := parser.New(string(src))
 	file := p.ParseFile()
-	after := time.Now()
-	if printJson {
-		bytes, err := json.MarshalIndent(file, "", "  ")
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(string(bytes))
-	} else {
-		ast.Walk(&file.Block, func(n ast.Node) bool {
-			fmt.Printf("%T: {%d, %d}\n", n, n.Pos(), n.End())
-			return true
-		})
-		fmt.Printf("Time taken: %s\n", after.Sub(before))
-		for _, err := range p.Errors() {
-			fmt.Println(err)
-		}
+	bytes, err := json.MarshalIndent(struct {
+		Duration string
+		File     parser.File
+	}{
+		Duration: time.Since(before).String(),
+		File:     file,
+	}, "", "  ")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
+	fmt.Println(string(bytes))
 }
