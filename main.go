@@ -69,8 +69,6 @@ func parseFile(filename string, printJson bool) {
 			fmt.Printf("%T: {%d, %d}\n", n, n.Pos(), n.End())
 			return true
 		})
-	}
-	if !printJson {
 		fmt.Printf("Time taken: %s\n", after.Sub(before))
 		for _, err := range p.Errors() {
 			fmt.Println(err)
