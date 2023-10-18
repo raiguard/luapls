@@ -27,7 +27,7 @@ func (as *AssignmentStatement) End() token.Pos {
 }
 
 type BreakStatement struct {
-	StartPos token.Pos
+	StartPos token.Pos `json:"-"`
 }
 
 func (bs *BreakStatement) statementNode() {}
@@ -43,8 +43,8 @@ func (bs *BreakStatement) End() token.Pos {
 
 type DoStatement struct {
 	Body     Block
-	StartPos token.Pos
-	EndPos   token.Pos
+	StartPos token.Pos `json:"-"`
+	EndPos   token.Pos `json:"-"`
 }
 
 func (ds *DoStatement) statementNode() {}
@@ -85,8 +85,8 @@ type ForStatement struct {
 	Finish   Expression
 	Step     Expression
 	Body     Block
-	StartPos token.Pos
-	EndPos   token.Pos
+	StartPos token.Pos `json:"-"`
+	EndPos   token.Pos `json:"-"`
 }
 
 func (fs *ForStatement) statementNode() {}
@@ -121,8 +121,8 @@ type ForInStatement struct {
 	Names    []*Identifier
 	Exps     []Expression
 	Body     Block
-	StartPos token.Pos
-	EndPos   token.Pos
+	StartPos token.Pos `json:"-"`
+	EndPos   token.Pos `json:"-"`
 }
 
 func (fs *ForInStatement) statementNode() {}
@@ -142,8 +142,8 @@ type FunctionStatement struct {
 	Vararg   bool
 	Body     Block
 	IsLocal  bool
-	StartPos token.Pos
-	EndPos   token.Pos
+	StartPos token.Pos `json:"-"`
+	EndPos   token.Pos `json:"-"`
 }
 
 func (fs *FunctionStatement) statementNode() {}
@@ -169,7 +169,7 @@ func (fs *FunctionStatement) End() token.Pos {
 
 type GotoStatement struct {
 	Name     *Identifier
-	StartPos token.Pos
+	StartPos token.Pos `json:"-"`
 }
 
 func (gs *GotoStatement) statementNode() {}
@@ -186,7 +186,7 @@ func (gs *GotoStatement) End() token.Pos {
 type IfStatement struct {
 	Clauses  []*IfClause
 	StartPos token.Pos
-	EndPos   token.Pos
+	EndPos   token.Pos `json:"-"`
 }
 
 func (is *IfStatement) statementNode() {}
@@ -203,8 +203,8 @@ func (is *IfStatement) End() token.Pos {
 type IfClause struct {
 	Condition Expression
 	Body      Block
-	StartPos  token.Pos
-	EndPos    token.Pos
+	StartPos  token.Pos `json:"-"`
+	EndPos    token.Pos `json:"-"`
 }
 
 func (ic *IfClause) statementNode() {}
@@ -225,8 +225,8 @@ func (ic *IfClause) End() token.Pos {
 
 type LabelStatement struct {
 	Name     *Identifier
-	StartPos token.Pos
-	EndPos   token.Pos
+	StartPos token.Pos `json:"-"`
+	EndPos   token.Pos `json:"-"`
 }
 
 func (ls *LabelStatement) statementNode() {}
@@ -244,7 +244,7 @@ func (ls *LabelStatement) leaf() {}
 type LocalStatement struct {
 	Names    []*Identifier
 	Exps     []Expression
-	StartPos token.Pos
+	StartPos token.Pos `json:"-"`
 }
 
 func (ls *LocalStatement) statementNode() {}
@@ -264,7 +264,7 @@ func (ls *LocalStatement) End() token.Pos {
 type RepeatStatement struct {
 	Body      Block
 	Condition Expression
-	StartPos  token.Pos
+	StartPos  token.Pos `json:"-"`
 }
 
 func (rs *RepeatStatement) statementNode() {}
@@ -280,7 +280,7 @@ func (rs *RepeatStatement) End() token.Pos {
 
 type ReturnStatement struct {
 	Exps     []Expression
-	StartPos token.Pos
+	StartPos token.Pos `json:"-"`
 }
 
 func (rs *ReturnStatement) statementNode() {}
@@ -300,8 +300,8 @@ func (rs *ReturnStatement) End() token.Pos {
 type WhileStatement struct {
 	Condition Expression
 	Body      Block
-	StartPos  token.Pos
-	EndPos    token.Pos
+	StartPos  token.Pos `json:"-"`
+	EndPos    token.Pos `json:"-"`
 }
 
 func (ws *WhileStatement) statementNode() {}

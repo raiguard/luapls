@@ -19,7 +19,7 @@ func Range(n Node) token.Range {
 
 type Block struct {
 	Stmts    []Statement
-	StartPos token.Pos
+	StartPos token.Pos `json:"-"`
 }
 
 func (b *Block) String() string {
@@ -42,7 +42,7 @@ func (b *Block) End() token.Pos {
 type TableField struct {
 	Key      Expression
 	Value    Expression
-	StartPos token.Pos // Needed in case of bracketed keys
+	StartPos token.Pos `json:"-"` // Needed in case of bracketed keys
 }
 
 func (tf *TableField) String() string {
