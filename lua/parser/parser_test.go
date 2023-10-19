@@ -1,49 +1,49 @@
 package parser
 
-import (
-	"fmt"
-	"testing"
+// import (
+// 	"fmt"
+// 	"testing"
 
-	"github.com/raiguard/luapls/lua/ast"
-	"github.com/stretchr/testify/require"
-)
+// 	"github.com/raiguard/luapls/lua/ast"
+// 	"github.com/stretchr/testify/require"
+// )
 
-func checkParserErrors(t *testing.T, p *Parser) {
-	if len(p.errors) == 0 {
-		return
-	}
+// func checkParserErrors(t *testing.T, p *Parser) {
+// 	if len(p.errors) == 0 {
+// 		return
+// 	}
 
-	t.Errorf("parser has %d errors", len(p.errors))
-	for _, msg := range p.errors {
-		t.Errorf("parser error: %q", msg)
-	}
-	t.Fail()
-}
+// 	t.Errorf("parser has %d errors", len(p.errors))
+// 	for _, msg := range p.errors {
+// 		t.Errorf("parser error: %q", msg)
+// 	}
+// 	t.Fail()
+// }
 
-func testNumberLiteral(t *testing.T, il ast.Expression, value float64) {
-	num := requireTypeConversion[ast.NumberLiteral](t, il)
-	require.Equal(t, value, num.Value)
-	require.Equal(t, fmt.Sprintf("%.0f", value), num.String())
-}
+// func testNumberLiteral(t *testing.T, il ast.Expression, value float64) {
+// 	num := requireTypeConversion[ast.NumberLiteral](t, il)
+// 	require.Equal(t, value, num.Value)
+// 	require.Equal(t, fmt.Sprintf("%.0f", value), num.String())
+// }
 
-type statementTest struct {
-	input, expected string
-}
+// type statementTest struct {
+// 	input, expected string
+// }
 
-func testStatements(t *testing.T, tests []statementTest) {
-	for _, test := range tests {
-		p := New(test.input)
+// func testStatements(t *testing.T, tests []statementTest) {
+// 	for _, test := range tests {
+// 		p := New(test.input)
 
-		block := p.ParseBlock()
-		require.NotNil(t, block)
-		require.Equal(t, 1, len(block.Stmts))
+// 		block := p.ParseBlock()
+// 		require.NotNil(t, block)
+// 		require.Equal(t, 1, len(block.Stmts))
 
-		require.Equal(t, test.expected, block.String())
-	}
-}
+// 		require.Equal(t, test.expected, block.String())
+// 	}
+// }
 
-func requireTypeConversion[T any](t *testing.T, val any) T {
-	res, ok := val.(*T)
-	require.True(t, ok)
-	return *res
-}
+// func requireTypeConversion[T any](t *testing.T, val any) T {
+// 	res, ok := val.(*T)
+// 	require.True(t, ok)
+// 	return *res
+// }

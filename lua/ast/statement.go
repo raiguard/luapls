@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"fmt"
 	"github.com/raiguard/luapls/lua/token"
 )
 
@@ -16,9 +15,6 @@ type AssignmentStatement struct {
 }
 
 func (as *AssignmentStatement) statementNode() {}
-func (as *AssignmentStatement) String() string {
-	return fmt.Sprintf("%s = %s", nodeListToString(as.Vars), nodeListToString(as.Exps))
-}
 func (as *AssignmentStatement) Pos() token.Pos {
 	return as.Vars[0].Pos()
 }
@@ -31,14 +27,11 @@ type BreakStatement struct {
 }
 
 func (bs *BreakStatement) statementNode() {}
-func (bs *BreakStatement) String() string {
-	return token.BREAK.String()
-}
 func (bs *BreakStatement) Pos() token.Pos {
 	return bs.StartPos
 }
 func (bs *BreakStatement) End() token.Pos {
-	return bs.StartPos + len(bs.String())
+	return bs.StartPos + len(token.BREAK.String())
 }
 
 type DoStatement struct {
@@ -48,9 +41,6 @@ type DoStatement struct {
 }
 
 func (ds *DoStatement) statementNode() {}
-func (ds *DoStatement) String() string {
-	return fmt.Sprintf("do\n%s\nend", ds.Body.String())
-}
 func (ds *DoStatement) Pos() token.Pos {
 	return ds.StartPos
 }
@@ -63,9 +53,6 @@ type ExpressionStatement struct {
 }
 
 func (es *ExpressionStatement) statementNode() {}
-func (es *ExpressionStatement) String() string {
-	return fmt.Sprintf("%s", es.Exp.String())
-}
 func (es *ExpressionStatement) Pos() token.Pos {
 	if es.Exp == nil {
 		return token.InvalidPos
@@ -90,26 +77,6 @@ type ForStatement struct {
 }
 
 func (fs *ForStatement) statementNode() {}
-func (fs *ForStatement) String() string {
-	if fs.Step != nil {
-		return fmt.Sprintf(
-			"for %s = %s, %s, %s do\n%s\nend",
-			fs.Name.String(),
-			fs.Start.String(),
-			fs.Finish.String(),
-			fs.Step.String(),
-			fs.Body.String(),
-		)
-	} else {
-		return fmt.Sprintf(
-			"for %s = %s, %s do\n%s\nend",
-			fs.Name.String(),
-			fs.Start.String(),
-			fs.Finish.String(),
-			fs.Body.String(),
-		)
-	}
-}
 func (fs *ForStatement) Pos() token.Pos {
 	return fs.StartPos
 }
@@ -126,9 +93,6 @@ type ForInStatement struct {
 }
 
 func (fs *ForInStatement) statementNode() {}
-func (fs *ForInStatement) String() string {
-	return fmt.Sprintf("for %s in %s do\n%s\nend", nodeListToString(fs.Names), nodeListToString(fs.Exps), fs.Body.String())
-}
 func (fs *ForInStatement) Pos() token.Pos {
 	return fs.StartPos
 }
@@ -147,19 +111,6 @@ type FunctionStatement struct {
 }
 
 func (fs *FunctionStatement) statementNode() {}
-func (fs *FunctionStatement) String() string {
-	localStr := ""
-	if fs.IsLocal {
-		localStr = "local "
-	}
-	return fmt.Sprintf(
-		"%sfunction %s(%s)\n%s\nend",
-		localStr,
-		fs.Left.String(),
-		nodeListToString(fs.Params),
-		fs.Body.String(),
-	)
-}
 func (fs *FunctionStatement) Pos() token.Pos {
 	return fs.StartPos
 }
@@ -173,9 +124,6 @@ type GotoStatement struct {
 }
 
 func (gs *GotoStatement) statementNode() {}
-func (gs *GotoStatement) String() string {
-	return fmt.Sprintf("goto %s", gs.Name.String())
-}
 func (gs *GotoStatement) Pos() token.Pos {
 	return gs.StartPos
 }
@@ -190,9 +138,6 @@ type IfStatement struct {
 }
 
 func (is *IfStatement) statementNode() {}
-func (is *IfStatement) String() string {
-	return fmt.Sprintf("%send", nodeListToString(is.Clauses))
-}
 func (is *IfStatement) Pos() token.Pos {
 	return is.StartPos
 }
@@ -208,14 +153,6 @@ type IfClause struct {
 }
 
 func (ic *IfClause) statementNode() {}
-func (ic *IfClause) String() string {
-	// TODO: elseif
-	if ic.Condition != nil {
-		return fmt.Sprintf("if %s then\n%s\n", ic.Condition.String(), ic.Body.String())
-	} else {
-		return fmt.Sprintf("else\n%s\n", ic.Body.String())
-	}
-}
 func (ic *IfClause) Pos() token.Pos {
 	return ic.StartPos
 }
@@ -230,9 +167,6 @@ type LabelStatement struct {
 }
 
 func (ls *LabelStatement) statementNode() {}
-func (ls *LabelStatement) String() string {
-	return fmt.Sprintf("::%s::", ls.Name.String())
-}
 func (ls *LabelStatement) Pos() token.Pos {
 	return ls.StartPos
 }
@@ -248,9 +182,6 @@ type LocalStatement struct {
 }
 
 func (ls *LocalStatement) statementNode() {}
-func (ls *LocalStatement) String() string {
-	return fmt.Sprintf("local %s = %s", nodeListToString(ls.Names), nodeListToString(ls.Exps))
-}
 func (ls *LocalStatement) Pos() token.Pos {
 	return ls.StartPos
 }
@@ -268,9 +199,6 @@ type RepeatStatement struct {
 }
 
 func (rs *RepeatStatement) statementNode() {}
-func (rs *RepeatStatement) String() string {
-	return fmt.Sprintf("repeat\n%s\nuntil %s", rs.Body.String(), rs.Condition.String())
-}
 func (rs *RepeatStatement) Pos() token.Pos {
 	return rs.StartPos
 }
@@ -284,9 +212,6 @@ type ReturnStatement struct {
 }
 
 func (rs *ReturnStatement) statementNode() {}
-func (rs *ReturnStatement) String() string {
-	return fmt.Sprintf("return %s", nodeListToString(rs.Exps))
-}
 func (rs *ReturnStatement) Pos() token.Pos {
 	return rs.StartPos
 }
@@ -305,9 +230,6 @@ type WhileStatement struct {
 }
 
 func (ws *WhileStatement) statementNode() {}
-func (ws *WhileStatement) String() string {
-	return fmt.Sprintf("while %s do\n%s\nend", ws.Condition.String(), ws.Body.String())
-}
 func (ws *WhileStatement) Pos() token.Pos {
 	return ws.StartPos
 }

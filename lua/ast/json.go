@@ -19,32 +19,18 @@ func (node *AssignmentStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// If we use a pointer receiver then it doesn't do it on the parser.File object
-func (node Block) MarshalJSON() ([]byte, error) {
+func (node *Block) MarshalJSON() ([]byte, error) {
 	type Alias Block
 	return json.Marshal(&struct {
 		NodeKind string
 		Range    token.Range
-		Alias
+		*Alias
 	}{
 		NodeKind: "Block",
 		Range:    token.Range{node.Pos(), node.End()},
-		Alias:    (Alias)(node),
+		Alias:    (*Alias)(node),
 	})
 }
-
-// func (node *Block) MarshalJSON() ([]byte, error) {
-// 	type Alias Block
-// 	return json.Marshal(&struct {
-// 		NodeKind string
-// 		Range    token.Range
-// 		*Alias
-// 	}{
-// 		NodeKind: "Block",
-// 		Range:    token.Range{node.Pos(), node.End()},
-// 		Alias:    (*Alias)(node),
-// 	})
-// }
 
 func (node *BooleanLiteral) MarshalJSON() ([]byte, error) {
 	type Alias BooleanLiteral

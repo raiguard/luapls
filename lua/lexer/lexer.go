@@ -26,7 +26,7 @@ func (l *Lexer) NextToken() token.Token {
 	tok := token.EOF
 
 	switch l.char {
-	case 0:
+	case 0: // EOF
 	case '=':
 		l.readChar()
 		if l.char == '=' {

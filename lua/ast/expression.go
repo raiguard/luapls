@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/raiguard/luapls/lua/token"
 )
@@ -18,9 +18,6 @@ type FunctionCall struct {
 }
 
 func (fc *FunctionCall) expressionNode() {}
-func (fc *FunctionCall) String() string {
-	return fmt.Sprintf("%s(%s)", fc.Left.String(), nodeListToString(fc.Args))
-}
 func (fc *FunctionCall) Pos() token.Pos {
 	return fc.Left.Pos()
 }
@@ -37,9 +34,6 @@ type FunctionExpression struct {
 }
 
 func (fe *FunctionExpression) expressionNode() {}
-func (fe *FunctionExpression) String() string {
-	return fmt.Sprintf("function(%s)\n%s\nend", nodeListToString(fe.Params), fe.Body.String())
-}
 func (fe *FunctionExpression) Pos() token.Pos {
 	return fe.StartPos
 }
@@ -56,13 +50,6 @@ type IndexExpression struct {
 }
 
 func (ie *IndexExpression) expressionNode() {}
-func (ie *IndexExpression) String() string {
-	if ie.IsBrackets {
-		return fmt.Sprintf("%s[%s]", ie.Left.String(), ie.Inner.String())
-	} else {
-		return fmt.Sprintf("%s.%s", ie.Left.String(), ie.Inner.String())
-	}
-}
 func (ie *IndexExpression) Pos() token.Pos {
 	return ie.Left.Pos()
 }
@@ -77,9 +64,6 @@ type InfixExpression struct {
 }
 
 func (be *InfixExpression) expressionNode() {}
-func (be *InfixExpression) String() string {
-	return fmt.Sprintf("(%s %s %s)", be.Left.String(), be.Operator.String(), be.Right.String())
-}
 func (be *InfixExpression) Pos() token.Pos {
 	return be.Left.Pos()
 }
@@ -94,9 +78,6 @@ type PrefixExpression struct {
 }
 
 func (pe *PrefixExpression) expressionNode() {}
-func (pe *PrefixExpression) String() string {
-	return fmt.Sprintf("(%s%s)", pe.Operator, pe.Right.String())
-}
 func (pe *PrefixExpression) Pos() token.Pos {
 	return pe.StartPos
 }
@@ -112,14 +93,11 @@ type BooleanLiteral struct {
 }
 
 func (bl *BooleanLiteral) expressionNode() {}
-func (bl *BooleanLiteral) String() string {
-	return fmt.Sprintf("%t", bl.Value)
-}
 func (bl *BooleanLiteral) Pos() token.Pos {
 	return bl.StartPos
 }
 func (bl *BooleanLiteral) End() token.Pos {
-	return bl.StartPos + len(bl.String())
+	return bl.StartPos + len(strconv.FormatBool(bl.Value))
 }
 func (bl *BooleanLiteral) leaf() {}
 
@@ -129,12 +107,11 @@ type Identifier struct {
 }
 
 func (i *Identifier) expressionNode() {}
-func (i *Identifier) String() string  { return i.Literal }
 func (i *Identifier) Pos() token.Pos {
 	return i.StartPos
 }
 func (i *Identifier) End() token.Pos {
-	return i.StartPos + len(i.String())
+	return i.StartPos + len(i.Literal)
 }
 func (i *Identifier) leaf() {}
 
@@ -145,28 +122,26 @@ type NumberLiteral struct {
 }
 
 func (nl *NumberLiteral) expressionNode() {}
-func (nl *NumberLiteral) String() string  { return nl.Literal }
 func (nl *NumberLiteral) Pos() token.Pos {
 	return nl.StartPos
 }
 func (nl *NumberLiteral) End() token.Pos {
-	return nl.StartPos + len(nl.String())
+	return nl.StartPos + len(nl.Literal)
 }
 func (nl *NumberLiteral) leaf() {}
 
 type StringLiteral struct {
-	Value    string
+	Literal  string
 	StartPos token.Pos `json:"-"`
 	// TODO: Store type of quote
 }
 
 func (sl *StringLiteral) expressionNode() {}
-func (sl *StringLiteral) String() string  { return fmt.Sprintf("\"%s\"", sl.Value) }
 func (sl *StringLiteral) Pos() token.Pos {
 	return sl.StartPos
 }
 func (sl *StringLiteral) End() token.Pos {
-	return sl.StartPos + len(sl.String())
+	return sl.StartPos + len(sl.Literal)
 }
 func (sl *StringLiteral) leaf() {}
 
@@ -177,7 +152,6 @@ type TableLiteral struct {
 }
 
 func (tl *TableLiteral) expressionNode() {}
-func (tl *TableLiteral) String() string  { return fmt.Sprintf("{ %s }", nodeListToString(tl.Fields)) }
 func (tl *TableLiteral) Pos() token.Pos {
 	return tl.StartPos
 }
@@ -190,7 +164,6 @@ type Vararg struct {
 }
 
 func (va *Vararg) expressionNode() {}
-func (va *Vararg) String() string  { return token.TokenStr[token.VARARG] }
 func (va *Vararg) Pos() token.Pos {
 	return va.StartPos
 }

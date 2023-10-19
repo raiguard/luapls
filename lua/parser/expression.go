@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
@@ -216,7 +215,7 @@ func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	lit := &ast.StringLiteral{
-		Value:    strings.Trim(p.tok.Literal, "\"'"),
+		Literal:  p.tok.Literal,
 		StartPos: p.tok.Pos,
 	}
 	p.next()

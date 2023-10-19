@@ -1,14 +1,10 @@
 package ast
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/raiguard/luapls/lua/token"
 )
 
 type Node interface {
-	String() string
 	Pos() token.Pos
 	End() token.Pos
 }
@@ -22,13 +18,6 @@ type Block struct {
 	StartPos token.Pos `json:"-"`
 }
 
-func (b *Block) String() string {
-	var out string
-	for _, stmt := range b.Stmts {
-		out += stmt.String() + "\n"
-	}
-	return strings.TrimSpace(out)
-}
 func (b *Block) Pos() token.Pos {
 	return b.StartPos
 }
@@ -45,15 +34,6 @@ type TableField struct {
 	StartPos token.Pos `json:"-"` // Needed in case of bracketed keys
 }
 
-func (tf *TableField) String() string {
-	if tf.Key == nil {
-		return tf.Value.String()
-	}
-	if ident, ok := tf.Key.(*Identifier); ok {
-		return fmt.Sprintf("%s = %s", ident.String(), tf.Value.String())
-	}
-	return fmt.Sprintf("[%s] = %s", tf.Key.String(), tf.Value.String())
-}
 func (rf *TableField) Pos() token.Pos {
 	return rf.StartPos
 }
@@ -64,12 +44,4 @@ func (rf *TableField) End() token.Pos {
 // A Leaf node has no children and is interactable in the editor.
 type LeafNode interface {
 	leaf()
-}
-
-func nodeListToString[T Node](nodes []T) string {
-	items := []string{}
-	for _, node := range nodes {
-		items = append(items, node.String())
-	}
-	return strings.Join(items, ", ")
 }
