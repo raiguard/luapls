@@ -13,13 +13,13 @@ func Walk(n Node, v Visitor) {
 		return
 	}
 
-	switch n.(type) {
+	switch n := n.(type) {
 	case *AssignmentStatement:
-		WalkList(n.(*AssignmentStatement).Vars, v)
-		WalkList(n.(*AssignmentStatement).Exps, v)
+		WalkList(n.Vars, v)
+		WalkList(n.Exps, v)
 
 	case *Block:
-		WalkList(n.(*Block).Stmts, v)
+		WalkList(n.Stmts, v)
 
 	case *BooleanLiteral:
 		// Leaf
@@ -28,92 +28,92 @@ func Walk(n Node, v Visitor) {
 		// Leaf
 
 	case *DoStatement:
-		Walk(&n.(*DoStatement).Body, v)
+		Walk(&n.Body, v)
 
 	case *ExpressionStatement:
-		Walk(n.(*ExpressionStatement).Exp, v)
+		Walk(n.Exp, v)
 
 	case *ForInStatement:
-		WalkList(n.(*ForInStatement).Names, v)
-		WalkList(n.(*ForInStatement).Exps, v)
-		Walk(&n.(*ForInStatement).Body, v)
+		WalkList(n.Names, v)
+		WalkList(n.Exps, v)
+		Walk(&n.Body, v)
 
 	case *ForStatement:
-		Walk(n.(*ForStatement).Start, v)
-		Walk(n.(*ForStatement).Finish, v)
-		Walk(n.(*ForStatement).Step, v)
-		Walk(&n.(*ForStatement).Body, v)
+		Walk(n.Start, v)
+		Walk(n.Finish, v)
+		Walk(n.Step, v)
+		Walk(&n.Body, v)
 
 	case *FunctionCall:
-		Walk(n.(*FunctionCall).Left, v)
-		WalkList(n.(*FunctionCall).Args, v)
+		Walk(n.Left, v)
+		WalkList(n.Args, v)
 
 	case *FunctionExpression:
-		WalkList(n.(*FunctionExpression).Params, v)
-		Walk(&n.(*FunctionExpression).Body, v)
+		WalkList(n.Params, v)
+		Walk(&n.Body, v)
 
 	case *FunctionStatement:
-		Walk(n.(*FunctionStatement).Left, v)
-		WalkList(n.(*FunctionStatement).Params, v)
-		Walk(&n.(*FunctionStatement).Body, v)
+		Walk(n.Left, v)
+		WalkList(n.Params, v)
+		Walk(&n.Body, v)
 
 	case *GotoStatement:
-		Walk(n.(*GotoStatement).Name, v)
+		Walk(n.Name, v)
 
 	case *Identifier:
 		// Leaf
 
 	case *IfClause:
-		Walk(n.(*IfClause).Condition, v)
-		Walk(&n.(*IfClause).Body, v)
+		Walk(n.Condition, v)
+		Walk(&n.Body, v)
 
 	case *IfStatement:
-		WalkList(n.(*IfStatement).Clauses, v)
+		WalkList(n.Clauses, v)
 
 	case *IndexExpression:
-		Walk(n.(*IndexExpression).Left, v)
-		Walk(n.(*IndexExpression).Inner, v)
+		Walk(n.Left, v)
+		Walk(n.Inner, v)
 
 	case *InfixExpression:
-		Walk(n.(*InfixExpression).Left, v)
-		Walk(n.(*InfixExpression).Right, v)
+		Walk(n.Left, v)
+		Walk(n.Right, v)
 
 	case *LabelStatement:
 		// Leaf
 
 	case *LocalStatement:
-		WalkList(n.(*LocalStatement).Names, v)
-		WalkList(n.(*LocalStatement).Exps, v)
+		WalkList(n.Names, v)
+		WalkList(n.Exps, v)
 
 	case *NumberLiteral:
 		// Leaf
 
 	case *PrefixExpression:
-		Walk(n.(*PrefixExpression).Right, v)
+		Walk(n.Right, v)
 
 	case *RepeatStatement:
-		Walk(&n.(*RepeatStatement).Body, v)
-		Walk(n.(*RepeatStatement).Condition, v)
+		Walk(&n.Body, v)
+		Walk(n.Condition, v)
 
 	case *ReturnStatement:
-		WalkList(n.(*ReturnStatement).Exps, v)
+		WalkList(n.Exps, v)
 
 	case *StringLiteral:
 		// Leaf
 
 	case *TableField:
-		Walk(n.(*TableField).Key, v)
-		Walk(n.(*TableField).Value, v)
+		Walk(n.Key, v)
+		Walk(n.Value, v)
 
 	case *TableLiteral:
-		WalkList(n.(*TableLiteral).Fields, v)
+		WalkList(n.Fields, v)
 
 	case *Vararg:
 		// Leaf
 
 	case *WhileStatement:
-		Walk(n.(*WhileStatement).Condition, v)
-		Walk(&n.(*WhileStatement).Body, v)
+		Walk(n.Condition, v)
+		Walk(&n.Body, v)
 
 	default:
 		panic(fmt.Sprintf("Walk unimplemented for %T", n))
