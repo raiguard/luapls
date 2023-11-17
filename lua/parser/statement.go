@@ -45,7 +45,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		exps := p.parseExpressionList()
 		if p.tokIs(token.ASSIGN) {
 			stat = p.parseAssignmentStatement(exps)
-		} else if len(exps) == 1 {
+			// TODO: Can there ever be zero expressions?
+		} else if _, ok := exps[0].(*ast.FunctionCall); ok {
 			stat = &ast.ExpressionStatement{Exp: exps[0]}
 		} else {
 			p.invalidTokenError()
