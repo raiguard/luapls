@@ -22,19 +22,25 @@ func main() {
 
 	switch task {
 	case "lex":
-		if len(args) < 2 {
-			fmt.Println("Did not provide a filename")
+		if len(args) < 3 {
+			fmt.Fprintln(os.Stderr, "Did not provide a filename")
 			os.Exit(1)
 		}
 		lexFile(args[2])
 	case "lsp":
 		lsp.Run()
 	case "parse":
-		if len(args) < 2 {
-			fmt.Println("Did not provide a filename")
+		if len(args) < 3 {
+			fmt.Fprintln(os.Stderr, "Did not provide a filename")
 			os.Exit(1)
 		}
 		parseFile(args[2])
+	case "make-test":
+		if len(args) < 4 {
+			fmt.Fprintln(os.Stderr, "Not enough arguments, requires a label and input string")
+			os.Exit(1)
+		}
+		makeTest(args[2], args[3])
 	case "repl":
 		repl.Run()
 	}
@@ -60,7 +66,7 @@ func parseFile(filename string) {
 	before := time.Now()
 	src, err := os.ReadFile(filename)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	p := parser.New(string(src))
@@ -73,8 +79,35 @@ func parseFile(filename string) {
 		File:     file,
 	}, "", "  ")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	fmt.Println(string(bytes))
+}
+
+type testSpec struct {
+	Label string
+	Input string
+	AST   json.RawMessage
+}
+
+func makeTest(label string, input string) {
+	block := parseBlockToJSON(input)
+	bytes, err := json.MarshalIndent(&testSpec{label, input, block}, "", "  ")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println(string(bytes))
+}
+
+func parseBlockToJSON(input string) []byte {
+	p := parser.New(input)
+	block := p.ParseBlock()
+	bytes, err := json.MarshalIndent(&block, "", "  ")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	return bytes
 }

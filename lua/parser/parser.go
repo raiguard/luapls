@@ -20,11 +20,9 @@ type ParserError struct {
 }
 
 type Parser struct {
-	lexer *lexer.Lexer
-
+	lexer  *lexer.Lexer
 	errors []ParserError
-
-	tok token.Token
+	tok    token.Token
 }
 
 func New(input string) *Parser {

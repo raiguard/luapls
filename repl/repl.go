@@ -42,7 +42,7 @@ func Run() {
 		if len(p.Errors()) > 0 {
 			continue
 		}
-		bytes, _ := json.MarshalIndent(block, "", "  ")
+		bytes, _ := json.MarshalIndent(&block, "", "  ")
 		fmt.Println(string(bytes))
 
 		// fmt.Println("NODES:")

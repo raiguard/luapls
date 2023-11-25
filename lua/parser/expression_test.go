@@ -10,10 +10,10 @@ package parser
 
 // func TestInfixExpression(t *testing.T) {
 // 	infixTests := []struct {
-// 		input      string
-// 		leftValue  float64
-// 		operator   token.TokenType
-// 		rightValue float64
+// 		input    string
+// 		left     float64
+// 		operator token.TokenType
+// 		right    float64
 // 	}{
 // 		{"5 + 5", 5, token.PLUS, 5},
 // 		{"5 - 5", 5, token.MINUS, 5},
@@ -26,17 +26,11 @@ package parser
 // 	}
 
 // 	for _, tt := range infixTests {
-// 		p := New(tt.input)
-// 		exp := p.parseExpression(LOWEST, true)
-// 		checkParserErrors(t, p)
-
-// 		infixExp := requireTypeConversion[ast.InfixExpression](t, exp)
-
-// 		testNumberLiteral(t, infixExp.Left, tt.leftValue)
-
-// 		require.Equal(t, tt.operator, infixExp.Operator)
-
-// 		testNumberLiteral(t, infixExp.Right, tt.rightValue)
+// 		testExpression(t, tt.input, func(exp ast.InfixExpression) {
+// 			require.Equal(t, tt.left, requireTypeConversion[ast.NumberLiteral](t, exp.Left).Value)
+// 			require.Equal(t, tt.operator, exp.Operator)
+// 			require.Equal(t, tt.right, requireTypeConversion[ast.NumberLiteral](t, exp.Right).Value)
+// 		})
 // 	}
 // }
 
