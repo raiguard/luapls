@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/raiguard/luapls/lsp"
@@ -40,7 +41,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, "Not enough arguments, requires a label and input string")
 			os.Exit(1)
 		}
-		makeTest(args[2], args[3])
+		makeTest(args[2], args[3], args[4])
 	case "repl":
 		repl.Run()
 	}
@@ -91,14 +92,23 @@ type testSpec struct {
 	AST   json.RawMessage
 }
 
-func makeTest(label string, input string) {
+func makeTest(suite string, label string, input string) {
 	block := parseBlockToJSON(input)
-	bytes, err := json.MarshalIndent(&testSpec{label, input, block}, "", "  ")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	newSpec := testSpec{label, input, block}
+	path := filepath.Join("lua/parser/test_specs", suite+".json")
+	specs := readOrMakeSpecs(path)
+	specs = append(specs, newSpec)
+	output, _ := json.MarshalIndent(specs, "", "  ")
+	os.WriteFile(path, output, 0644)
+}
+
+func readOrMakeSpecs(path string) []testSpec {
+	specs := []testSpec{}
+	file, err := os.ReadFile(path)
+	if err == nil {
+		json.Unmarshal(file, &specs)
 	}
-	fmt.Println(string(bytes))
+	return specs
 }
 
 func parseBlockToJSON(input string) []byte {

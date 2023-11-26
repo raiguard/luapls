@@ -1,0 +1,162 @@
+[
+  {
+    "Label": "function_call",
+    "Input": "print(foo)",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        10
+      ],
+      "Stmts": [
+        {
+          "Type": "ExpressionStatement",
+          "Range": [
+            0,
+            10
+          ],
+          "Exp": {
+            "Type": "FunctionCall",
+            "Range": [
+              0,
+              10
+            ],
+            "Left": {
+              "Type": "Identifier",
+              "Range": [
+                0,
+                5
+              ],
+              "Literal": "print"
+            },
+            "Args": [
+              {
+                "Type": "Identifier",
+                "Range": [
+                  6,
+                  9
+                ],
+                "Literal": "foo"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Label": "function_expression",
+    "Input": "local add = function(a, b) print(a + b) end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        43
+      ],
+      "Stmts": [
+        {
+          "Type": "LocalStatement",
+          "Range": [
+            0,
+            43
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                6,
+                9
+              ],
+              "Literal": "add"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "FunctionExpression",
+              "Range": [
+                12,
+                43
+              ],
+              "Params": [
+                {
+                  "Type": "Identifier",
+                  "Range": [
+                    21,
+                    22
+                  ],
+                  "Literal": "a"
+                },
+                {
+                  "Type": "Identifier",
+                  "Range": [
+                    24,
+                    25
+                  ],
+                  "Literal": "b"
+                }
+              ],
+              "Vararg": false,
+              "Body": {
+                "Type": "Block",
+                "Range": [
+                  27,
+                  39
+                ],
+                "Stmts": [
+                  {
+                    "Type": "ExpressionStatement",
+                    "Range": [
+                      27,
+                      39
+                    ],
+                    "Exp": {
+                      "Type": "FunctionCall",
+                      "Range": [
+                        27,
+                        39
+                      ],
+                      "Left": {
+                        "Type": "Identifier",
+                        "Range": [
+                          27,
+                          32
+                        ],
+                        "Literal": "print"
+                      },
+                      "Args": [
+                        {
+                          "Type": "InfixExpression",
+                          "Range": [
+                            33,
+                            38
+                          ],
+                          "Left": {
+                            "Type": "Identifier",
+                            "Range": [
+                              33,
+                              34
+                            ],
+                            "Literal": "a"
+                          },
+                          "Operator": "plus",
+                          "Right": {
+                            "Type": "Identifier",
+                            "Range": [
+                              37,
+                              38
+                            ],
+                            "Literal": "b"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

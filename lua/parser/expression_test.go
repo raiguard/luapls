@@ -8,48 +8,6 @@ package parser
 // 	"github.com/stretchr/testify/require"
 // )
 
-// func TestInfixExpression(t *testing.T) {
-// 	infixTests := []struct {
-// 		input    string
-// 		left     float64
-// 		operator token.TokenType
-// 		right    float64
-// 	}{
-// 		{"5 + 5", 5, token.PLUS, 5},
-// 		{"5 - 5", 5, token.MINUS, 5},
-// 		{"5 * 5", 5, token.MUL, 5},
-// 		{"5 / 5", 5, token.SLASH, 5},
-// 		{"5 > 5", 5, token.GT, 5},
-// 		{"5 < 5", 5, token.LT, 5},
-// 		{"5 == 5", 5, token.EQUAL, 5},
-// 		{"5 ~= 5", 5, token.NEQ, 5},
-// 	}
-
-// 	for _, tt := range infixTests {
-// 		testExpression(t, tt.input, func(exp ast.InfixExpression) {
-// 			require.Equal(t, tt.left, requireTypeConversion[ast.NumberLiteral](t, exp.Left).Value)
-// 			require.Equal(t, tt.operator, exp.Operator)
-// 			require.Equal(t, tt.right, requireTypeConversion[ast.NumberLiteral](t, exp.Right).Value)
-// 		})
-// 	}
-// }
-
-// func TestBooleanLiteral(t *testing.T) {
-// 	tests := []struct {
-// 		input    string
-// 		expected bool
-// 	}{
-// 		{"false", false},
-// 		{"true", true},
-// 	}
-// 	for _, test := range tests {
-// 		p := New(test.input)
-// 		lit := p.parseBooleanLiteral()
-// 		checkParserErrors(t, p)
-// 		require.Equal(t, test.expected, lit.Value)
-// 	}
-// }
-
 // func TestFunctionExpression(t *testing.T) {
 // 	testExpression(t, "function(a, b) print(a + b) end", func(exp ast.FunctionExpression) {
 // 		require.Equal(t, 2, len(exp.Params))
