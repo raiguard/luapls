@@ -158,5 +158,110 @@
         }
       ]
     }
+  },
+  {
+    "Label": "function_statement",
+    "Input": "function add(a, b) print(a + b) end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        35
+      ],
+      "Stmts": [
+        {
+          "Type": "FunctionStatement",
+          "Range": [
+            0,
+            35
+          ],
+          "Left": {
+            "Type": "Identifier",
+            "Range": [
+              9,
+              12
+            ],
+            "Literal": "add"
+          },
+          "Params": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                13,
+                14
+              ],
+              "Literal": "a"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                16,
+                17
+              ],
+              "Literal": "b"
+            }
+          ],
+          "Vararg": false,
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              19,
+              31
+            ],
+            "Stmts": [
+              {
+                "Type": "ExpressionStatement",
+                "Range": [
+                  19,
+                  31
+                ],
+                "Exp": {
+                  "Type": "FunctionCall",
+                  "Range": [
+                    19,
+                    31
+                  ],
+                  "Left": {
+                    "Type": "Identifier",
+                    "Range": [
+                      19,
+                      24
+                    ],
+                    "Literal": "print"
+                  },
+                  "Args": [
+                    {
+                      "Type": "InfixExpression",
+                      "Range": [
+                        25,
+                        30
+                      ],
+                      "Left": {
+                        "Type": "Identifier",
+                        "Range": [
+                          25,
+                          26
+                        ],
+                        "Literal": "a"
+                      },
+                      "Operator": "plus",
+                      "Right": {
+                        "Type": "Identifier",
+                        "Range": [
+                          29,
+                          30
+                        ],
+                        "Literal": "b"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "IsLocal": false
+        }
+      ]
+    }
   }
 ]
