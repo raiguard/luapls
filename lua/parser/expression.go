@@ -126,13 +126,12 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression {
-	isBrackets := p.tokIs(token.LBRACK)
-	isColon := p.tokIs(token.COLON)
+	indexer := p.tok.Type
 	p.next()
 
 	var end token.Pos
 	var inner ast.Expression
-	if isBrackets {
+	if indexer == token.LBRACK {
 		inner = p.parseExpression(LOWEST, true)
 		end = p.tok.Pos
 		p.expect(token.RBRACK)
@@ -142,11 +141,10 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 	}
 
 	return &ast.IndexExpression{
-		Left:       left,
-		Inner:      inner,
-		IsBrackets: isBrackets,
-		IsColon:    isColon,
-		EndPos:     end,
+		Left:    left,
+		Indexer: indexer,
+		Inner:   inner,
+		EndPos:  end,
 	}
 }
 

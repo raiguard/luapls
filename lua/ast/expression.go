@@ -42,11 +42,10 @@ func (fe *FunctionExpression) End() token.Pos {
 }
 
 type IndexExpression struct {
-	Left       Expression
-	Inner      Expression
-	IsBrackets bool
-	IsColon    bool
-	EndPos     token.Pos `json:"-"`
+	Left    Expression
+	Indexer token.TokenType
+	Inner   Expression
+	EndPos  token.Pos `json:"-"`
 }
 
 func (ie *IndexExpression) expressionNode() {}
