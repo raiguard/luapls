@@ -1,7 +1,7 @@
 [
   {
     "Label": "repeat",
-    "Input": "local i = 0 repeat i = i + 1 until i == 50 print('done'0",
+    "Input": "local i = 0 repeat i = i + 1 until i == 50 print('done')",
     "AST": {
       "Type": "Block",
       "Range": [

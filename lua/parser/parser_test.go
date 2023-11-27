@@ -11,10 +11,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type spec struct {
-	Label string
-	Input string `json:"input"`
-	AST   json.RawMessage
+type TestSpec struct {
+	Label  string
+	Input  string `json:"input"`
+	AST    json.RawMessage
+	Errors json.RawMessage `json:",omitempty"`
 }
 
 func TestParser(t *testing.T) {
@@ -22,7 +23,7 @@ func TestParser(t *testing.T) {
 	require.NoError(t, err)
 	for _, entry := range dir {
 		bytes, err := os.ReadFile(filepath.Join("test_specs", entry.Name()))
-		var specs []spec
+		var specs []TestSpec
 		err = json.Unmarshal(bytes, &specs)
 		if !assert.NoError(t, err) {
 			continue
@@ -34,7 +35,7 @@ func TestParser(t *testing.T) {
 	}
 }
 
-func testSpec(t *testing.T, spec *spec) {
+func testSpec(t *testing.T, spec *TestSpec) {
 	p := New(spec.Input)
 	file := p.ParseFile()
 	ast, err := json.Marshal(&file.Block)
@@ -42,5 +43,15 @@ func testSpec(t *testing.T, spec *spec) {
 		return
 	}
 	assert.JSONEq(t, string(spec.AST), string(ast))
-	// TODO: Expected errors
+
+	if len(spec.Errors) == 0 {
+		assert.Empty(t, p.Errors())
+		return
+	}
+
+	errors, err := json.Marshal(&file.Errors)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.JSONEq(t, string(spec.Errors), string(errors))
 }

@@ -3,7 +3,6 @@ package repl
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
@@ -35,20 +34,8 @@ func Run() {
 		fmt.Println("AST:")
 
 		p := parser.New(line)
-		block := p.ParseBlock()
-		for _, err := range p.Errors() {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		if len(p.Errors()) > 0 {
-			continue
-		}
-		bytes, _ := json.MarshalIndent(&block, "", "  ")
+		file := p.ParseFile()
+		bytes, _ := json.MarshalIndent(file, "", "  ")
 		fmt.Println(string(bytes))
-
-		// fmt.Println("NODES:")
-		// ast.Walk(&block, func(n ast.Node) bool {
-		// 	fmt.Printf("%T: {%d, %d}\n", n, n.Pos(), n.End())
-		// 	return true
-		// })
 	}
 }

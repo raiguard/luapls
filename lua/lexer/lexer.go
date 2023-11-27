@@ -14,7 +14,7 @@ type Lexer struct {
 }
 
 func New(input string) *Lexer {
-	l := &Lexer{input: input, pos: -1}
+	l := &Lexer{input: input, pos: -1, lineBreaks: []int{}}
 	l.readChar()
 	return l
 }

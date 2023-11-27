@@ -87,14 +87,18 @@ func parseFile(filename string) {
 }
 
 type testSpec struct {
-	Label string
-	Input string
-	AST   json.RawMessage
+	Label  string
+	Input  string
+	AST    json.RawMessage
+	Errors json.RawMessage `json:",omitempty"`
 }
 
 func makeTest(suite string, label string, input string) {
-	block := parseBlockToJSON(input)
-	newSpec := testSpec{label, input, block}
+	p := parser.New(input)
+	file := p.ParseFile()
+	ast, _ := json.Marshal(&file.Block)
+	errors, _ := json.Marshal(p.Errors())
+	newSpec := testSpec{label, input, ast, errors}
 	path := filepath.Join("lua/parser/test_specs", suite+".json")
 	specs := readOrMakeSpecs(path)
 	specs = append(specs, newSpec)
@@ -109,15 +113,4 @@ func readOrMakeSpecs(path string) []testSpec {
 		json.Unmarshal(file, &specs)
 	}
 	return specs
-}
-
-func parseBlockToJSON(input string) []byte {
-	p := parser.New(input)
-	block := p.ParseBlock()
-	bytes, err := json.MarshalIndent(&block, "", "  ")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	return bytes
 }
