@@ -41,6 +41,15 @@ func (rf *TableField) End() token.Pos {
 	return rf.Value.End()
 }
 
+type Invalid struct {
+	Tokens []token.Token
+}
+
+func (i *Invalid) expressionNode() {}
+func (i *Invalid) statementNode()  {}
+func (i *Invalid) Pos() token.Pos  { return i.Tokens[0].Pos }
+func (i *Invalid) End() token.Pos  { return i.Tokens[len(i.Tokens)-1].End() }
+
 // A Leaf node has no children and is interactable in the editor.
 type LeafNode interface {
 	leaf()

@@ -78,6 +78,9 @@ func Walk(n Node, v Visitor) {
 		Walk(n.Left, v)
 		Walk(n.Right, v)
 
+	case *Invalid:
+		// Leaf
+
 	case *LabelStatement:
 		// Leaf
 

@@ -125,6 +125,10 @@ func (p *Parser) addError(message string) {
 	p.errors = append(p.errors, ParserError{Range: p.tok.Range(), Message: message})
 }
 
+func (p *Parser) addErrorForNode(node ast.Node, message string) {
+	p.errors = append(p.errors, ParserError{Range: ast.Range(node), Message: message})
+}
+
 func (p *Parser) tokIs(tokenType token.TokenType) bool {
 	return p.tok.Type == tokenType
 }

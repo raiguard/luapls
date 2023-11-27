@@ -31,8 +31,9 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		left = p.parseVararg()
 	default:
 		p.addError(fmt.Sprintf("Expected expression, got %s", token.TokenStr[p.tok.Type]))
+		invalid := ast.Invalid{Tokens: []token.Token{p.tok}}
 		p.next()
-		return nil
+		return &invalid
 	}
 
 	for isSuffixOperator(p.tok.Type) {
@@ -252,19 +253,28 @@ func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 
 func (p *Parser) parseTableField() *ast.TableField {
 	var leftExp ast.Expression
-	needClosingBracket := false
+	hasKeyBrackets := false
 	pos := p.tok.Pos
 	if p.tokIs(token.LBRACK) {
-		needClosingBracket = true
+		hasKeyBrackets = true
 		p.next()
 	}
 	leftExp = p.parseExpression(LOWEST, true)
-	if needClosingBracket {
+	if hasKeyBrackets {
 		p.expect(token.RBRACK)
 	}
-	// If key is in brackets, value is required
-	if !needClosingBracket && (tableSep[p.tok.Type] || p.tokIs(token.RBRACE)) {
-		return &ast.TableField{Value: leftExp, StartPos: leftExp.Pos()}
+	// Expression keys require values
+	if !hasKeyBrackets {
+		if tableSep[p.tok.Type] || p.tokIs(token.RBRACE) || isType[ast.Invalid](leftExp) {
+			return &ast.TableField{Value: leftExp, StartPos: leftExp.Pos()}
+		}
+		if !isType[ast.Identifier](leftExp) {
+			if p.tokIs(token.ASSIGN) {
+				p.addErrorForNode(leftExp, "Missing brackets around expression key")
+			} else {
+				return &ast.TableField{Value: leftExp, StartPos: leftExp.Pos()}
+			}
+		}
 	}
 	p.expect(token.ASSIGN)
 	rightExp := p.parseExpression(LOWEST, true)
@@ -273,6 +283,11 @@ func (p *Parser) parseTableField() *ast.TableField {
 		Value:    rightExp,
 		StartPos: pos,
 	}
+}
+
+func isType[T any](thing any) bool {
+	_, ok := thing.(*T)
+	return ok
 }
 
 func (p *Parser) parseVararg() *ast.Vararg {

@@ -164,5 +164,170 @@
         }
       ]
     }
+  },
+  {
+    "Label": "missing_end_brace_eof",
+    "Input": "local tbl = {",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        13
+      ],
+      "Stmts": [
+        {
+          "Type": "LocalStatement",
+          "Range": [
+            0,
+            13
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                6,
+                9
+              ],
+              "Literal": "tbl"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "TableLiteral",
+              "Range": [
+                12,
+                13
+              ],
+              "Fields": [
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    13,
+                    13
+                  ],
+                  "Key": null,
+                  "Value": {
+                    "Tokens": [
+                      {
+                        "Type": "eof",
+                        "Literal": "",
+                        "Pos": 13
+                      }
+                    ]
+                  }
+                }
+              ],
+              "StartPos": 12
+            }
+          ]
+        }
+      ]
+    },
+    "Errors": [
+      {
+        "Message": "Expected expression, got eof",
+        "Range": [
+          13,
+          13
+        ]
+      },
+      {
+        "Message": "Expected right brace, got eof",
+        "Range": [
+          13,
+          13
+        ]
+      }
+    ]
+  },
+  {
+    "Label": "unwrapped_expression_key",
+    "Input": "local tbl = {foo.bar = 'baz'}",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        29
+      ],
+      "Stmts": [
+        {
+          "Type": "LocalStatement",
+          "Range": [
+            0,
+            29
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                6,
+                9
+              ],
+              "Literal": "tbl"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "TableLiteral",
+              "Range": [
+                12,
+                29
+              ],
+              "Fields": [
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    13,
+                    28
+                  ],
+                  "Key": {
+                    "Type": "IndexExpression",
+                    "Range": [
+                      13,
+                      20
+                    ],
+                    "Left": {
+                      "Type": "Identifier",
+                      "Range": [
+                        13,
+                        16
+                      ],
+                      "Literal": "foo"
+                    },
+                    "Indexer": "dot",
+                    "Inner": {
+                      "Type": "Identifier",
+                      "Range": [
+                        17,
+                        20
+                      ],
+                      "Literal": "bar"
+                    }
+                  },
+                  "Value": {
+                    "Type": "StringLiteral",
+                    "Range": [
+                      23,
+                      28
+                    ],
+                    "Literal": "'baz'"
+                  }
+                }
+              ],
+              "StartPos": 12
+            }
+          ]
+        }
+      ]
+    },
+    "Errors": [
+      {
+        "Message": "Missing brackets around expression key",
+        "Range": [
+          13,
+          20
+        ]
+      }
+    ]
   }
 ]
