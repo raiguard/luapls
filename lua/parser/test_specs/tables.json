@@ -1,0 +1,168 @@
+[
+  {
+    "Label": "complex_literal",
+    "Input": "a = {1, 2, three = 3, ['four'] = 4, [2+3] = 5}",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        46
+      ],
+      "Stmts": [
+        {
+          "Type": "AssignmentStatement",
+          "Range": [
+            0,
+            46
+          ],
+          "Vars": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                0,
+                1
+              ],
+              "Literal": "a"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "TableLiteral",
+              "Range": [
+                4,
+                46
+              ],
+              "Fields": [
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    5,
+                    6
+                  ],
+                  "Key": null,
+                  "Value": {
+                    "Type": "NumberLiteral",
+                    "Range": [
+                      5,
+                      6
+                    ],
+                    "Literal": "1",
+                    "Value": 1
+                  }
+                },
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    8,
+                    9
+                  ],
+                  "Key": null,
+                  "Value": {
+                    "Type": "NumberLiteral",
+                    "Range": [
+                      8,
+                      9
+                    ],
+                    "Literal": "2",
+                    "Value": 2
+                  }
+                },
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    11,
+                    20
+                  ],
+                  "Key": {
+                    "Type": "Identifier",
+                    "Range": [
+                      11,
+                      16
+                    ],
+                    "Literal": "three"
+                  },
+                  "Value": {
+                    "Type": "NumberLiteral",
+                    "Range": [
+                      19,
+                      20
+                    ],
+                    "Literal": "3",
+                    "Value": 3
+                  }
+                },
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    22,
+                    34
+                  ],
+                  "Key": {
+                    "Type": "StringLiteral",
+                    "Range": [
+                      23,
+                      29
+                    ],
+                    "Literal": "'four'"
+                  },
+                  "Value": {
+                    "Type": "NumberLiteral",
+                    "Range": [
+                      33,
+                      34
+                    ],
+                    "Literal": "4",
+                    "Value": 4
+                  }
+                },
+                {
+                  "Type": "TableField",
+                  "Range": [
+                    36,
+                    45
+                  ],
+                  "Key": {
+                    "Type": "InfixExpression",
+                    "Range": [
+                      37,
+                      40
+                    ],
+                    "Left": {
+                      "Type": "NumberLiteral",
+                      "Range": [
+                        37,
+                        38
+                      ],
+                      "Literal": "2",
+                      "Value": 2
+                    },
+                    "Operator": "plus",
+                    "Right": {
+                      "Type": "NumberLiteral",
+                      "Range": [
+                        39,
+                        40
+                      ],
+                      "Literal": "3",
+                      "Value": 3
+                    }
+                  },
+                  "Value": {
+                    "Type": "NumberLiteral",
+                    "Range": [
+                      44,
+                      45
+                    ],
+                    "Literal": "5",
+                    "Value": 5
+                  }
+                }
+              ],
+              "StartPos": 4
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

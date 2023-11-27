@@ -114,8 +114,8 @@
     }
   },
   {
-    "Label": "same_precedence",
-    "Input": "a = b + c + d",
+    "Label": "left_associative",
+    "Input": "a = 2 + 2 + 2",
     "AST": {
       "Type": "Block",
       "Range": [
@@ -153,31 +153,106 @@
                   9
                 ],
                 "Left": {
-                  "Type": "Identifier",
+                  "Type": "NumberLiteral",
                   "Range": [
                     4,
                     5
                   ],
-                  "Literal": "b"
+                  "Literal": "2",
+                  "Value": 2
                 },
                 "Operator": "plus",
                 "Right": {
-                  "Type": "Identifier",
+                  "Type": "NumberLiteral",
                   "Range": [
                     8,
                     9
                   ],
-                  "Literal": "c"
+                  "Literal": "2",
+                  "Value": 2
                 }
               },
               "Operator": "plus",
               "Right": {
-                "Type": "Identifier",
+                "Type": "NumberLiteral",
                 "Range": [
                   12,
                   13
                 ],
-                "Literal": "d"
+                "Literal": "2",
+                "Value": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "Label": "right_associative",
+    "Input": "a = 'foo'..'bar'..'baz'",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        23
+      ],
+      "Stmts": [
+        {
+          "Type": "AssignmentStatement",
+          "Range": [
+            0,
+            23
+          ],
+          "Vars": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                0,
+                1
+              ],
+              "Literal": "a"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "InfixExpression",
+              "Range": [
+                4,
+                23
+              ],
+              "Left": {
+                "Type": "StringLiteral",
+                "Range": [
+                  4,
+                  9
+                ],
+                "Literal": "'foo'"
+              },
+              "Operator": "concat",
+              "Right": {
+                "Type": "InfixExpression",
+                "Range": [
+                  11,
+                  23
+                ],
+                "Left": {
+                  "Type": "StringLiteral",
+                  "Range": [
+                    11,
+                    16
+                  ],
+                  "Literal": "'bar'"
+                },
+                "Operator": "concat",
+                "Right": {
+                  "Type": "StringLiteral",
+                  "Range": [
+                    18,
+                    23
+                  ],
+                  "Literal": "'baz'"
+                }
               }
             }
           ]

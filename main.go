@@ -38,7 +38,7 @@ func main() {
 		parseFile(args[2])
 	case "make-test":
 		if len(args) < 4 {
-			fmt.Fprintln(os.Stderr, "Not enough arguments, requires a label and input string")
+			fmt.Fprintln(os.Stderr, "Not enough arguments: luapls make-test <suite> <label> <input string>")
 			os.Exit(1)
 		}
 		makeTest(args[2], args[3], args[4])
