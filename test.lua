@@ -30,6 +30,8 @@ local first, second = "second", "first"
 
 -- Other
 
+local tbl = {foo.bar = "baz"}
+
 print(num_1, num_2)
 
 if num_2 < 5 then

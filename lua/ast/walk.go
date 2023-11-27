@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/raiguard/luapls/lua/token"
 )
 
 type Visitor func(n Node) bool
@@ -128,4 +130,21 @@ func WalkList[N Node](nodes []N, v Visitor) {
 	for i := 0; i < len(nodes); i++ {
 		Walk(nodes[i], v)
 	}
+}
+
+// GetNode returns the innermost node at the given position, and its parent nodes.
+func GetNode(base Node, pos token.Pos) (Node, []Node) {
+	var node Node
+	parents := []Node{}
+	Walk(base, func(n Node) bool {
+		if n.Pos() <= pos && pos < n.End() {
+			if node != nil {
+				parents = append(parents, node)
+			}
+			node = n
+			return true
+		}
+		return false
+	})
+	return node, parents
 }

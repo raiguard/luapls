@@ -47,6 +47,7 @@ func Run() {
 	handler.TextDocumentDocumentHighlight = textDocumentHighlight
 	handler.TextDocumentHover = textDocumentHover
 	handler.TextDocumentCompletion = textDocumentCompletion
+	handler.TextDocumentSelectionRange = textDocumentSelectionRange
 
 	server := server.NewServer(&handler, lsName, true)
 

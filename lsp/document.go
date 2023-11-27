@@ -32,7 +32,7 @@ func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlight
 	if file == nil {
 		return nil, nil
 	}
-	node := getInnermostNode(&file.Block, file.ToPos(params.Position))
+	node, _ := ast.GetNode(&file.Block, file.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
@@ -46,7 +46,7 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 	if file == nil {
 		return nil, nil
 	}
-	node := getInnermostNode(&file.Block, file.ToPos(params.Position))
+	node, _ := ast.GetNode(&file.Block, file.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
@@ -67,4 +67,25 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 
 func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
 	return reserved, nil
+}
+
+func textDocumentSelectionRange(ctx *glsp.Context, params *protocol.SelectionRangeParams) ([]protocol.SelectionRange, error) {
+	file := files[params.TextDocument.URI]
+	if file == nil {
+		return nil, nil
+	}
+	ranges := []protocol.SelectionRange{}
+	for _, position := range params.Positions {
+		node, parents := ast.GetNode(&file.Block, file.ToPos(position))
+		ranges = append(ranges, protocol.SelectionRange{
+			Range: file.ToProtocolRange(ast.Range(node)),
+		})
+		curRange := &ranges[len(ranges)-1]
+		for i := len(parents) - 1; i >= 0; i-- {
+			parentRange := protocol.SelectionRange{Range: file.ToProtocolRange(ast.Range(parents[i]))}
+			curRange.Parent = &parentRange
+			curRange = &parentRange
+		}
+	}
+	return ranges, nil
 }
