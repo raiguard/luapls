@@ -1,0 +1,324 @@
+[
+  {
+    "Label": "repeat",
+    "Input": "local i = 0 repeat i = i + 1 until i == 50 print('done'0",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        56
+      ],
+      "Stmts": [
+        {
+          "Type": "LocalStatement",
+          "Range": [
+            0,
+            11
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                6,
+                7
+              ],
+              "Literal": "i"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "NumberLiteral",
+              "Range": [
+                10,
+                11
+              ],
+              "Literal": "0",
+              "Value": 0
+            }
+          ]
+        },
+        {
+          "Type": "RepeatStatement",
+          "Range": [
+            12,
+            42
+          ],
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              19,
+              28
+            ],
+            "Stmts": [
+              {
+                "Type": "AssignmentStatement",
+                "Range": [
+                  19,
+                  28
+                ],
+                "Vars": [
+                  {
+                    "Type": "Identifier",
+                    "Range": [
+                      19,
+                      20
+                    ],
+                    "Literal": "i"
+                  }
+                ],
+                "Exps": [
+                  {
+                    "Type": "InfixExpression",
+                    "Range": [
+                      23,
+                      28
+                    ],
+                    "Left": {
+                      "Type": "Identifier",
+                      "Range": [
+                        23,
+                        24
+                      ],
+                      "Literal": "i"
+                    },
+                    "Operator": "plus",
+                    "Right": {
+                      "Type": "NumberLiteral",
+                      "Range": [
+                        27,
+                        28
+                      ],
+                      "Literal": "1",
+                      "Value": 1
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "Condition": {
+            "Type": "InfixExpression",
+            "Range": [
+              35,
+              42
+            ],
+            "Left": {
+              "Type": "Identifier",
+              "Range": [
+                35,
+                36
+              ],
+              "Literal": "i"
+            },
+            "Operator": "equal",
+            "Right": {
+              "Type": "NumberLiteral",
+              "Range": [
+                40,
+                42
+              ],
+              "Literal": "50",
+              "Value": 50
+            }
+          }
+        },
+        {
+          "Type": "ExpressionStatement",
+          "Range": [
+            43,
+            56
+          ],
+          "Exp": {
+            "Type": "FunctionCall",
+            "Range": [
+              43,
+              56
+            ],
+            "Left": {
+              "Type": "Identifier",
+              "Range": [
+                43,
+                48
+              ],
+              "Literal": "print"
+            },
+            "Args": [
+              {
+                "Type": "StringLiteral",
+                "Range": [
+                  49,
+                  55
+                ],
+                "Literal": "'done'"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Label": "return",
+    "Input": "return foo, bar",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        15
+      ],
+      "Stmts": [
+        {
+          "Type": "ReturnStatement",
+          "Range": [
+            0,
+            15
+          ],
+          "Exps": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                7,
+                10
+              ],
+              "Literal": "foo"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                12,
+                15
+              ],
+              "Literal": "bar"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "Label": "while",
+    "Input": "local i = 0 while i \u003c 10 do i = i + 1 end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        41
+      ],
+      "Stmts": [
+        {
+          "Type": "LocalStatement",
+          "Range": [
+            0,
+            11
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                6,
+                7
+              ],
+              "Literal": "i"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "NumberLiteral",
+              "Range": [
+                10,
+                11
+              ],
+              "Literal": "0",
+              "Value": 0
+            }
+          ]
+        },
+        {
+          "Type": "WhileStatement",
+          "Range": [
+            12,
+            41
+          ],
+          "Condition": {
+            "Type": "InfixExpression",
+            "Range": [
+              18,
+              24
+            ],
+            "Left": {
+              "Type": "Identifier",
+              "Range": [
+                18,
+                19
+              ],
+              "Literal": "i"
+            },
+            "Operator": "lt",
+            "Right": {
+              "Type": "NumberLiteral",
+              "Range": [
+                22,
+                24
+              ],
+              "Literal": "10",
+              "Value": 10
+            }
+          },
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              28,
+              37
+            ],
+            "Stmts": [
+              {
+                "Type": "AssignmentStatement",
+                "Range": [
+                  28,
+                  37
+                ],
+                "Vars": [
+                  {
+                    "Type": "Identifier",
+                    "Range": [
+                      28,
+                      29
+                    ],
+                    "Literal": "i"
+                  }
+                ],
+                "Exps": [
+                  {
+                    "Type": "InfixExpression",
+                    "Range": [
+                      32,
+                      37
+                    ],
+                    "Left": {
+                      "Type": "Identifier",
+                      "Range": [
+                        32,
+                        33
+                      ],
+                      "Literal": "i"
+                    },
+                    "Operator": "plus",
+                    "Right": {
+                      "Type": "NumberLiteral",
+                      "Range": [
+                        36,
+                        37
+                      ],
+                      "Literal": "1",
+                      "Value": 1
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

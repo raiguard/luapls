@@ -1,0 +1,171 @@
+[
+  {
+    "Label": "continue",
+    "Input": "for i = 1, 100 do if i > 50 then goto continue end print(i) ::continue:: end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        76
+      ],
+      "Stmts": [
+        {
+          "Type": "ForStatement",
+          "Range": [
+            0,
+            76
+          ],
+          "Name": {
+            "Type": "Identifier",
+            "Range": [
+              4,
+              5
+            ],
+            "Literal": "i"
+          },
+          "Start": {
+            "Type": "NumberLiteral",
+            "Range": [
+              8,
+              9
+            ],
+            "Literal": "1",
+            "Value": 1
+          },
+          "Finish": {
+            "Type": "NumberLiteral",
+            "Range": [
+              11,
+              14
+            ],
+            "Literal": "100",
+            "Value": 100
+          },
+          "Step": null,
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              18,
+              72
+            ],
+            "Stmts": [
+              {
+                "Type": "IfStatement",
+                "Range": [
+                  18,
+                  50
+                ],
+                "Clauses": [
+                  {
+                    "Type": "IfClause",
+                    "Range": [
+                      18,
+                      46
+                    ],
+                    "Condition": {
+                      "Type": "InfixExpression",
+                      "Range": [
+                        21,
+                        27
+                      ],
+                      "Left": {
+                        "Type": "Identifier",
+                        "Range": [
+                          21,
+                          22
+                        ],
+                        "Literal": "i"
+                      },
+                      "Operator": "gt",
+                      "Right": {
+                        "Type": "NumberLiteral",
+                        "Range": [
+                          25,
+                          27
+                        ],
+                        "Literal": "50",
+                        "Value": 50
+                      }
+                    },
+                    "Body": {
+                      "Type": "Block",
+                      "Range": [
+                        33,
+                        46
+                      ],
+                      "Stmts": [
+                        {
+                          "Type": "GotoStatement",
+                          "Range": [
+                            33,
+                            46
+                          ],
+                          "Name": {
+                            "Type": "Identifier",
+                            "Range": [
+                              38,
+                              46
+                            ],
+                            "Literal": "continue"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "StartPos": 18
+              },
+              {
+                "Type": "ExpressionStatement",
+                "Range": [
+                  51,
+                  59
+                ],
+                "Exp": {
+                  "Type": "FunctionCall",
+                  "Range": [
+                    51,
+                    59
+                  ],
+                  "Left": {
+                    "Type": "Identifier",
+                    "Range": [
+                      51,
+                      56
+                    ],
+                    "Literal": "print"
+                  },
+                  "Args": [
+                    {
+                      "Type": "Identifier",
+                      "Range": [
+                        57,
+                        58
+                      ],
+                      "Literal": "i"
+                    }
+                  ]
+                }
+              },
+              {
+                "Type": "LabelStatement",
+                "Range": [
+                  60,
+                  72
+                ],
+                "Name": {
+                  "Type": "Identifier",
+                  "Range": [
+                    62,
+                    70
+                  ],
+                  "Literal": "continue"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

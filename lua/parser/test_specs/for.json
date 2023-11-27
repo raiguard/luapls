@@ -1,0 +1,353 @@
+[
+  {
+    "Label": "standard_numeric",
+    "Input": "for i = 1, 100 do end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        21
+      ],
+      "Stmts": [
+        {
+          "Type": "ForStatement",
+          "Range": [
+            0,
+            21
+          ],
+          "Name": {
+            "Type": "Identifier",
+            "Range": [
+              4,
+              5
+            ],
+            "Literal": "i"
+          },
+          "Start": {
+            "Type": "NumberLiteral",
+            "Range": [
+              8,
+              9
+            ],
+            "Literal": "1",
+            "Value": 1
+          },
+          "Finish": {
+            "Type": "NumberLiteral",
+            "Range": [
+              11,
+              14
+            ],
+            "Literal": "100",
+            "Value": 100
+          },
+          "Step": null,
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              18,
+              18
+            ],
+            "Stmts": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Label": "stepped_numeric",
+    "Input": "for i = 1, 100, 5 do end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        24
+      ],
+      "Stmts": [
+        {
+          "Type": "ForStatement",
+          "Range": [
+            0,
+            24
+          ],
+          "Name": {
+            "Type": "Identifier",
+            "Range": [
+              4,
+              5
+            ],
+            "Literal": "i"
+          },
+          "Start": {
+            "Type": "NumberLiteral",
+            "Range": [
+              8,
+              9
+            ],
+            "Literal": "1",
+            "Value": 1
+          },
+          "Finish": {
+            "Type": "NumberLiteral",
+            "Range": [
+              11,
+              14
+            ],
+            "Literal": "100",
+            "Value": 100
+          },
+          "Step": {
+            "Type": "NumberLiteral",
+            "Range": [
+              16,
+              17
+            ],
+            "Literal": "5",
+            "Value": 5
+          },
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              21,
+              21
+            ],
+            "Stmts": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Label": "reverse_numeric",
+    "Input": "for i = 100, -1, -2 do end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        26
+      ],
+      "Stmts": [
+        {
+          "Type": "ForStatement",
+          "Range": [
+            0,
+            26
+          ],
+          "Name": {
+            "Type": "Identifier",
+            "Range": [
+              4,
+              5
+            ],
+            "Literal": "i"
+          },
+          "Start": {
+            "Type": "NumberLiteral",
+            "Range": [
+              8,
+              11
+            ],
+            "Literal": "100",
+            "Value": 100
+          },
+          "Finish": {
+            "Type": "PrefixExpression",
+            "Range": [
+              13,
+              15
+            ],
+            "Operator": "minus",
+            "Right": {
+              "Type": "NumberLiteral",
+              "Range": [
+                14,
+                15
+              ],
+              "Literal": "1",
+              "Value": 1
+            }
+          },
+          "Step": {
+            "Type": "PrefixExpression",
+            "Range": [
+              17,
+              19
+            ],
+            "Operator": "minus",
+            "Right": {
+              "Type": "NumberLiteral",
+              "Range": [
+                18,
+                19
+              ],
+              "Literal": "2",
+              "Value": 2
+            }
+          },
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              23,
+              23
+            ],
+            "Stmts": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Label": "generic_pairs",
+    "Input": "for key, value in pairs({}) do end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        34
+      ],
+      "Stmts": [
+        {
+          "Type": "ForInStatement",
+          "Range": [
+            0,
+            34
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                4,
+                7
+              ],
+              "Literal": "key"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                9,
+                14
+              ],
+              "Literal": "value"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "FunctionCall",
+              "Range": [
+                18,
+                27
+              ],
+              "Left": {
+                "Type": "Identifier",
+                "Range": [
+                  18,
+                  23
+                ],
+                "Literal": "pairs"
+              },
+              "Args": [
+                {
+                  "Type": "TableLiteral",
+                  "Range": [
+                    24,
+                    26
+                  ],
+                  "Fields": [],
+                  "StartPos": 24
+                }
+              ]
+            }
+          ],
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              31,
+              31
+            ],
+            "Stmts": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "Label": "generic_five_values",
+    "Input": "for first, second, third, fourth, fifth in some_iterable_variable do end",
+    "AST": {
+      "Type": "Block",
+      "Range": [
+        0,
+        72
+      ],
+      "Stmts": [
+        {
+          "Type": "ForInStatement",
+          "Range": [
+            0,
+            72
+          ],
+          "Names": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                4,
+                9
+              ],
+              "Literal": "first"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                11,
+                17
+              ],
+              "Literal": "second"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                19,
+                24
+              ],
+              "Literal": "third"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                26,
+                32
+              ],
+              "Literal": "fourth"
+            },
+            {
+              "Type": "Identifier",
+              "Range": [
+                34,
+                39
+              ],
+              "Literal": "fifth"
+            }
+          ],
+          "Exps": [
+            {
+              "Type": "Identifier",
+              "Range": [
+                43,
+                65
+              ],
+              "Literal": "some_iterable_variable"
+            }
+          ],
+          "Body": {
+            "Type": "Block",
+            "Range": [
+              69,
+              69
+            ],
+            "Stmts": []
+          }
+        }
+      ]
+    }
+  }
+]
