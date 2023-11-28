@@ -20,9 +20,7 @@ func textDocumentDefinition(ctx *glsp.Context, params *protocol.DefinitionParams
 		return nil, nil
 	}
 
-	locals := getLocals(&file.Block, pos, true)
-
-	def := locals[ident.Literal]
+	def := getDefinition(&file.Block, ident)
 	if def == nil {
 		return nil, nil
 	}
@@ -31,4 +29,8 @@ func textDocumentDefinition(ctx *glsp.Context, params *protocol.DefinitionParams
 		URI:   params.TextDocument.URI,
 		Range: file.ToProtocolRange(ast.Range(def)),
 	}, nil
+}
+
+func getDefinition(node ast.Node, ident *ast.Identifier) *ast.Identifier {
+	return getLocals(node, ident.Pos(), true)[ident.Literal]
 }

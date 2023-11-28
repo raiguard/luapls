@@ -29,19 +29,6 @@ func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocu
 	return nil
 }
 
-func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
-	file := files[params.TextDocument.URI]
-	if file == nil {
-		return nil, nil
-	}
-	node, _ := ast.GetNode(&file.Block, file.ToPos(params.Position))
-	if node == nil {
-		return nil, nil
-	}
-	return []protocol.DocumentHighlight{
-		{Range: file.ToProtocolRange(ast.Range(node))},
-	}, nil
-}
 func textDocumentSelectionRange(ctx *glsp.Context, params *protocol.SelectionRangeParams) ([]protocol.SelectionRange, error) {
 	file := files[params.TextDocument.URI]
 	if file == nil {
