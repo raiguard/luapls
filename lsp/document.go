@@ -82,7 +82,14 @@ func textDocumentSelectionRange(ctx *glsp.Context, params *protocol.SelectionRan
 		})
 		curRange := &ranges[len(ranges)-1]
 		for i := len(parents) - 1; i >= 0; i-- {
-			parentRange := protocol.SelectionRange{Range: file.ToProtocolRange(ast.Range(parents[i]))}
+			parent := &parents[i]
+			if parent, ok := (*parent).(*ast.TableField); ok {
+				// The table field will have the same selection range as the value node.
+				if parent.Key == nil {
+					continue
+				}
+			}
+			parentRange := protocol.SelectionRange{Range: file.ToProtocolRange(ast.Range(*parent))}
 			curRange.Parent = &parentRange
 			curRange = &parentRange
 		}
