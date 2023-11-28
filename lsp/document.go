@@ -1,7 +1,6 @@
 package lsp
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
