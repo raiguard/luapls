@@ -7,8 +7,8 @@ import (
 )
 
 type File struct {
-	Block      ast.Block
-	Errors     []ParserError
+	Block    ast.Block
+	Errors   []ParserError
 	LineBreaks []int
 	// TODO: Global exports, etc.
 }
@@ -40,13 +40,13 @@ func (f *File) ToProtocolPos(pos token.Pos) protocol.Position {
 	line := 0
 	lineStart := 0
 	lineEnd := -1
-	for i := 0; i < len(f.LineBreaks); i++ {
+	for line < len(f.LineBreaks) {
 		lineStart = lineEnd + 1
-		lineEnd = f.LineBreaks[i]
+		lineEnd = f.LineBreaks[line]
 		if lineStart <= pos && lineEnd >= pos {
-			line = i
 			break
 		}
+		line++
 	}
 	return protocol.Position{
 		Line:      uint32(line),

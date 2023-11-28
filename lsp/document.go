@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
+
+// TODO: Listen for modifications to files that were previously parsed
 
 func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	parseFile(ctx, params.TextDocument.URI, params.TextDocument.Text)
@@ -63,10 +66,6 @@ func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protoc
 		),
 		Range: ptr(file.ToProtocolRange(ast.Range(node))),
 	}, nil
-}
-
-func textDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
-	return reserved, nil
 }
 
 func textDocumentSelectionRange(ctx *glsp.Context, params *protocol.SelectionRangeParams) ([]protocol.SelectionRange, error) {

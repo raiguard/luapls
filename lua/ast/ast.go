@@ -16,16 +16,14 @@ func Range(n Node) token.Range {
 type Block struct {
 	Stmts    []Statement
 	StartPos token.Pos `json:"-"`
+	EndPos   token.Pos `json:"-"`
 }
 
 func (b *Block) Pos() token.Pos {
 	return b.StartPos
 }
 func (b *Block) End() token.Pos {
-	if len(b.Stmts) > 0 {
-		return b.Stmts[len(b.Stmts)-1].End()
-	}
-	return b.StartPos
+	return b.EndPos
 }
 
 type TableField struct {
@@ -42,13 +40,25 @@ func (rf *TableField) End() token.Pos {
 }
 
 type Invalid struct {
-	Tokens []token.Token
+	Exps []Expression `json:",omitempty"`
+	// OR
+	Token *token.Token `json:",omitempty"`
 }
 
 func (i *Invalid) expressionNode() {}
 func (i *Invalid) statementNode()  {}
-func (i *Invalid) Pos() token.Pos  { return i.Tokens[0].Pos }
-func (i *Invalid) End() token.Pos  { return i.Tokens[len(i.Tokens)-1].End() }
+func (i *Invalid) Pos() token.Pos {
+	if i.Token != nil {
+		return i.Token.Pos
+	}
+	return i.Exps[0].Pos()
+}
+func (i *Invalid) End() token.Pos {
+	if i.Token != nil {
+		return i.Token.End()
+	}
+	return i.Exps[len(i.Exps)-1].End()
+}
 
 // A Leaf node has no children and is interactable in the editor.
 type LeafNode interface {

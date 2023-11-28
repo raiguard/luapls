@@ -31,7 +31,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		left = p.parseVararg()
 	default:
 		p.addError(fmt.Sprintf("Expected expression, got %s", token.TokenStr[p.tok.Type]))
-		invalid := ast.Invalid{Tokens: []token.Token{p.tok}}
+		invalid := ast.Invalid{Token: &p.tok}
 		p.next()
 		return &invalid
 	}

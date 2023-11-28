@@ -6,22 +6,22 @@ import (
 	"github.com/raiguard/luapls/lua/token"
 )
 
-type Visitor func(n Node) bool
+type Visitor func(node Node) bool
 
 // Walk performs a depth-first traversal of the AST, calling the visitor for each node.
 // If the visitor returns false, this node's children are not traversed.
-func Walk(n Node, v Visitor) {
-	if n == nil || !v(n) {
+func Walk(node Node, visitor Visitor) {
+	if node == nil || !visitor(node) {
 		return
 	}
 
-	switch n := n.(type) {
+	switch node := node.(type) {
 	case *AssignmentStatement:
-		WalkList(n.Vars, v)
-		WalkList(n.Exps, v)
+		WalkList(node.Vars, visitor)
+		WalkList(node.Exps, visitor)
 
 	case *Block:
-		WalkList(n.Stmts, v)
+		WalkList(node.Stmts, visitor)
 
 	case *BooleanLiteral:
 		// Leaf
@@ -30,95 +30,98 @@ func Walk(n Node, v Visitor) {
 		// Leaf
 
 	case *DoStatement:
-		Walk(&n.Body, v)
+		Walk(&node.Body, visitor)
 
 	case *ForInStatement:
-		WalkList(n.Names, v)
-		WalkList(n.Exps, v)
-		Walk(&n.Body, v)
+		WalkList(node.Names, visitor)
+		WalkList(node.Exps, visitor)
+		Walk(&node.Body, visitor)
 
 	case *ForStatement:
-		Walk(n.Start, v)
-		Walk(n.Finish, v)
-		Walk(n.Step, v)
-		Walk(&n.Body, v)
+		Walk(node.Start, visitor)
+		Walk(node.Finish, visitor)
+		Walk(node.Step, visitor)
+		Walk(&node.Body, visitor)
 
 	case *FunctionCall:
-		Walk(n.Left, v)
-		WalkList(n.Args, v)
+		Walk(node.Left, visitor)
+		WalkList(node.Args, visitor)
 
 	case *FunctionExpression:
-		WalkList(n.Params, v)
-		Walk(&n.Body, v)
+		WalkList(node.Params, visitor)
+		Walk(&node.Body, visitor)
 
 	case *FunctionStatement:
-		Walk(n.Left, v)
-		WalkList(n.Params, v)
-		Walk(&n.Body, v)
+		Walk(node.Left, visitor)
+		WalkList(node.Params, visitor)
+		Walk(&node.Body, visitor)
 
 	case *GotoStatement:
-		Walk(n.Name, v)
+		Walk(node.Name, visitor)
 
 	case *Identifier:
 		// Leaf
 
 	case *IfClause:
-		Walk(n.Condition, v)
-		Walk(&n.Body, v)
+		Walk(node.Condition, visitor)
+		Walk(&node.Body, visitor)
 
 	case *IfStatement:
-		WalkList(n.Clauses, v)
+		WalkList(node.Clauses, visitor)
 
 	case *IndexExpression:
-		Walk(n.Left, v)
-		Walk(n.Inner, v)
+		Walk(node.Left, visitor)
+		Walk(node.Inner, visitor)
 
 	case *InfixExpression:
-		Walk(n.Left, v)
-		Walk(n.Right, v)
+		Walk(node.Left, visitor)
+		Walk(node.Right, visitor)
 
 	case *Invalid:
-		// Leaf
+		if node.Exps != nil {
+			WalkList(node.Exps, visitor)
+		}
+		// Otherwise, leaf
 
 	case *LabelStatement:
 		// Leaf
 
 	case *LocalStatement:
-		WalkList(n.Names, v)
-		WalkList(n.Exps, v)
+		WalkList(node.Names, visitor)
+		WalkList(node.Exps, visitor)
 
 	case *NumberLiteral:
 		// Leaf
 
 	case *PrefixExpression:
-		Walk(n.Right, v)
+		Walk(node.Right, visitor)
 
 	case *RepeatStatement:
-		Walk(&n.Body, v)
-		Walk(n.Condition, v)
+		Walk(&node.Body, visitor)
+		Walk(node.Condition, visitor)
 
 	case *ReturnStatement:
-		WalkList(n.Exps, v)
+		WalkList(node.Exps, visitor)
 
 	case *StringLiteral:
 		// Leaf
 
 	case *TableField:
-		Walk(n.Key, v)
-		Walk(n.Value, v)
+		Walk(node.Key, visitor)
+		Walk(node.Value, visitor)
 
 	case *TableLiteral:
-		WalkList(n.Fields, v)
+		WalkList(node.Fields, visitor)
 
 	case *Vararg:
 		// Leaf
 
 	case *WhileStatement:
-		Walk(n.Condition, v)
-		Walk(&n.Body, v)
+		Walk(node.Condition, visitor)
+		Walk(&node.Body, visitor)
 
 	default:
-		panic(fmt.Sprintf("Walk unimplemented for %T", n))
+		panic(fmt.Sprintf("Walk unimplemented for %T", node))
 	}
 }
 

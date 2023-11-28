@@ -27,13 +27,16 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.LABEL:
 		stat = p.parseLabelStatement()
 	case token.LOCAL:
-		pos := p.tok.Pos
+		tok := p.tok
 		p.next()
 		switch p.tok.Type {
 		case token.FUNCTION:
-			stat = p.parseFunctionStatement(pos, true)
+			stat = p.parseFunctionStatement(tok.Pos, true)
 		case token.IDENT:
-			stat = p.parseLocalStatement(pos)
+			stat = p.parseLocalStatement(tok.Pos)
+		default:
+			stat = &ast.Invalid{Token: &tok}
+			p.addErrorForNode(stat, "Invalid statement")
 		}
 	case token.REPEAT:
 		stat = p.parseRepeatStatement()
@@ -49,7 +52,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		} else if _, ok := exps[0].(*ast.FunctionCall); ok {
 			stat = exps[0].(*ast.FunctionCall)
 		} else {
-			p.invalidTokenError()
+			stat = &ast.Invalid{Exps: exps}
+			p.addErrorForNode(stat, "Invalid statement")
 		}
 	}
 	for p.tokIs(token.SEMICOLON) {

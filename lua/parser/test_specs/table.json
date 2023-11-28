@@ -207,13 +207,16 @@
                   ],
                   "Key": null,
                   "Value": {
-                    "Tokens": [
-                      {
-                        "Type": "eof",
-                        "Literal": "",
-                        "Pos": 13
-                      }
-                    ]
+                    "Type": "Invalid",
+                    "Range": [
+                      13,
+                      13
+                    ],
+                    "Token": {
+                      "Type": "eof",
+                      "Literal": "",
+                      "Pos": 13
+                    }
                   }
                 }
               ],

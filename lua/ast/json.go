@@ -227,6 +227,19 @@ func (node *LabelStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (node *Invalid) MarshalJSON() ([]byte, error) {
+	type Alias Invalid
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "Invalid",
+		Range: token.Range{node.Pos(), node.End()},
+		Alias: (*Alias)(node),
+	})
+}
+
 func (node *LocalStatement) MarshalJSON() ([]byte, error) {
 	type Alias LocalStatement
 	return json.Marshal(&struct {

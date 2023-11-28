@@ -50,8 +50,8 @@ func (p *Parser) next() {
 
 func (p *Parser) ParseFile() File {
 	return File{
-		Block:      p.ParseBlock(),
-		Errors:     p.errors,
+		Block:    p.ParseBlock(),
+		Errors:   p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
 	}
 }
@@ -65,6 +65,14 @@ func (p *Parser) ParseBlock() ast.Block {
 
 	for !blockEnd[p.tok.Type] {
 		block.Stmts = append(block.Stmts, p.parseStatement())
+	}
+
+	if p.tokIs(token.EOF) {
+		block.EndPos = p.tok.Pos
+	} else if len(block.Stmts) > 0 {
+		block.EndPos = block.Stmts[len(block.Stmts)-1].End()
+	} else {
+		block.EndPos = block.StartPos
 	}
 
 	return block
