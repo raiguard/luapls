@@ -18,6 +18,7 @@ type FunctionCall struct {
 }
 
 func (fc *FunctionCall) expressionNode() {}
+func (fc *FunctionCall) statementNode()  {}
 func (fc *FunctionCall) Pos() token.Pos {
 	return fc.Left.Pos()
 }

@@ -123,36 +123,29 @@
           }
         },
         {
-          "Type": "ExpressionStatement",
+          "Type": "FunctionCall",
           "Range": [
             43,
             56
           ],
-          "Exp": {
-            "Type": "FunctionCall",
+          "Left": {
+            "Type": "Identifier",
             "Range": [
               43,
-              56
+              48
             ],
-            "Left": {
-              "Type": "Identifier",
+            "Literal": "print"
+          },
+          "Args": [
+            {
+              "Type": "StringLiteral",
               "Range": [
-                43,
-                48
+                49,
+                55
               ],
-              "Literal": "print"
-            },
-            "Args": [
-              {
-                "Type": "StringLiteral",
-                "Range": [
-                  49,
-                  55
-                ],
-                "Literal": "'done'"
-              }
-            ]
-          }
+              "Literal": "'done'"
+            }
+          ]
         }
       ]
     }

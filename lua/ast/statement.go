@@ -48,24 +48,6 @@ func (ds *DoStatement) End() token.Pos {
 	return ds.EndPos
 }
 
-type ExpressionStatement struct {
-	Exp Expression
-}
-
-func (es *ExpressionStatement) statementNode() {}
-func (es *ExpressionStatement) Pos() token.Pos {
-	if es.Exp == nil {
-		return token.InvalidPos
-	}
-	return es.Exp.Pos()
-}
-func (es *ExpressionStatement) End() token.Pos {
-	if es.Exp == nil {
-		return token.InvalidPos
-	}
-	return es.Exp.End()
-}
-
 type ForStatement struct {
 	Name     *Identifier
 	Start    Expression

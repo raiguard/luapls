@@ -47,7 +47,7 @@ func (p *Parser) parseStatement() ast.Statement {
 			stat = p.parseAssignmentStatement(exps)
 			// TODO: Can there ever be zero expressions?
 		} else if _, ok := exps[0].(*ast.FunctionCall); ok {
-			stat = &ast.ExpressionStatement{Exp: exps[0]}
+			stat = exps[0].(*ast.FunctionCall)
 		} else {
 			p.invalidTokenError()
 		}

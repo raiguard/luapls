@@ -116,36 +116,29 @@
                 "StartPos": 18
               },
               {
-                "Type": "ExpressionStatement",
+                "Type": "FunctionCall",
                 "Range": [
                   51,
                   59
                 ],
-                "Exp": {
-                  "Type": "FunctionCall",
+                "Left": {
+                  "Type": "Identifier",
                   "Range": [
                     51,
-                    59
+                    56
                   ],
-                  "Left": {
+                  "Literal": "print"
+                },
+                "Args": [
+                  {
                     "Type": "Identifier",
                     "Range": [
-                      51,
-                      56
+                      57,
+                      58
                     ],
-                    "Literal": "print"
-                  },
-                  "Args": [
-                    {
-                      "Type": "Identifier",
-                      "Range": [
-                        57,
-                        58
-                      ],
-                      "Literal": "i"
-                    }
-                  ]
-                }
+                    "Literal": "i"
+                  }
+                ]
               },
               {
                 "Type": "LabelStatement",

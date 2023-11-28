@@ -32,9 +32,6 @@ func Walk(n Node, v Visitor) {
 	case *DoStatement:
 		Walk(&n.Body, v)
 
-	case *ExpressionStatement:
-		Walk(n.Exp, v)
-
 	case *ForInStatement:
 		WalkList(n.Names, v)
 		WalkList(n.Exps, v)

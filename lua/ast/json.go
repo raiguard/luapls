@@ -71,19 +71,6 @@ func (node *DoStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (node *ExpressionStatement) MarshalJSON() ([]byte, error) {
-	type Alias ExpressionStatement
-	return json.Marshal(&struct {
-		Type  string
-		Range token.Range
-		*Alias
-	}{
-		Type:  "ExpressionStatement",
-		Range: token.Range{node.Pos(), node.End()},
-		Alias: (*Alias)(node),
-	})
-}
-
 func (node *ForInStatement) MarshalJSON() ([]byte, error) {
 	type Alias ForInStatement
 	return json.Marshal(&struct {

@@ -59,52 +59,45 @@
                 ],
                 "Stmts": [
                   {
-                    "Type": "ExpressionStatement",
+                    "Type": "FunctionCall",
                     "Range": [
                       27,
                       39
                     ],
-                    "Exp": {
-                      "Type": "FunctionCall",
+                    "Left": {
+                      "Type": "Identifier",
                       "Range": [
                         27,
-                        39
+                        32
                       ],
-                      "Left": {
-                        "Type": "Identifier",
+                      "Literal": "print"
+                    },
+                    "Args": [
+                      {
+                        "Type": "InfixExpression",
                         "Range": [
-                          27,
-                          32
+                          33,
+                          38
                         ],
-                        "Literal": "print"
-                      },
-                      "Args": [
-                        {
-                          "Type": "InfixExpression",
+                        "Left": {
+                          "Type": "Identifier",
                           "Range": [
                             33,
+                            34
+                          ],
+                          "Literal": "a"
+                        },
+                        "Operator": "plus",
+                        "Right": {
+                          "Type": "Identifier",
+                          "Range": [
+                            37,
                             38
                           ],
-                          "Left": {
-                            "Type": "Identifier",
-                            "Range": [
-                              33,
-                              34
-                            ],
-                            "Literal": "a"
-                          },
-                          "Operator": "plus",
-                          "Right": {
-                            "Type": "Identifier",
-                            "Range": [
-                              37,
-                              38
-                            ],
-                            "Literal": "b"
-                          }
+                          "Literal": "b"
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
                 ]
               }
@@ -165,52 +158,45 @@
             ],
             "Stmts": [
               {
-                "Type": "ExpressionStatement",
+                "Type": "FunctionCall",
                 "Range": [
                   19,
                   31
                 ],
-                "Exp": {
-                  "Type": "FunctionCall",
+                "Left": {
+                  "Type": "Identifier",
                   "Range": [
                     19,
-                    31
+                    24
                   ],
-                  "Left": {
-                    "Type": "Identifier",
+                  "Literal": "print"
+                },
+                "Args": [
+                  {
+                    "Type": "InfixExpression",
                     "Range": [
-                      19,
-                      24
+                      25,
+                      30
                     ],
-                    "Literal": "print"
-                  },
-                  "Args": [
-                    {
-                      "Type": "InfixExpression",
+                    "Left": {
+                      "Type": "Identifier",
                       "Range": [
                         25,
+                        26
+                      ],
+                      "Literal": "a"
+                    },
+                    "Operator": "plus",
+                    "Right": {
+                      "Type": "Identifier",
+                      "Range": [
+                        29,
                         30
                       ],
-                      "Left": {
-                        "Type": "Identifier",
-                        "Range": [
-                          25,
-                          26
-                        ],
-                        "Literal": "a"
-                      },
-                      "Operator": "plus",
-                      "Right": {
-                        "Type": "Identifier",
-                        "Range": [
-                          29,
-                          30
-                        ],
-                        "Literal": "b"
-                      }
+                      "Literal": "b"
                     }
-                  ]
-                }
+                  }
+                ]
               }
             ]
           },
