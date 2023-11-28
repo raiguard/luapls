@@ -23,48 +23,50 @@ func logToEditor(ctx *glsp.Context, format string, args ...any) {
 }
 
 // getLocals returns a list of all local variables contained in node for the given pos.
-func getLocals(node ast.Node, pos token.Pos) map[string]*ast.Identifier {
+func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.Identifier {
 	locals := map[string]*ast.Identifier{}
 
 	ast.Walk(node, func(node ast.Node) bool {
-		// If the entire node is before the current position
-		if pos >= node.Pos() && pos > node.End() {
-			switch node := node.(type) {
-			case *ast.LocalStatement:
+		isBefore := pos >= node.Pos() && pos > node.End()
+		inRange := node.Pos() <= pos && node.End() > pos
+		switch node := node.(type) {
+		case *ast.ForInStatement:
+			if inRange {
 				for _, ident := range node.Names {
 					locals[ident.Literal] = ident
 				}
-			case *ast.FunctionStatement:
+			}
+		case *ast.ForStatement:
+			if inRange {
+				if node.Name != nil {
+					locals[node.Name.Literal] = node.Name
+				}
+			}
+		case *ast.FunctionExpression:
+			if inRange {
+				for _, ident := range node.Params {
+					locals[ident.Literal] = ident
+				}
+			}
+		case *ast.FunctionStatement:
+			if inRange {
+				for _, ident := range node.Params {
+					locals[ident.Literal] = ident
+				}
+			}
+			if isBefore || includeSelf {
 				if ident, ok := node.Left.(*ast.Identifier); ok {
 					locals[ident.Literal] = ident
 				}
 			}
-			return false
-		}
-		// If the node does not intersect the position
-		if pos < node.Pos() || pos >= node.End() {
-			return false
-		}
-		switch node := node.(type) {
-		case *ast.ForInStatement:
-			for _, ident := range node.Names {
-				locals[ident.Literal] = ident
-			}
-		case *ast.ForStatement:
-			if node.Name != nil {
-				locals[node.Name.Literal] = node.Name
-			}
-		case *ast.FunctionExpression:
-			for _, ident := range node.Params {
-				locals[ident.Literal] = ident
-			}
-		case *ast.FunctionStatement:
-			for _, ident := range node.Params {
-				locals[ident.Literal] = ident
+		case *ast.LocalStatement:
+			if isBefore || includeSelf {
+				for _, ident := range node.Names {
+					locals[ident.Literal] = ident
+				}
 			}
 		default:
-			// If the node contains the position
-			return node.Pos() <= pos && pos < node.End()
+			return inRange
 		}
 
 		return true

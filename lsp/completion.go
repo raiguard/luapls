@@ -15,7 +15,7 @@ func textDocumentCompletion(ctx *glsp.Context, params *protocol.CompletionParams
 
 	completions := []protocol.CompletionItem{}
 
-	for _, ident := range getLocals(&file.Block, pos) {
+	for _, ident := range getLocals(&file.Block, pos, false) {
 		completions = append(completions, protocol.CompletionItem{
 			Label: ident.Literal,
 			Kind:  ptr(protocol.CompletionItemKindVariable),

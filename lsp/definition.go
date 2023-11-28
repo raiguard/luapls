@@ -20,7 +20,7 @@ func textDocumentDefinition(ctx *glsp.Context, params *protocol.DefinitionParams
 		return nil, nil
 	}
 
-	locals := getLocals(&file.Block, pos)
+	locals := getLocals(&file.Block, pos, true)
 
 	def := locals[ident.Literal]
 	if def == nil {

@@ -1,6 +1,10 @@
 package lsp
 
 import (
+	"fmt"
+
+	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/parser"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -18,8 +22,30 @@ func publishDiagnostics(ctx *glsp.Context, uri protocol.URI) {
 			Message:  err.Message,
 		})
 	}
+	validateLocals(file, &diagnostics)
 	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
 		URI:         uri,
 		Diagnostics: diagnostics,
+	})
+}
+
+func validateLocals(file *parser.File, diagnostics *[]protocol.Diagnostic) {
+	ast.Walk(&file.Block, func(node ast.Node) bool {
+		ident, ok := node.(*ast.Identifier)
+		if !ok {
+			return true
+		}
+
+		locals := getLocals(&file.Block, ident.Pos(), true)
+		if locals[ident.Literal] == nil {
+			(*diagnostics) = append((*diagnostics), protocol.Diagnostic{
+				Range: file.ToProtocolRange(ast.Range(ident)),
+				// TODO: Configurable severity
+				Severity: ptr(protocol.DiagnosticSeverityError),
+				Message:  fmt.Sprintf("Unknown variable '%s'", ident.Literal),
+			})
+		}
+
+		return true
 	})
 }
