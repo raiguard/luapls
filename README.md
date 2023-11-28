@@ -1,6 +1,6 @@
 # luapls
 
-luapls is a language server for the Lua programming language.
+luapls ("Lua please") is a language server for the Lua programming language.
 
 This project is under very heavy development and is not ready for use.
 
@@ -13,16 +13,22 @@ This project is under very heavy development and is not ready for use.
 go build
 ```
 
-## TODO (always in flux)
+## TODO (always in flux, not necessarily in order)
 
-- Refactor parser to better support syntax errors.
-  - Currently, when an unexpected token is encountered the parser will just keep
-    going and emit a bunch of errors before ceasing parsing of the file.
-- Validate that the AST is valid Lua syntax.
-  - Don't replicate Lua compiler errors 1:1, be more helpful.
-  - Still allow as many features as possible even within invalid sections.
-- Rewrite parser tests to not rely on `String()` output.
-- Remove `String()` methods from AST nodes - now that we have range highlighting in-editor it's not nearly
-  as helpful any more, and is full of inconsistencies.
-- Implement basic autocompletion of identifiers.
-- Implement basic go-to definition for identifiers.
+- LSP settings
+  - Also support standalone configuration file (`luapls.json`)?
+- Environments system
+  - Analagous to Lua environments
+  - Every environment has pre-defined "root" files and library files that are pre-loaded (pulled from settings)
+  - Will facilitate cross-file diagnostics and go-to, and global variables
+- Go-to-references / highlight references
+- Unicode support in the Lexer (Lua itself doesn't support unicode identifiers, but we should support them for better diagnostics)
+- Proper autocompletion and diagnostics of table members
+- Automated testing of LSP faculties
+  - Utilize kak-lsp somehow?
+- MOAR DIAGNOSTICS
+  - Most important: Unknown field, undefined global
+- Support other Lua versions (5.3, 5.4, etc)
+- Type annotations
+- Third-party addons / plugins
+  - MVP to enable Factorio require semantics and event handler typing (after the type system is made)
