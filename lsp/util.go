@@ -27,29 +27,33 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 	locals := map[string]*ast.Identifier{}
 
 	ast.Walk(node, func(node ast.Node) bool {
-		isBefore := pos >= node.Pos() && pos > node.End()
-		inRange := node.Pos() <= pos && node.End() > pos
+		isAfter := node.Pos() > pos && pos < node.End()
+		if isAfter {
+			return false
+		}
+		isBefore := node.Pos() <= pos && pos > node.End()
+		isInside := node.Pos() <= pos && pos < node.End()
 		switch node := node.(type) {
 		case *ast.ForInStatement:
-			if inRange {
+			if isInside {
 				for _, ident := range node.Names {
 					locals[ident.Literal] = ident
 				}
 			}
 		case *ast.ForStatement:
-			if inRange {
+			if isInside {
 				if node.Name != nil {
 					locals[node.Name.Literal] = node.Name
 				}
 			}
 		case *ast.FunctionExpression:
-			if inRange {
+			if isInside {
 				for _, ident := range node.Params {
 					locals[ident.Literal] = ident
 				}
 			}
 		case *ast.FunctionStatement:
-			if inRange {
+			if isInside {
 				for _, ident := range node.Params {
 					locals[ident.Literal] = ident
 				}
@@ -66,7 +70,7 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 				}
 			}
 		default:
-			return inRange
+			return isInside
 		}
 
 		return true
