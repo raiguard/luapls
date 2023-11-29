@@ -1,7 +1,6 @@
 package lsp
 
 import (
-	"net/url"
 	"os"
 	"time"
 
@@ -102,13 +101,10 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 }
 
 func (s *Server) getFile(uri string) *parser.File {
-	u, err := url.ParseRequestURI(uri)
-	if err != nil {
-		s.log.Errorf("Failed to parse file URI: %s", err)
-	}
-	file := s.files[u.Path]
+	path := s.uriToPath(uri)
+	file := s.files[path]
 	if file == nil {
-		s.log.Errorf("File '%s' does not belong to any environment", u.Path)
+		s.log.Errorf("File '%s' does not belong to any environment", path)
 	}
 	return file
 }
