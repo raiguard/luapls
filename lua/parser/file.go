@@ -7,8 +7,8 @@ import (
 )
 
 type File struct {
-	Block    ast.Block
-	Errors   []ParserError
+	Block      ast.Block
+	Errors     []ParserError
 	LineBreaks []int
 	// TODO: Global exports, etc.
 }
@@ -16,7 +16,7 @@ type File struct {
 func (f *File) ToPos(position protocol.Position) token.Pos {
 	line := int(position.Line)
 	col := int(position.Character)
-	if line > len(f.LineBreaks) {
+	if line >= len(f.LineBreaks) {
 		return token.InvalidPos
 	}
 	lineStart := 0
