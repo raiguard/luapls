@@ -71,7 +71,7 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 		s.getConfiguration(ctx)
 
 		s.log.Debug("Parsing files")
-		before := time.Now()
+		allTimer := time.Now()
 		for _, env := range s.envs {
 			for _, uri := range env.getFiles() {
 				if s.files[uri] != nil {
@@ -87,13 +87,14 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 					s.log.Errorf("Failed to parse file %s: %s", uri, err)
 					continue
 				}
+				timer := time.Now()
 				file := parser.New(string(src)).ParseFile()
 				s.files[uri] = &file
-				s.log.Debugf("Parsed file '%s'", uri)
+				s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
 			}
 		}
-		s.log.Debugf("Initial parse: %s", time.Since(before).String())
 		s.isInitialized = true
+		s.log.Debugf("Initialization took %s", time.Since(allTimer).String())
 	}()
 	return nil
 }
