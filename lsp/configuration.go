@@ -25,7 +25,8 @@ func (s *Server) getConfiguration(ctx *glsp.Context) {
 		s.config.Environments = map[string]EnvConfig{}
 		s.log.Notice("No environments were specified, using root path")
 		s.config.Environments["<fallback>"] = EnvConfig{
-			Roots: []string{s.rootPath},
+			Libraries: []string{},
+			Roots:     []string{s.rootPath},
 		}
 	}
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/tliron/commonlog"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type Env struct {
@@ -18,7 +19,8 @@ type Env struct {
 }
 
 type EnvConfig struct {
-	Roots []string `json:"roots"`
+	Libraries []string `json:"libraries"`
+	Roots     []string `json:"roots"`
 }
 
 func newEnv(name string, config EnvConfig) *Env {
@@ -29,37 +31,44 @@ func newEnv(name string, config EnvConfig) *Env {
 	}
 }
 
-func (e *Env) getFiles() []string {
+func (e *Env) getFiles() []protocol.URI {
 	e.log.Debug("Finding files")
-	var files []string
+	var files []protocol.URI
+	for _, path := range e.config.Libraries {
+		files = e.addPath(files, path)
+	}
 	for _, path := range e.config.Roots {
-		stat, err := os.Stat(path)
-		if err != nil {
-			e.log.Errorf("Failed to initialize: %s", err)
-			continue
-		}
-		if stat.IsDir() {
-			filepath.WalkDir(path, func(path string, info fs.DirEntry, err error) error {
-				if !strings.HasSuffix(path, ".lua") {
-					return nil
-				}
-				uri, err := pathToURI(path)
-				if err != nil {
-					e.log.Errorf("%s", err)
-					return nil
-				}
-				files = append(files, uri)
-				return nil
-			})
-		} else {
-			uri, err := pathToURI(path)
-			if err != nil {
-				e.log.Errorf("%s", err)
-				return nil
-			}
-			files = append(files, uri)
-		}
+		files = e.addPath(files, path)
 	}
 	e.log.Debugf("Found files: %s", toJSON(files))
 	return files
+}
+
+func (e *Env) addPath(files []protocol.URI, path string) []protocol.URI {
+	stat, err := os.Stat(path)
+	if err != nil {
+		e.log.Errorf("Failed to initialize: %s", err)
+		return files
+	}
+	if stat.IsDir() {
+		filepath.WalkDir(path, func(path string, info fs.DirEntry, err error) error {
+			if !strings.HasSuffix(path, ".lua") {
+				return nil
+			}
+			files = e.addFile(files, path)
+			return nil
+		})
+	} else {
+		files = e.addFile(files, path)
+	}
+	return files
+}
+
+func (e *Env) addFile(files []protocol.URI, path string) []protocol.URI {
+	uri, err := pathToURI(path)
+	if err != nil {
+		e.log.Errorf("%s", err)
+		return nil
+	}
+	return append(files, uri)
 }
