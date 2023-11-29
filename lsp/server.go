@@ -28,8 +28,8 @@ type Server struct {
 	server   *glspserv.Server
 }
 
-func Run() {
-	commonlog.Configure(2, ptr("/tmp/luapls.log"))
+func Run(logLevel int) {
+	commonlog.Configure(logLevel, ptr("/tmp/luapls.log"))
 
 	s := Server{
 		envs:  map[string]*Env{},
@@ -48,7 +48,7 @@ func Run() {
 	s.handler.TextDocumentSelectionRange = s.textDocumentSelectionRange
 	s.handler.TextDocumentDefinition = s.textDocumentDefinition
 
-	s.server = glspserv.NewServer(&s.handler, LS_NAME, true)
+	s.server = glspserv.NewServer(&s.handler, LS_NAME, logLevel > 2)
 
 	s.log = s.server.Log
 

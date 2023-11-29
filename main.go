@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/raiguard/luapls/lsp"
@@ -30,7 +31,11 @@ func main() {
 		}
 		lexFile(args[2])
 	case "lsp":
-		lsp.Run()
+		level := int64(0)
+		if len(args) > 2 {
+			level, _ = strconv.ParseInt(args[2], 0, 8)
+		}
+		lsp.Run(int(level))
 	case "parse":
 		if len(args) < 3 {
 			fmt.Fprintln(os.Stderr, "Did not provide a filename")
