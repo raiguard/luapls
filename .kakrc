@@ -1,7 +1,7 @@
 # vim: ft=kak
 
 define-command luapls-log %{
-  edit /tmp/luapls.log -readonly
+  edit /tmp/luapls.log
 }
 
 hook global WinCreate /tmp/luapls\.log %{
@@ -18,7 +18,7 @@ hook global WinCreate /tmp/luapls\.log %{
 
   evaluate-commands -draft %{
     try %{
-      execute-keys '%sreading from stdin, writing to stdout\n<ret>x'
+      execute-keys '%sreading from stdin, writing to stdout\n<ret>'
       evaluate-commands -itersel %{
         add-highlighter window/ line %val{cursor_line} +r@keyword
       }
