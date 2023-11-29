@@ -25,6 +25,8 @@ type Server struct {
 	log      commonlog.Logger
 	rootPath string
 	server   *glspserv.Server
+
+	isInitialized bool
 }
 
 func Run(logLevel int) {
@@ -91,6 +93,7 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 			}
 		}
 		s.log.Debugf("Initial parse: %s", time.Since(before).String())
+		s.isInitialized = true
 	}()
 	return nil
 }
@@ -106,6 +109,9 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 }
 
 func (s *Server) getFile(uri protocol.URI) *parser.File {
+	if !s.isInitialized {
+		return nil
+	}
 	file := s.files[uri]
 	if file == nil {
 		s.log.Errorf("File '%s' does not belong to any environment", uri)

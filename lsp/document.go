@@ -11,12 +11,17 @@ import (
 
 // TODO: Incremental changes
 func (s *Server) textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	// TODO: Check if file was not yet parsed
+	if s.getFile(params.TextDocument.URI) == nil {
+		return nil
+	}
 	s.publishDiagnostics(ctx, params.TextDocument.URI)
 	return nil
 }
 
 func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
+	if s.getFile(params.TextDocument.URI) == nil {
+		return nil
+	}
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			before := time.Now()
