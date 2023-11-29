@@ -6,8 +6,8 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
-	file := files[params.TextDocument.URI]
+func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
+	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
 		return nil, nil
 	}

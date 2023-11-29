@@ -1,97 +1,114 @@
 package lsp
 
 import (
-	"io/fs"
+	"net/url"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/raiguard/luapls/lua/parser"
-	"github.com/raiguard/luapls/lua/token"
+	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
-	"github.com/tliron/glsp/server"
+	glspserv "github.com/tliron/glsp/server"
+
+	// To enable logging
+	_ "github.com/tliron/commonlog/simple"
 )
 
-const lsName = "luapls"
+const LS_NAME = "luapls"
 
-var handler protocol.Handler
-
-var files = map[string]*parser.File{}
-var rootPath string = ""
-
-// ptr returns a pointer to the given value.
-func ptr[T any](value T) *T {
-	inner := value
-	return &inner
+// Type Server contains the state for the LSP session.
+type Server struct {
+	config   Config
+	envs     map[string]*Env
+	files    map[string]*parser.File
+	handler  protocol.Handler
+	log      commonlog.Logger
+	rootPath string
+	server   *glspserv.Server
 }
-
-var reserved []protocol.CompletionItem
 
 func Run() {
-	reserved = []protocol.CompletionItem{}
-	for literal := range token.Reserved {
-		reserved = append(reserved, protocol.CompletionItem{
-			Label: literal,
-			Kind:  ptr(protocol.CompletionItemKindKeyword),
-		})
+	commonlog.Configure(2, ptr("/tmp/luapls.log"))
+
+	s := Server{
+		envs:  map[string]*Env{},
+		files: map[string]*parser.File{},
 	}
 
-	handler.Initialize = initialize
-	handler.Initialized = initialized
-	handler.Shutdown = shutdown
-	handler.SetTrace = setTrace
-	handler.TextDocumentDidOpen = textDocumentDidOpen
-	handler.TextDocumentDidChange = textDocumentDidChange
-	handler.TextDocumentDocumentHighlight = textDocumentHighlight
-	handler.TextDocumentHover = textDocumentHover
-	handler.TextDocumentCompletion = textDocumentCompletion
-	handler.TextDocumentSelectionRange = textDocumentSelectionRange
-	handler.TextDocumentDefinition = textDocumentDefinition
+	s.handler.Initialize = s.initialize
+	s.handler.Initialized = s.initialized
+	s.handler.Shutdown = s.shutdown
+	s.handler.SetTrace = s.setTrace
+	s.handler.TextDocumentDidOpen = s.textDocumentDidOpen
+	s.handler.TextDocumentDidChange = s.textDocumentDidChange
+	s.handler.TextDocumentDocumentHighlight = s.textDocumentHighlight
+	s.handler.TextDocumentHover = s.textDocumentHover
+	s.handler.TextDocumentCompletion = s.textDocumentCompletion
+	s.handler.TextDocumentSelectionRange = s.textDocumentSelectionRange
+	s.handler.TextDocumentDefinition = s.textDocumentDefinition
 
-	server := server.NewServer(&handler, lsName, true)
+	s.server = glspserv.NewServer(&s.handler, LS_NAME, true)
 
-	server.RunStdio()
+	s.log = s.server.Log
+
+	s.server.RunStdio()
 }
 
-func initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
-	capabilities := handler.CreateServerCapabilities()
-	rootPath = *params.RootPath
+func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
+	capabilities := s.handler.CreateServerCapabilities()
+	s.rootPath = *params.RootPath
 
 	return protocol.InitializeResult{
 		Capabilities: capabilities,
-		ServerInfo:   &protocol.InitializeResultServerInfo{Name: lsName},
+		ServerInfo:   &protocol.InitializeResultServerInfo{Name: LS_NAME},
 	}, nil
 }
 
-func initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
-	var toParse []string
-	filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
-		if strings.HasSuffix(path, ".lua") {
-			toParse = append(toParse, path)
+func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
+	go func() {
+		s.getConfiguration(ctx)
+
+		s.log.Debug("Parsing files")
+		before := time.Now()
+		for _, env := range s.envs {
+			for _, path := range env.getFiles() {
+				if s.files[path] != nil {
+					continue
+				}
+				src, err := os.ReadFile(path)
+				if err != nil {
+					s.log.Errorf("Failed to parse file %s: %s", path, err)
+					continue
+				}
+				file := parser.New(string(src)).ParseFile()
+				s.files[path] = &file
+				s.log.Debugf("Parsed file '%s'", path)
+			}
 		}
-		return nil
-	})
-	before := time.Now()
-	for _, path := range toParse {
-		src, err := os.ReadFile(path)
-		if err != nil {
-			logToEditor(ctx, "%s", err)
-			continue
-		}
-		parseFile(ctx, path, string(src))
-	}
-	logToEditor(ctx, "Initial parse (%d files): %s", len(toParse), time.Since(before))
+		s.log.Debugf("Initial parse: %s", time.Since(before).String())
+	}()
 	return nil
 }
 
-func shutdown(ctx *glsp.Context) error {
+func (s *Server) shutdown(ctx *glsp.Context) error {
 	protocol.SetTraceValue(protocol.TraceValueOff)
 	return nil
 }
 
-func setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
+func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 	protocol.SetTraceValue(params.Value)
 	return nil
+}
+
+func (s *Server) getFile(uri string) *parser.File {
+	u, err := url.ParseRequestURI(uri)
+	if err != nil {
+		s.log.Errorf("Failed to parse file URI: %s", err)
+	}
+	file := s.files[u.Path]
+	if file == nil {
+		s.log.Errorf("File '%s' does not belong to any environment", u.Path)
+	}
+	return file
 }

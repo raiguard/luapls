@@ -12,6 +12,7 @@ import (
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/repl"
+	"github.com/tliron/kutil/util"
 )
 
 func main() {
@@ -45,6 +46,8 @@ func main() {
 	case "repl":
 		repl.Run()
 	}
+
+	util.Exit(0)
 }
 
 func lexFile(filename string) {

@@ -6,8 +6,8 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func textDocumentDefinition(ctx *glsp.Context, params *protocol.DefinitionParams) (any, error) {
-	file := files[params.TextDocument.URI]
+func (s *Server) textDocumentDefinition(ctx *glsp.Context, params *protocol.DefinitionParams) (any, error) {
+	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
 		return nil, nil
 	}

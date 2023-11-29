@@ -5,8 +5,8 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func textDocumentCompletion(ctx *glsp.Context, params *protocol.CompletionParams) (any, error) {
-	file := files[params.TextDocument.URI]
+func (s *Server) textDocumentCompletion(ctx *glsp.Context, params *protocol.CompletionParams) (any, error) {
+	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
 		return nil, nil
 	}

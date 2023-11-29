@@ -8,8 +8,8 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	file := files[params.TextDocument.URI]
+func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
 		return nil, nil
 	}

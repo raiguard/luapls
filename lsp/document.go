@@ -1,36 +1,36 @@
 package lsp
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/parser"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-// TODO: Listen for modifications to files that were previously parsed
-
-func textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	parseFile(ctx, params.TextDocument.URI, params.TextDocument.Text)
-	publishDiagnostics(ctx, params.TextDocument.URI)
+// TODO: Incremental changes
+func (s *Server) textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
+	// TODO: Check if file was not yet parsed
+	s.publishDiagnostics(ctx, params.TextDocument.URI)
 	return nil
 }
 
-func textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
+func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			before := time.Now()
-			parseFile(ctx, params.TextDocument.URI, change.Text)
-			publishDiagnostics(ctx, params.TextDocument.URI)
-			logToEditor(ctx, fmt.Sprint("Reparse duration:", time.Since(before).String()))
+			newFile := parser.New(change.Text).ParseFile()
+			s.files[params.TextDocument.URI] = &newFile
+			s.log.Debugf("Reparse duration: %s", time.Since(before).String())
+			s.publishDiagnostics(ctx, params.TextDocument.URI)
 		}
 	}
 	return nil
 }
 
-func textDocumentSelectionRange(ctx *glsp.Context, params *protocol.SelectionRangeParams) ([]protocol.SelectionRange, error) {
-	file := files[params.TextDocument.URI]
+func (s *Server) textDocumentSelectionRange(ctx *glsp.Context, params *protocol.SelectionRangeParams) ([]protocol.SelectionRange, error) {
+	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
 		return nil, nil
 	}

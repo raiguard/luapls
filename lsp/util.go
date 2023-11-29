@@ -1,25 +1,23 @@
 package lsp
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
-	"github.com/tliron/glsp"
-	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func parseFile(ctx *glsp.Context, filename, src string) {
-	file := parser.New(src).ParseFile()
-	files[filename] = &file
+func toJSON(v any) string {
+	res, err := json.Marshal(v)
+	if err != nil {
+		return "<ERROR>"
+	}
+	return string(res)
 }
 
-func logToEditor(ctx *glsp.Context, format string, args ...any) {
-	ctx.Notify(
-		protocol.ServerWindowLogMessage,
-		protocol.LogMessageParams{Type: protocol.MessageTypeLog, Message: fmt.Sprintf(format, args...)},
-	)
+// ptr returns a pointer to the given value.
+func ptr[T any](value T) *T {
+	return &value
 }
 
 // getLocals returns a list of all local variables contained in node for the given pos.

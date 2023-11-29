@@ -13,6 +13,11 @@ This project is under very heavy development and is not ready for use.
 go build
 ```
 
+## Features
+
+- Parsing of every Lua file in the directory where it is opened.
+- Extremely basic, locals-only, file-local missing variable diagnostics, go-to-definition, and autocompletion.
+
 ## TODO (always in flux, not necessarily in order)
 
 - LSP settings
@@ -26,6 +31,7 @@ go build
 - Proper autocompletion and diagnostics of table members
 - Automated testing of LSP faculties
   - Utilize kak-lsp somehow?
+- Increase parser test coverage to ensure it doesn't allow invalid syntax
 - MOAR DIAGNOSTICS
   - Most important: Unknown field, undefined global
 - Support other Lua versions (5.3, 5.4, etc)

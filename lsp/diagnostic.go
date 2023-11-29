@@ -9,8 +9,8 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func publishDiagnostics(ctx *glsp.Context, uri protocol.URI) {
-	file := files[uri]
+func (s *Server) publishDiagnostics(ctx *glsp.Context, uri protocol.URI) {
+	file := s.getFile(uri)
 	if file == nil {
 		return
 	}
@@ -22,14 +22,14 @@ func publishDiagnostics(ctx *glsp.Context, uri protocol.URI) {
 			Message:  err.Message,
 		})
 	}
-	validateLocals(file, &diagnostics)
+	s.validateLocals(file, &diagnostics)
 	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
 		URI:         uri,
 		Diagnostics: diagnostics,
 	})
 }
 
-func validateLocals(file *parser.File, diagnostics *[]protocol.Diagnostic) {
+func (s *Server) validateLocals(file *parser.File, diagnostics *[]protocol.Diagnostic) {
 	ast.Walk(&file.Block, func(node ast.Node) bool {
 		ident, ok := node.(*ast.Identifier)
 		if !ok {
@@ -41,7 +41,7 @@ func validateLocals(file *parser.File, diagnostics *[]protocol.Diagnostic) {
 			(*diagnostics) = append((*diagnostics), protocol.Diagnostic{
 				Range: file.ToProtocolRange(ast.Range(ident)),
 				// TODO: Configurable severity
-				Severity: ptr(protocol.DiagnosticSeverityError),
+				Severity: ptr(protocol.DiagnosticSeverityInformation),
 				Message:  fmt.Sprintf("Unknown variable '%s'", ident.Literal),
 			})
 		}
