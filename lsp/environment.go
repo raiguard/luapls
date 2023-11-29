@@ -43,21 +43,21 @@ func (e *Env) getFiles() []string {
 				if !strings.HasSuffix(path, ".lua") {
 					return nil
 				}
-				abs, err := filepath.Abs(path)
+				uri, err := pathToURI(path)
 				if err != nil {
-					e.log.Errorf("Failed to get full path: %s", err)
+					e.log.Errorf("%s", err)
 					return nil
 				}
-				files = append(files, abs)
+				files = append(files, uri)
 				return nil
 			})
 		} else {
-			abs, err := filepath.Abs(path)
+			uri, err := pathToURI(path)
 			if err != nil {
-				e.log.Errorf("Failed to get full path: %s", err)
+				e.log.Errorf("%s", err)
 				return nil
 			}
-			files = append(files, abs)
+			files = append(files, uri)
 		}
 	}
 	e.log.Debugf("Found files: %s", toJSON(files))

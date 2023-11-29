@@ -2,11 +2,9 @@ package lsp
 
 import (
 	"encoding/json"
-	"net/url"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
-	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 func toJSON(v any) string {
@@ -20,14 +18,6 @@ func toJSON(v any) string {
 // ptr returns a pointer to the given value.
 func ptr[T any](value T) *T {
 	return &value
-}
-
-func (s *Server) uriToPath(uri protocol.URI) string {
-	u, err := url.ParseRequestURI(uri)
-	if err != nil {
-		s.log.Errorf("Failed to parse file URI: %s", err)
-	}
-	return u.Path
 }
 
 // getLocals returns a list of all local variables contained in node for the given pos.

@@ -71,18 +71,23 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 		s.log.Debug("Parsing files")
 		before := time.Now()
 		for _, env := range s.envs {
-			for _, path := range env.getFiles() {
-				if s.files[path] != nil {
+			for _, uri := range env.getFiles() {
+				if s.files[uri] != nil {
+					continue
+				}
+				path, err := uriToPath(uri)
+				if err != nil {
+					s.log.Errorf("%s", err)
 					continue
 				}
 				src, err := os.ReadFile(path)
 				if err != nil {
-					s.log.Errorf("Failed to parse file %s: %s", path, err)
+					s.log.Errorf("Failed to parse file %s: %s", uri, err)
 					continue
 				}
 				file := parser.New(string(src)).ParseFile()
-				s.files[path] = &file
-				s.log.Debugf("Parsed file '%s'", path)
+				s.files[uri] = &file
+				s.log.Debugf("Parsed file '%s'", uri)
 			}
 		}
 		s.log.Debugf("Initial parse: %s", time.Since(before).String())
@@ -100,11 +105,10 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri string) *parser.File {
-	path := s.uriToPath(uri)
-	file := s.files[path]
+func (s *Server) getFile(uri protocol.URI) *parser.File {
+	file := s.files[uri]
 	if file == nil {
-		s.log.Errorf("File '%s' does not belong to any environment", path)
+		s.log.Errorf("File '%s' does not belong to any environment", uri)
 	}
 	return file
 }
