@@ -95,6 +95,10 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 		}
 		s.isInitialized = true
 		s.log.Debugf("Initialization took %s", time.Since(allTimer).String())
+
+		for uri := range s.files {
+			s.publishDiagnostics(ctx, uri)
+		}
 	}()
 	return nil
 }
