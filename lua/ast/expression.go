@@ -9,6 +9,7 @@ import (
 type Expression interface {
 	Node
 	expressionNode()
+	Type() Type
 }
 
 type FunctionCall struct {

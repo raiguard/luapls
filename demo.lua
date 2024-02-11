@@ -5,6 +5,7 @@ end
 
 print(add(3, 4))
 
+--- @type []number
 local items = {5, 10, 15}
 
 for i = 1, #items do
