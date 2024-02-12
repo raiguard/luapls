@@ -32,8 +32,8 @@ func (self *FunctionCall) Type() Type       { return &Unknown{} }
 func (self *FunctionExpression) Type() Type { return &Function{} }
 func (self *Identifier) Type() Type         { return &Unknown{} }
 func (self *IndexExpression) Type() Type    { return &Unknown{} }
-func (self *Invalid) Type() Type            { return &Unknown{} }
 func (self *InfixExpression) Type() Type    { return &Unknown{} }
+func (self *Invalid) Type() Type            { return &Unknown{} }
 func (self *NumberLiteral) Type() Type      { return &Number{} }
 func (self *PrefixExpression) Type() Type   { return &Unknown{} }
 func (self *StringLiteral) Type() Type      { return &String{} }

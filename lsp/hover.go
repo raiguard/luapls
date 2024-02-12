@@ -8,6 +8,10 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
+// Get type of node at cursor and show it
+// - Find most recent definition of the variable
+// - Resolve the type of that expression
+
 func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
 	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
@@ -17,6 +21,20 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if node == nil {
 		return nil, nil
 	}
+	// TODO: Literals
+	ident, _ := node.(*ast.Identifier)
+	if ident == nil {
+		return nil, nil
+	}
+
+	// TODO: To do this reasonably, we need to store back-references to parent nodes
+	// in the AST.
+	// TODO: Or maybe resolve types as the AST is parsed?
+	definition := getDefinition(&file.Block, ident)
+	if definition == nil {
+		return nil, nil
+	}
+
 	return &protocol.Hover{
 		Contents: fmt.Sprintf(
 			"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`",
