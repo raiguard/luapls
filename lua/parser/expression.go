@@ -112,7 +112,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 
 	p.expect(token.RPAREN)
 
-	body := p.ParseBlock()
+	body := p.parseBlock()
 
 	end := p.tok.End()
 	p.expect(token.END)

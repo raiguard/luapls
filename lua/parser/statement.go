@@ -83,7 +83,7 @@ func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 func (p *Parser) parseDoStatement() *ast.DoStatement {
 	pos := p.tok.Pos
 	p.expect(token.DO)
-	block := p.ParseBlock()
+	block := p.parseBlock()
 	end := p.tok.End()
 	p.expect(token.END)
 	return &ast.DoStatement{
@@ -109,7 +109,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 
 	p.expect(token.DO)
 
-	body := p.ParseBlock()
+	body := p.parseBlock()
 
 	end := p.tok.End()
 	p.expect(token.END)
@@ -152,7 +152,7 @@ func (p *Parser) parseFunctionStatement(pos token.Pos, isLocal bool) *ast.Functi
 	p.expect(token.LPAREN)
 	params, vararg := p.parseParameterList()
 	p.expect(token.RPAREN)
-	body := p.ParseBlock()
+	body := p.parseBlock()
 	end := p.tok.End()
 	p.expect(token.END)
 
@@ -192,7 +192,7 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 	if p.tokIs(token.ELSE) {
 		clausePos := p.tok.Pos
 		p.next()
-		body := p.ParseBlock()
+		body := p.parseBlock()
 		clauses = append(clauses, &ast.IfClause{Body: body, StartPos: clausePos, EndPos: body.End()})
 	}
 
@@ -205,7 +205,7 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 func (p *Parser) parseIfClause(pos token.Pos) *ast.IfClause {
 	condition := p.parseExpression(LOWEST, true)
 	p.expect(token.THEN)
-	block := p.ParseBlock()
+	block := p.parseBlock()
 	return &ast.IfClause{
 		Condition: condition,
 		Body:      block,
@@ -246,7 +246,7 @@ func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
 func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 	pos := p.tok.Pos
 	p.expect(token.REPEAT)
-	body := p.ParseBlock()
+	body := p.parseBlock()
 	p.expect(token.UNTIL)
 	condition := p.parseExpression(LOWEST, true)
 	return &ast.RepeatStatement{
@@ -277,7 +277,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	p.expect(token.WHILE)
 	condition := p.parseExpression(LOWEST, true)
 	p.expect(token.DO)
-	body := p.ParseBlock()
+	body := p.parseBlock()
 	end := p.tok.End()
 	p.expect(token.END)
 	return &ast.WhileStatement{

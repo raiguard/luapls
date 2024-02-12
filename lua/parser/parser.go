@@ -50,14 +50,13 @@ func (p *Parser) next() {
 
 func (p *Parser) ParseFile() File {
 	return File{
-		Block:    p.ParseBlock(),
-		Errors:   p.errors,
+		Block:      p.parseBlock(),
+		Errors:     p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
 	}
 }
 
-// TODO: Make private
-func (p *Parser) ParseBlock() ast.Block {
+func (p *Parser) parseBlock() ast.Block {
 	block := ast.Block{
 		Stmts:    []ast.Statement{},
 		StartPos: p.tok.Pos,
