@@ -20,21 +20,16 @@ go build
 
 ## TODO (always in flux, not necessarily in order)
 
-- LSP settings
-  - Also support standalone configuration file (`luapls.json`)?
-- Environments system
-  - Analagous to Lua environments
-  - Every environment has pre-defined "root" files and library files that are pre-loaded (pulled from settings)
-  - Will facilitate cross-file diagnostics and go-to, and global variables
-- Go-to-references / highlight references
-- Unicode support in the Lexer (Lua itself doesn't support unicode identifiers, but we should support them for better diagnostics)
-- Proper autocompletion and diagnostics of table members
-- Automated testing of LSP faculties
-  - Utilize kak-lsp somehow?
-- Increase parser test coverage to ensure it doesn't allow invalid syntax
-- MOAR DIAGNOSTICS
-  - Most important: Unknown field, undefined global
-- Support other Lua versions (5.3, 5.4, etc)
-- Type annotations
-- Third-party addons / plugins
-  - MVP to enable Factorio require semantics and event handler typing (after the type system is made)
+- Bring parser into alignment with the Lua specification (don't successfully parse illegal things)
+- Add parent back-references to AST nodes
+- Improve parser error handling
+- Instrumentation for resolving types in the parser
+- Basic types (literals, simple expressions)
+- Table types (structs/classes)
+- Union types
+- Intersection types
+- Inheritance
+- Metatable handling
+- As much type inference as possible
+- Useful LSP integrations
+- Third-party addons/plugins to modify AST
