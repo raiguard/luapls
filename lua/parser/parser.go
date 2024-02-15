@@ -63,7 +63,11 @@ func (p *Parser) parseBlock() ast.Block {
 	}
 
 	for !blockEnd[p.tok.Type] {
-		block.Stmts = append(block.Stmts, p.parseStatement())
+		stat := p.parseStatement()
+		block.Stmts = append(block.Stmts, stat)
+		for p.tokIs(token.SEMICOLON) {
+			p.next()
+		}
 	}
 
 	if p.tokIs(token.EOF) {
@@ -107,13 +111,12 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 	return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
 }
 
-func (p *Parser) expect(tokenType token.TokenType) token.Token {
+func (p *Parser) expect(tokenType token.TokenType) {
 	if !p.tokIs(tokenType) {
 		p.expectedTokenError(tokenType)
 	}
-	current := p.tok
+	// TODO: Smart error recovery
 	p.next()
-	return current
 }
 
 func (p *Parser) expectedTokenError(expected token.TokenType) {

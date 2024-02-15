@@ -186,13 +186,8 @@ func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	ident := ast.Identifier{StartPos: p.tok.Pos}
-	if p.tokIs(token.IDENT) {
-		ident.Literal = p.tok.Literal
-	} else {
-		p.expectedTokenError(token.IDENT)
-	}
-	p.next()
+	ident := ast.Identifier{StartPos: p.tok.Pos, Literal: p.tok.Literal}
+	p.expect(token.IDENT)
 	return &ident
 }
 

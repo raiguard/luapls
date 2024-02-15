@@ -6,60 +6,52 @@ import (
 )
 
 func (p *Parser) parseStatement() ast.Statement {
-	// TODO: SemicolonStatement so we can show errors
-	for p.tokIs(token.SEMICOLON) {
-		p.next()
-	}
-	var stat ast.Statement
 	switch p.tok.Type {
 	case token.BREAK:
-		stat = p.parseBreakStatement()
+		return p.parseBreakStatement()
 	case token.DO:
-		stat = p.parseDoStatement()
+		return p.parseDoStatement()
 	case token.FOR:
-		stat = p.parseForStatement()
+		return p.parseForStatement()
 	case token.FUNCTION:
-		stat = p.parseFunctionStatement(p.tok.Pos, false)
+		return p.parseFunctionStatement(p.tok.Pos, false)
 	case token.GOTO:
-		stat = p.parseGotoStatement()
+		return p.parseGotoStatement()
 	case token.IF:
-		stat = p.parseIfStatement()
+		return p.parseIfStatement()
 	case token.LABEL:
-		stat = p.parseLabelStatement()
+		return p.parseLabelStatement()
 	case token.LOCAL:
 		tok := p.tok
 		p.next()
 		switch p.tok.Type {
 		case token.FUNCTION:
-			stat = p.parseFunctionStatement(tok.Pos, true)
+			return p.parseFunctionStatement(tok.Pos, true)
 		case token.IDENT:
-			stat = p.parseLocalStatement(tok.Pos)
-		default:
-			stat = &ast.Invalid{Token: &tok}
-			p.addErrorForNode(stat, "Invalid statement")
+			return p.parseLocalStatement(tok.Pos)
 		}
+		stat := &ast.Invalid{Token: &tok}
+		p.addErrorForNode(stat, "Invalid statement")
+		return stat
 	case token.REPEAT:
-		stat = p.parseRepeatStatement()
+		return p.parseRepeatStatement()
 	case token.RETURN:
-		stat = p.parseReturnStatement()
+		return p.parseReturnStatement()
 	case token.WHILE:
-		stat = p.parseWhileStatement()
-	default:
-		exps := p.parseExpressionList()
-		if p.tokIs(token.ASSIGN) {
-			stat = p.parseAssignmentStatement(exps)
-			// TODO: Can there ever be zero expressions?
-		} else if _, ok := exps[0].(*ast.FunctionCall); ok {
-			stat = exps[0].(*ast.FunctionCall)
-		} else {
-			stat = &ast.Invalid{Exps: exps}
-			p.addErrorForNode(stat, "Invalid statement")
-		}
+		return p.parseWhileStatement()
 	}
-	for p.tokIs(token.SEMICOLON) {
-		p.next()
+
+	exps := p.parseExpressionList()
+	if p.tokIs(token.ASSIGN) {
+		return p.parseAssignmentStatement(exps)
+		// TODO: Can there ever be zero expressions?
+	} else if _, ok := exps[0].(*ast.FunctionCall); ok {
+		return exps[0].(*ast.FunctionCall)
+	} else {
+		stat := &ast.Invalid{Exps: exps}
+		p.addErrorForNode(stat, "Invalid statement")
+		return stat
 	}
-	return stat
 }
 
 func (p *Parser) parseAssignmentStatement(vars []ast.Expression) *ast.AssignmentStatement {
@@ -135,14 +127,14 @@ func (p *Parser) parseForStatement() ast.Statement {
 			StartPos: pos,
 			EndPos:   end,
 		}
-	} else {
-		return &ast.ForInStatement{
-			Names:    names,
-			Exps:     exps,
-			Body:     body,
-			StartPos: pos,
-			EndPos:   end,
-		}
+	}
+
+	return &ast.ForInStatement{
+		Names:    names,
+		Exps:     exps,
+		Body:     body,
+		StartPos: pos,
+		EndPos:   end,
 	}
 }
 
