@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
@@ -20,7 +21,7 @@ const LS_NAME = "luapls"
 type Server struct {
 	config   Config
 	envs     map[string]*Env
-	files    map[string]*parser.File
+	files    map[string]*ast.File
 	handler  protocol.Handler
 	log      commonlog.Logger
 	rootPath string
@@ -34,7 +35,7 @@ func Run(logLevel int) {
 
 	s := Server{
 		envs:  map[string]*Env{},
-		files: map[string]*parser.File{},
+		files: map[string]*ast.File{},
 	}
 
 	s.handler.Initialize = s.initialize
@@ -113,7 +114,7 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri protocol.URI) *parser.File {
+func (s *Server) getFile(uri protocol.URI) *ast.File {
 	if !s.isInitialized {
 		return nil
 	}

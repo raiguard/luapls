@@ -3,6 +3,7 @@ package parser
 import (
 	"testing"
 
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/stretchr/testify/assert"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -33,7 +34,7 @@ func assertSlicesEqual[T comparable](t *testing.T, expected []T, actual []T) {
 	}
 }
 
-func assertPositionsMatch(t *testing.T, file *File, position protocol.Position, pos token.Pos) {
+func assertPositionsMatch(t *testing.T, file *ast.File, position protocol.Position, pos token.Pos) {
 	protocolPos := file.ToProtocolPos(pos)
 	assert.Equal(t, protocolPos.Line, position.Line)
 	assert.Equal(t, protocolPos.Character, position.Character)

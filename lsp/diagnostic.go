@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/parser"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -29,7 +28,7 @@ func (s *Server) publishDiagnostics(ctx *glsp.Context, uri protocol.URI) {
 	})
 }
 
-func (s *Server) validateLocals(file *parser.File, diagnostics *[]protocol.Diagnostic) {
+func (s *Server) validateLocals(file *ast.File, diagnostics *[]protocol.Diagnostic) {
 	ast.Walk(&file.Block, func(node ast.Node) bool {
 		ident, ok := node.(*ast.Identifier)
 		if !ok {

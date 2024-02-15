@@ -14,21 +14,16 @@ import (
 	"github.com/raiguard/luapls/lua/token"
 )
 
-type ParserError struct {
-	Message string
-	Range   token.Range
-}
-
 type Parser struct {
 	lexer  *lexer.Lexer
-	errors []ParserError
+	errors []ast.Error
 	tok    token.Token
 }
 
 func New(input string) *Parser {
 	p := &Parser{
 		lexer:  lexer.New(input),
-		errors: []ParserError{},
+		errors: []ast.Error{},
 	}
 
 	p.next()
@@ -36,7 +31,7 @@ func New(input string) *Parser {
 	return p
 }
 
-func (p *Parser) Errors() []ParserError {
+func (p *Parser) Errors() []ast.Error {
 	return p.errors
 }
 
@@ -48,8 +43,8 @@ func (p *Parser) next() {
 	}
 }
 
-func (p *Parser) ParseFile() File {
-	return File{
+func (p *Parser) ParseFile() ast.File {
+	return ast.File{
 		Block:      p.parseBlock(),
 		Errors:     p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
@@ -132,11 +127,11 @@ func (p *Parser) invalidTokenError() {
 }
 
 func (p *Parser) addError(message string) {
-	p.errors = append(p.errors, ParserError{Range: p.tok.Range(), Message: message})
+	p.errors = append(p.errors, ast.Error{Range: p.tok.Range(), Message: message})
 }
 
 func (p *Parser) addErrorForNode(node ast.Node, message string) {
-	p.errors = append(p.errors, ParserError{Range: ast.Range(node), Message: message})
+	p.errors = append(p.errors, ast.Error{Range: ast.Range(node), Message: message})
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {

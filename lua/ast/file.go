@@ -1,14 +1,13 @@
-package parser
+package ast
 
 import (
-	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type File struct {
-	Block      ast.Block
-	Errors     []ParserError
+	Block      Block
+	Errors     []Error
 	LineBreaks []int
 	// TODO: Global exports, etc.
 }
