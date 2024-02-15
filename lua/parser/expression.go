@@ -301,8 +301,7 @@ type prefixParseFn func() ast.Expression
 type operatorPrecedence int
 
 const (
-	_ operatorPrecedence = iota
-	LOWEST
+	LOWEST operatorPrecedence = iota
 	OR
 	AND
 	CMP
