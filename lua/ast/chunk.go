@@ -9,7 +9,7 @@ type Chunk struct {
 	Block      Block
 	Errors     []Error
 	LineBreaks []int
-	// TODO: Global exports, etc.
+	// TODO: Globals
 }
 
 func (f *Chunk) ToPos(position protocol.Position) token.Pos {

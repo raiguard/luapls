@@ -15,6 +15,7 @@ func Range(n Node) token.Range {
 
 type Block struct {
 	Stmts    []Statement
+	Locals   Environment
 	StartPos token.Pos `json:"-"`
 	EndPos   token.Pos `json:"-"`
 }

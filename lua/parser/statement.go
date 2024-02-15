@@ -217,6 +217,12 @@ func (p *Parser) parseLabelStatement() *ast.LabelStatement {
 
 func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
 	names := p.parseNameList()
+
+	// TODO: Move this to parseNameList?
+	for _, name := range names {
+		p.curEnv().Add(name.Literal, name)
+	}
+
 	if !p.tokIs(token.ASSIGN) {
 		return &ast.LocalStatement{
 			Names:    names,

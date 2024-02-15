@@ -18,6 +18,8 @@ type Parser struct {
 	lexer  *lexer.Lexer
 	errors []ast.Error
 	tok    token.Token
+
+	envs []*ast.Environment
 }
 
 func New(input string) *Parser {
@@ -44,10 +46,13 @@ func (p *Parser) next() {
 }
 
 func (p *Parser) ParseChunk() ast.Chunk {
+	block := p.parseBlock()
+
 	return ast.Chunk{
-		Block:      p.parseBlock(),
+		Block:      block,
 		Errors:     p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
+		// TODO: Global environment
 	}
 }
 
@@ -55,7 +60,9 @@ func (p *Parser) parseBlock() ast.Block {
 	block := ast.Block{
 		Stmts:    []ast.Statement{},
 		StartPos: p.tok.Pos,
+		Locals:   ast.Environment{},
 	}
+	p.pushEnv(&block.Locals)
 
 	for !blockEnd[p.tok.Type] {
 		stat := p.parseStatement()
@@ -72,6 +79,8 @@ func (p *Parser) parseBlock() ast.Block {
 	} else {
 		block.EndPos = block.StartPos
 	}
+
+	p.popEnv()
 
 	return block
 }
