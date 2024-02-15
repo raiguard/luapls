@@ -37,7 +37,7 @@ func TestParser(t *testing.T) {
 
 func testSpec(t *testing.T, spec *TestSpec) {
 	p := New(spec.Input)
-	file := p.ParseFile()
+	file := p.ParseChunk()
 	ast, err := json.Marshal(&file.Block)
 	if !assert.NoError(t, err) {
 		return

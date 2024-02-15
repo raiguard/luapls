@@ -80,10 +80,10 @@ func parseFile(filename string) {
 		os.Exit(1)
 	}
 	p := parser.New(string(src))
-	file := p.ParseFile()
+	file := p.ParseChunk()
 	bytes, err := json.MarshalIndent(struct {
 		Duration string
-		File     ast.File
+		File     ast.Chunk
 	}{
 		Duration: time.Since(before).String(),
 		File:     file,
@@ -104,7 +104,7 @@ type testSpec struct {
 
 func makeTest(suite string, label string, input string) {
 	p := parser.New(input)
-	file := p.ParseFile()
+	file := p.ParseChunk()
 	ast, _ := json.Marshal(&file.Block)
 	errors, _ := json.Marshal(p.Errors())
 	newSpec := testSpec{label, input, ast, errors}

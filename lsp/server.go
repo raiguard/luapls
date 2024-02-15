@@ -21,7 +21,7 @@ const LS_NAME = "luapls"
 type Server struct {
 	config   Config
 	envs     map[string]*Env
-	files    map[string]*ast.File
+	files    map[string]*ast.Chunk
 	handler  protocol.Handler
 	log      commonlog.Logger
 	rootPath string
@@ -35,7 +35,7 @@ func Run(logLevel int) {
 
 	s := Server{
 		envs:  map[string]*Env{},
-		files: map[string]*ast.File{},
+		files: map[string]*ast.Chunk{},
 	}
 
 	s.handler.Initialize = s.initialize
@@ -89,7 +89,7 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 					continue
 				}
 				timer := time.Now()
-				file := parser.New(string(src)).ParseFile()
+				file := parser.New(string(src)).ParseChunk()
 				s.files[uri] = &file
 				s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
 			}
@@ -114,7 +114,7 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri protocol.URI) *ast.File {
+func (s *Server) getFile(uri protocol.URI) *ast.Chunk {
 	if !s.isInitialized {
 		return nil
 	}

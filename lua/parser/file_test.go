@@ -17,7 +17,7 @@ end
 bar(i)
 `
 	p := New(input)
-	file := p.ParseFile()
+	file := p.ParseChunk()
 	assertSlicesEqual(t, []int{9, 33, 46, 50, 57}, file.LineBreaks)
 
 	assertPositionsMatch(t, &file, protocol.Position{Line: 0, Character: 2}, 2)
@@ -34,7 +34,7 @@ func assertSlicesEqual[T comparable](t *testing.T, expected []T, actual []T) {
 	}
 }
 
-func assertPositionsMatch(t *testing.T, file *ast.File, position protocol.Position, pos token.Pos) {
+func assertPositionsMatch(t *testing.T, file *ast.Chunk, position protocol.Position, pos token.Pos) {
 	protocolPos := file.ToProtocolPos(pos)
 	assert.Equal(t, protocolPos.Line, position.Line)
 	assert.Equal(t, protocolPos.Character, position.Character)

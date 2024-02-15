@@ -25,7 +25,7 @@ func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidCh
 	for _, change := range params.ContentChanges {
 		if change, ok := change.(protocol.TextDocumentContentChangeEventWhole); ok {
 			before := time.Now()
-			newFile := parser.New(change.Text).ParseFile()
+			newFile := parser.New(change.Text).ParseChunk()
 			s.files[params.TextDocument.URI] = &newFile
 			s.log.Debugf("Reparse duration: %s", time.Since(before).String())
 			s.publishDiagnostics(ctx, params.TextDocument.URI)

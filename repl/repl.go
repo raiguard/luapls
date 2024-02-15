@@ -34,7 +34,7 @@ func Run() {
 		fmt.Println("AST:")
 
 		p := parser.New(line)
-		file := p.ParseFile()
+		file := p.ParseChunk()
 		bytes, _ := json.MarshalIndent(file, "", "  ")
 		fmt.Println(string(bytes))
 	}

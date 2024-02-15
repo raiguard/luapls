@@ -43,8 +43,8 @@ func (p *Parser) next() {
 	}
 }
 
-func (p *Parser) ParseFile() ast.File {
-	return ast.File{
+func (p *Parser) ParseChunk() ast.Chunk {
+	return ast.Chunk{
 		Block:      p.parseBlock(),
 		Errors:     p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
