@@ -148,6 +148,14 @@ func (p *Parser) parseFunctionStatement(pos token.Pos, isLocal bool) *ast.Functi
 	end := p.tok.End()
 	p.expect(token.END)
 
+	// TODO: Non-local functions in global namespace
+	if isLocal {
+		ident, ok := left.(*ast.Identifier)
+		if ok {
+			p.curEnv().Add(ident.Literal, ident)
+		}
+	}
+
 	return &ast.FunctionStatement{
 		Left:     left,
 		Params:   params,

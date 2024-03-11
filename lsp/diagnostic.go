@@ -35,6 +35,7 @@ func (s *Server) validateLocals(file *ast.Chunk, diagnostics *[]protocol.Diagnos
 			return true
 		}
 
+		// TODO: Need to keep track of parents while walking in order to remove this
 		locals := getLocals(&file.Block, ident.Pos(), true)
 		if locals[ident.Literal] == nil {
 			(*diagnostics) = append((*diagnostics), protocol.Diagnostic{

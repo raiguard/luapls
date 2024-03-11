@@ -6,6 +6,6 @@ type VariableDeclaration struct {
 	Type       Type
 }
 
-func NewVariable(name string, definition Expression) VariableDeclaration {
-	return VariableDeclaration{Name: name, Definition: definition}
+func NewVariable(name string, def Expression) VariableDeclaration {
+	return VariableDeclaration{Name: name, Definition: def, Type: &Unknown{}}
 }

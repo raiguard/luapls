@@ -14,23 +14,38 @@ func (s *Server) textDocumentDefinition(ctx *glsp.Context, params *protocol.Defi
 
 	pos := file.ToPos(params.Position)
 
-	node, _ := ast.GetNode(&file.Block, pos)
-	ident, ok := node.(*ast.Identifier)
-	if !ok {
-		return nil, nil
-	}
-
-	def := getDefinition(&file.Block, ident)
+	node, parents := ast.GetNode(&file.Block, pos)
+	def := getDefinition(node, parents)
 	if def == nil {
 		return nil, nil
 	}
 
 	return &protocol.Location{
 		URI:   params.TextDocument.URI,
-		Range: file.ToProtocolRange(ast.Range(def)),
+		Range: file.ToProtocolRange(ast.Range(def.Definition)),
 	}, nil
 }
 
-func getDefinition(node ast.Node, ident *ast.Identifier) *ast.Identifier {
-	return getLocals(node, ident.Pos(), true)[ident.Literal]
+func getDefinition(node ast.Node, parents []ast.Node) *ast.VariableDeclaration {
+	ident, ok := node.(*ast.Identifier)
+	if !ok {
+		return nil
+	}
+	for i := len(parents) - 1; i >= 0; i-- {
+		parent := parents[i]
+		block, ok := parent.(*ast.Block)
+		if !ok {
+			continue
+		}
+		def := block.Locals[ident.Literal]
+		if def == nil {
+			continue
+		}
+		// TODO: Handle shadowing
+		if def.Definition.Pos() > node.Pos() {
+			continue
+		}
+		return def
+	}
+	return nil
 }

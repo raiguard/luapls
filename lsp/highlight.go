@@ -11,7 +11,7 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 	if file == nil {
 		return nil, nil
 	}
-	node, _ := ast.GetNode(&file.Block, file.ToPos(params.Position))
+	node, parents := ast.GetNode(&file.Block, file.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
@@ -20,11 +20,10 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 	if _, ok := node.(ast.LeafNode); ok {
 		highlights = append(highlights, protocol.DocumentHighlight{Range: file.ToProtocolRange(ast.Range(node))})
 	}
-	if ident, ok := node.(*ast.Identifier); ok {
-		def := getDefinition(&file.Block, ident)
-		if def != nil {
-			highlights = append(highlights, protocol.DocumentHighlight{Range: file.ToProtocolRange(ast.Range(def))})
-		}
+	def := getDefinition(node, parents)
+	if def != nil {
+		highlights = append(highlights, protocol.DocumentHighlight{Range: file.ToProtocolRange(ast.Range(def.Definition))})
 	}
+
 	return highlights, nil
 }
