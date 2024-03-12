@@ -102,6 +102,11 @@ func (p *Parser) parseForStatement() ast.Statement {
 	p.expect(token.DO)
 
 	body := p.parseBlock()
+	// Add names to body environment
+	// TODO: Shadowing in block
+	for _, name := range names {
+		body.Locals.Add(name.Literal, name)
+	}
 
 	end := p.tok.End()
 	p.expect(token.END)
