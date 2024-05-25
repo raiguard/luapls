@@ -22,4 +22,5 @@ local function add(a, b)
   return a + b
 end
 
-local baz = add(3, 3)
+local baz = add(true, 3)
+baz = "lorem ipsum"

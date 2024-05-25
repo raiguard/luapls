@@ -27,6 +27,9 @@ func (c *Environment) ResolveTypes() {
 	clear(c.Errors)
 
 	ast.Walk(&c.file.Block, func(node ast.Node) bool {
+		if c.Types[node] != nil {
+			return false
+		}
 		switch node := node.(type) {
 		case ast.Expression:
 			c.resolveExprType(node)
@@ -82,11 +85,11 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			}
 		}
 	case *ast.FunctionStatement:
-		comments := stmt.GetComments()
 		typ := &Function{
 			Params: []FunctionParameter{},
 			Return: nil,
 		}
+		comments := stmt.GetComments()
 		for _, param := range stmt.Params {
 			template := fmt.Sprintf("@param %s", param.Literal)
 			defStart := strings.Index(comments, template)
@@ -99,10 +102,6 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			var paramTyp Type = &Unknown{}
 			switch def {
 			case "any":
-				typ.Params = append(typ.Params, FunctionParameter{
-					Name: param.Literal,
-					Type: typ,
-				})
 				paramTyp = &Any{}
 			case "boolean":
 				paramTyp = &Boolean{}
