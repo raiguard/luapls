@@ -35,6 +35,27 @@ func (c *Environment) ResolveTypes() {
 
 func (e *Environment) resolveStmtType(stmt ast.Statement) {
 	switch stmt := stmt.(type) {
+	case *ast.AssignmentStatement:
+		for i := 0; i < len(stmt.Vars); i++ {
+			leftVar := stmt.Vars[i]
+			if i >= len(stmt.Exps) {
+				e.addType(leftVar, &Unknown{})
+				continue
+			}
+			exp := stmt.Exps[i]
+			typ := e.resolveExprType(exp)
+			leftTyp := e.resolveExprType(leftVar)
+			if leftTyp != nil && typ != nil && leftTyp != typ {
+				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar)})
+				e.addType(leftVar, leftTyp)
+				continue
+			}
+			if typ != nil {
+				e.addType(leftVar, typ)
+			} else {
+				e.addType(leftVar, &Unknown{})
+			}
+		}
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names); i++ {
 			ident := stmt.Names[i]
@@ -44,6 +65,12 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			}
 			exp := stmt.Exps[i]
 			typ := e.resolveExprType(exp)
+			leftTyp := e.resolveExprType(ident)
+			if leftTyp != nil && typ != nil && leftTyp != typ {
+				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident)})
+				e.addType(ident, leftTyp)
+				continue
+			}
 			if typ != nil {
 				e.addType(ident, typ)
 			} else {
