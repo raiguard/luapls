@@ -134,12 +134,12 @@ func checkFile(path string) {
 		return // TODO: Support partial type checking
 	}
 
-	checker := types.NewChecker(&file)
-	checker.Run()
-	for _, err := range checker.Errors {
+	env := types.NewEnvironment(&file)
+	env.ResolveTypes()
+	for _, err := range env.Errors {
 		fmt.Printf("ERROR: %s\n", err.String())
 	}
-	for node, typ := range checker.Types {
+	for node, typ := range env.Types {
 		fmt.Printf("%s: %s\n", node, typ)
 	}
 }

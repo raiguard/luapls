@@ -1,101 +1,102 @@
 package types
 
 import (
-	"cmp"
 	"fmt"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/parser"
 )
 
-func min[T cmp.Ordered](a, b T) T {
-	if cmp.Compare(a, b) <= 0 {
-		return a
-	}
-	return b
-}
-
-type Checker struct {
+type Environment struct {
 	file   *parser.File
 	Types  map[ast.Node]Type
 	Errors []parser.ParserError
 }
 
-func NewChecker(file *parser.File) Checker {
-	return Checker{
+func NewEnvironment(file *parser.File) Environment {
+	return Environment{
 		file:   file,
 		Types:  map[ast.Node]Type{},
 		Errors: []parser.ParserError{},
 	}
 }
 
-func (c *Checker) Run() {
+func (c *Environment) ResolveTypes() {
 	ast.Walk(&c.file.Block, func(node ast.Node) bool {
-		c.resolveType(node)
+		switch node := node.(type) {
+		case ast.Expression:
+			c.resolveExprType(node)
+		case ast.Statement:
+			c.resolveStmtType(node)
+		}
 		return true
 	})
 }
 
-func (c *Checker) resolveType(node ast.Node) Type {
-	switch node := node.(type) {
-	// Expressions
+func (e *Environment) resolveStmtType(stmt ast.Statement) {
+	switch stmt := stmt.(type) {
+	case *ast.LocalStatement:
+		for i := 0; i < len(stmt.Names); i++ {
+			ident := stmt.Names[i]
+			if i >= len(stmt.Exps) {
+				e.addType(ident, &Unknown{})
+				continue
+			}
+			exp := stmt.Exps[i]
+			typ := e.resolveExprType(exp)
+			if typ != nil {
+				e.addType(ident, typ)
+			} else {
+				e.addType(ident, &Unknown{})
+			}
+		}
+	}
+}
+
+func (e *Environment) resolveExprType(expr ast.Expression) Type {
+	switch expr := expr.(type) {
+	// Literals
 	case *ast.BooleanLiteral:
-		return c.addType(node, &Boolean{})
+		return e.addType(expr, &Boolean{})
+	case *ast.NilLiteral:
+		return e.addType(expr, &Unknown{})
+	case *ast.NumberLiteral:
+		return e.addType(expr, &Number{})
+	case *ast.StringLiteral:
+		return e.addType(expr, &String{})
+
+	case *ast.Identifier:
+		def := e.FindDefinition(expr, true)
+		if def != nil {
+			typ := e.Types[def]
+			if typ != nil {
+				return e.addType(expr, typ)
+			}
+		} else {
+			e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Unknown variable '%s'", expr.Literal), Range: ast.Range(expr)})
+		}
+
 	case *ast.FunctionExpression:
 		typ := &Function{Params: []FunctionParameter{}}
-		for _, param := range node.Params {
+		for _, param := range expr.Params {
 			// TODO: Function parameter types - requires parsing doc comments
 			typ.Params = append(typ.Params, FunctionParameter{Name: param.Literal, Type: &Unknown{}})
 		}
-		return c.addType(node, typ)
-	case *ast.NilLiteral:
-		return c.addType(node, &Unknown{})
-	case *ast.NumberLiteral:
-		return c.addType(node, &Number{})
-	case *ast.StringLiteral:
-		return c.addType(node, &String{})
-
-	case *ast.Identifier:
-		def := c.FindDefinition(node, true)
-		if def != nil {
-			typ := c.Types[def]
-			if typ != nil {
-				return c.addType(node, typ)
-			}
-		} else {
-			c.Errors = append(c.Errors, parser.ParserError{Message: fmt.Sprintf("Unknown variable '%s'", node.Literal), Range: ast.Range(node)})
-		}
-
-	// Statements
-	case *ast.LocalStatement:
-		for i := 0; i < len(node.Names); i++ {
-			ident := node.Names[i]
-			if i >= len(node.Exps) {
-				c.addType(ident, &Unknown{})
-				continue
-			}
-			exp := node.Exps[i]
-			typ := c.resolveType(exp)
-			if typ != nil {
-				c.addType(ident, typ)
-			} else {
-				c.addType(ident, &Unknown{})
-			}
-		}
+		return e.addType(expr, typ)
 	}
 
 	return nil
 }
 
-func (c *Checker) addType(node ast.Node, typ Type) Type {
-	c.Types[node] = typ
+func (e *Environment) addType(node ast.Node, typ Type) Type {
+	e.Types[node] = typ
 	return typ
 }
 
-func (c *Checker) FindDefinition(identFor *ast.Identifier, includeSelf bool) *ast.Identifier {
+func (e *Environment) FindDefinition(identFor *ast.Identifier, includeSelf bool) *ast.Identifier {
 	pos := identFor.StartPos
 	var def *ast.Identifier
-	ast.Walk(&c.file.Block, func(node ast.Node) bool {
+	ast.Walk(&e.file.Block, func(node ast.Node) bool {
 		isAfter := node.Pos() > pos && pos < node.End()
 		if isAfter {
 			return false
