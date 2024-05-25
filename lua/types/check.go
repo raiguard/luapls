@@ -43,7 +43,7 @@ func (t *Checker) Run() {
 				// case *ast.FunctionCall:
 				// 	t.types[ident] = &Unknown{}
 				case *ast.FunctionExpression:
-					t.Types[ident] = &Function{}
+					t.Types[ident] = &Function{Params: []Type{}}
 				// case *ast.Identifier:
 				// 	t.types[ident] = &Unknown{}
 				// case *ast.IndexExpression:
