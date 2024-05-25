@@ -206,17 +206,11 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			e.addError(expr, "'%s' is not a function", expr.Left)
 			return typ
 		}
-		if len(expr.Args) > len(function.Params) {
-			e.addError(expr, "Too many function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
-			return typ
-		} else if len(function.Params) > len(expr.Args) {
-			e.addError(expr, "Too few function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
-			return typ
-		}
 		for i := 0; i < len(expr.Args); i++ {
 			arg := expr.Args[i]
 			argTyp := e.resolveExprType(arg)
-			if i > len(function.Params) {
+			if i >= len(function.Params) {
+				e.addError(arg, "Unused parameter")
 				break // TODO:
 			}
 			if argTyp == nil {
@@ -225,6 +219,9 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			if argTyp != function.Params[i].Type {
 				e.addError(arg, "Cannot use '%s' as '%s' in argument.", argTyp, function.Params[i].Type)
 			}
+		}
+		if len(expr.Args) < len(function.Params) {
+			e.addError(expr, "Too few function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
 		}
 		return typ
 	}
