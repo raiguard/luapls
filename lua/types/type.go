@@ -8,6 +8,7 @@ type Type interface {
 }
 
 type (
+	Any      struct{}
 	Boolean  struct{}
 	Function struct {
 		Params []FunctionParameter
@@ -18,12 +19,14 @@ type (
 	Unknown struct{}
 )
 
+func (a *Any) isType()      {}
 func (b *Boolean) isType()  {}
 func (f *Function) isType() {}
 func (n *Number) isType()   {}
 func (s *String) isType()   {}
 func (u *Unknown) isType()  {}
 
+func (b *Any) String() string     { return "any" }
 func (b *Boolean) String() string { return "boolean" }
 func (f *Function) String() string {
 	output := "function("
@@ -31,11 +34,11 @@ func (f *Function) String() string {
 		output = output + param.String() + ", "
 	}
 	if len(f.Params) > 0 {
-		output = output[0:len(output)-2] + ")"
+		output = output[0 : len(output)-2]
 	}
 	output = output + ")"
 	if f.Return != nil {
-		output = output + " " + f.Return.String()
+		output = output + " -> " + f.Return.String()
 	}
 	return output
 }

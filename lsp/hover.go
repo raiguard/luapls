@@ -22,15 +22,18 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if !ok {
 		typ = &types.Unknown{}
 	}
-	contents := fmt.Sprintf("## %s: %s", node.String(), typ)
+	contents := fmt.Sprintf("## %s: %s\n\n-----", node.String(), typ)
 	comments := node.GetComments()
 	i := len(parents) - 1
 	for comments == "" && i >= 0 {
 		comments = parents[i].GetComments()
+		if _, ok := parents[i].(ast.Statement); ok {
+			break
+		}
 		i--
 	}
 	if comments != "" {
-		contents += "\n\n-----\n\n" + comments
+		contents += "\n\n" + comments
 	}
 	return &protocol.Hover{
 		Contents: contents,

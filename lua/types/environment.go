@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/parser"
@@ -80,6 +81,66 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				e.addError(stmt.Step, "Range step must be of type '%s'", typ)
 			}
 		}
+	case *ast.FunctionStatement:
+		comments := stmt.GetComments()
+		typ := &Function{
+			Params: []FunctionParameter{},
+			Return: nil,
+		}
+		for _, param := range stmt.Params {
+			template := fmt.Sprintf("@param %s", param.Literal)
+			defStart := strings.Index(comments, template)
+			if defStart == -1 {
+				e.addType(param, &Any{})
+				continue
+			}
+			// This is awful
+			def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
+			var paramTyp Type = &Unknown{}
+			switch def {
+			case "any":
+				typ.Params = append(typ.Params, FunctionParameter{
+					Name: param.Literal,
+					Type: typ,
+				})
+				paramTyp = &Any{}
+			case "boolean":
+				paramTyp = &Boolean{}
+			case "number":
+				paramTyp = &Number{}
+			case "string":
+				paramTyp = &String{}
+			}
+			e.addType(param, paramTyp)
+			typ.Params = append(typ.Params, FunctionParameter{
+				Name: param.Literal,
+				Type: paramTyp,
+			})
+			// TODO: Custom types
+		}
+		{
+			template := "@return"
+			defStart := strings.Index(comments, template)
+			if defStart == -1 {
+				typ.Return = &Unknown{}
+				return
+			}
+			// This is awful
+			def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
+			switch def {
+			case "any":
+				typ.Return = &Any{}
+			case "boolean":
+				typ.Return = &Boolean{}
+			case "number":
+				typ.Return = &Number{}
+			case "string":
+				typ.Return = &String{}
+			}
+		}
+		e.addType(stmt, typ)
+		// TODO: Parse index expression
+		e.addType(stmt.Left, typ)
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names); i++ {
 			ident := stmt.Names[i]
@@ -134,6 +195,38 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			typ.Params = append(typ.Params, FunctionParameter{Name: param.Literal, Type: &Unknown{}})
 		}
 		return e.addType(expr, typ)
+	case *ast.FunctionCall:
+		typ := e.resolveExprType(expr.Left)
+		if typ == nil {
+			return nil // TODO: Index expressions
+		}
+		e.addType(expr, typ)
+		function, ok := typ.(*Function)
+		if !ok {
+			e.addError(expr, "'%s' is not a function", expr.Left)
+			return typ
+		}
+		if len(expr.Args) > len(function.Params) {
+			e.addError(expr, "Too many function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
+			return typ
+		} else if len(function.Params) > len(expr.Args) {
+			e.addError(expr, "Too few function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
+			return typ
+		}
+		for i := 0; i < len(expr.Args); i++ {
+			arg := expr.Args[i]
+			argTyp := e.resolveExprType(arg)
+			if i > len(function.Params) {
+				break // TODO:
+			}
+			if argTyp == nil {
+				continue // TODO:
+			}
+			if argTyp != function.Params[i].Type {
+				e.addError(arg, "Cannot use '%s' as '%s' in argument.", argTyp, function.Params[i].Type)
+			}
+		}
+		return typ
 	}
 
 	return nil
