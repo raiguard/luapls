@@ -223,7 +223,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		if len(expr.Args) < len(function.Params) {
 			e.addError(expr, "Too few function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
 		}
-		return typ
+		return function.Return
 	}
 
 	return nil

@@ -22,4 +22,4 @@ local function add(a, b)
   return a + b
 end
 
-add("foo", 3)
+local baz = add(3, 3)
