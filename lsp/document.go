@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"os"
 	"time"
 
 	"github.com/raiguard/luapls/lua/parser"
@@ -11,11 +12,10 @@ import (
 
 // TODO: Incremental changes
 func (s *Server) textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	file := s.getFile(params.TextDocument.URI)
+	file := s.createFile(params.TextDocument.URI)
 	if file == nil {
 		return nil
 	}
-	file.Env.ResolveTypes()
 	s.publishDiagnostics(ctx, file)
 	return nil
 }
@@ -42,4 +42,25 @@ func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidCh
 func (s *Server) textDocumentDidClose(ctx *glsp.Context, params *protocol.DidCloseTextDocumentParams) error {
 	s.files[params.TextDocument.URI] = nil
 	return nil
+}
+
+func (s *Server) createFile(uri protocol.URI) *File {
+	path, err := uriToPath(uri)
+	if err != nil {
+		s.log.Errorf("%s", err)
+		return nil
+	}
+	src, err := os.ReadFile(path)
+	if err != nil {
+		s.log.Errorf("Failed to parse file %s: %s", uri, err)
+		return nil
+	}
+	timer := time.Now()
+	parserFile := parser.New(string(src)).ParseFile()
+	file := &File{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
+	file.Env.ResolveTypes()
+	s.files[uri] = file
+	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
+
+	return file
 }

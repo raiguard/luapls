@@ -1,9 +1,6 @@
 package lsp
 
 import (
-	"os"
-	"time"
-
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/tliron/commonlog"
@@ -72,6 +69,7 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 	go func() {
 		s.isInitialized = true
+		s.log.Debug("Initialized")
 		for _, file := range s.files {
 			s.publishDiagnostics(ctx, file)
 		}
@@ -97,24 +95,5 @@ func (s *Server) getFile(uri protocol.URI) *File {
 	if existing != nil {
 		return existing
 	}
-
-	// Otherwise, create, parse, and check it
-	path, err := uriToPath(uri)
-	if err != nil {
-		s.log.Errorf("%s", err)
-		return nil
-	}
-	src, err := os.ReadFile(path)
-	if err != nil {
-		s.log.Errorf("Failed to parse file %s: %s", uri, err)
-		return nil
-	}
-	timer := time.Now()
-	parserFile := parser.New(string(src)).ParseFile()
-	file := &File{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
-	file.Env.ResolveTypes()
-	s.files[uri] = file
-	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
-
-	return file
+	return nil
 }
