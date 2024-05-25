@@ -4,39 +4,39 @@
     "Input": "foo.bar = 'baz'",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        15
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 15
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            15
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 15
+          },
           "Vars": [
             {
               "Type": "IndexExpression",
-              "Range": [
-                0,
-                7
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 7
+              },
               "Left": {
                 "Type": "Identifier",
-                "Range": [
-                  0,
-                  3
-                ],
+                "Range": {
+                  "Start": 0,
+                  "End": 3
+                },
                 "Literal": "foo"
               },
               "Indexer": "dot",
               "Inner": {
                 "Type": "Identifier",
-                "Range": [
-                  4,
-                  7
-                ],
+                "Range": {
+                  "Start": 4,
+                  "End": 7
+                },
                 "Literal": "bar"
               }
             }
@@ -44,10 +44,10 @@
           "Exps": [
             {
               "Type": "StringLiteral",
-              "Range": [
-                10,
-                15
-              ],
+              "Range": {
+                "Start": 10,
+                "End": 15
+              },
               "Literal": "'baz'"
             }
           ]

@@ -4,155 +4,155 @@
     "Input": "a = {1, 2, three = 3, ['four'] = 4, [2+3] = 5}",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        46
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 46
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            46
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 46
+          },
           "Vars": [
             {
               "Type": "Identifier",
-              "Range": [
-                0,
-                1
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 1
+              },
               "Literal": "a"
             }
           ],
           "Exps": [
             {
               "Type": "TableLiteral",
-              "Range": [
-                4,
-                46
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 46
+              },
               "Fields": [
                 {
                   "Type": "TableField",
-                  "Range": [
-                    5,
-                    6
-                  ],
+                  "Range": {
+                    "Start": 5,
+                    "End": 6
+                  },
                   "Key": null,
                   "Value": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      5,
-                      6
-                    ],
+                    "Range": {
+                      "Start": 5,
+                      "End": 6
+                    },
                     "Literal": "1",
                     "Value": 1
                   }
                 },
                 {
                   "Type": "TableField",
-                  "Range": [
-                    8,
-                    9
-                  ],
+                  "Range": {
+                    "Start": 8,
+                    "End": 9
+                  },
                   "Key": null,
                   "Value": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      8,
-                      9
-                    ],
+                    "Range": {
+                      "Start": 8,
+                      "End": 9
+                    },
                     "Literal": "2",
                     "Value": 2
                   }
                 },
                 {
                   "Type": "TableField",
-                  "Range": [
-                    11,
-                    20
-                  ],
+                  "Range": {
+                    "Start": 11,
+                    "End": 20
+                  },
                   "Key": {
                     "Type": "Identifier",
-                    "Range": [
-                      11,
-                      16
-                    ],
+                    "Range": {
+                      "Start": 11,
+                      "End": 16
+                    },
                     "Literal": "three"
                   },
                   "Value": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      19,
-                      20
-                    ],
+                    "Range": {
+                      "Start": 19,
+                      "End": 20
+                    },
                     "Literal": "3",
                     "Value": 3
                   }
                 },
                 {
                   "Type": "TableField",
-                  "Range": [
-                    22,
-                    34
-                  ],
+                  "Range": {
+                    "Start": 22,
+                    "End": 34
+                  },
                   "Key": {
                     "Type": "StringLiteral",
-                    "Range": [
-                      23,
-                      29
-                    ],
+                    "Range": {
+                      "Start": 23,
+                      "End": 29
+                    },
                     "Literal": "'four'"
                   },
                   "Value": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      33,
-                      34
-                    ],
+                    "Range": {
+                      "Start": 33,
+                      "End": 34
+                    },
                     "Literal": "4",
                     "Value": 4
                   }
                 },
                 {
                   "Type": "TableField",
-                  "Range": [
-                    36,
-                    45
-                  ],
+                  "Range": {
+                    "Start": 36,
+                    "End": 45
+                  },
                   "Key": {
                     "Type": "InfixExpression",
-                    "Range": [
-                      37,
-                      40
-                    ],
+                    "Range": {
+                      "Start": 37,
+                      "End": 40
+                    },
                     "Left": {
                       "Type": "NumberLiteral",
-                      "Range": [
-                        37,
-                        38
-                      ],
+                      "Range": {
+                        "Start": 37,
+                        "End": 38
+                      },
                       "Literal": "2",
                       "Value": 2
                     },
                     "Operator": "plus",
                     "Right": {
                       "Type": "NumberLiteral",
-                      "Range": [
-                        39,
-                        40
-                      ],
+                      "Range": {
+                        "Start": 39,
+                        "End": 40
+                      },
                       "Literal": "3",
                       "Value": 3
                     }
                   },
                   "Value": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      44,
-                      45
-                    ],
+                    "Range": {
+                      "Start": 44,
+                      "End": 45
+                    },
                     "Literal": "5",
                     "Value": 5
                   }
@@ -170,48 +170,48 @@
     "Input": "local tbl = {",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        13
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 13
+      },
       "Stmts": [
         {
           "Type": "LocalStatement",
-          "Range": [
-            0,
-            13
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 13
+          },
           "Names": [
             {
               "Type": "Identifier",
-              "Range": [
-                6,
-                9
-              ],
+              "Range": {
+                "Start": 6,
+                "End": 9
+              },
               "Literal": "tbl"
             }
           ],
           "Exps": [
             {
               "Type": "TableLiteral",
-              "Range": [
-                12,
-                13
-              ],
+              "Range": {
+                "Start": 12,
+                "End": 13
+              },
               "Fields": [
                 {
                   "Type": "TableField",
-                  "Range": [
-                    13,
-                    13
-                  ],
+                  "Range": {
+                    "Start": 13,
+                    "End": 13
+                  },
                   "Key": null,
                   "Value": {
                     "Type": "Invalid",
-                    "Range": [
-                      13,
-                      13
-                    ],
+                    "Range": {
+                      "Start": 13,
+                      "End": 13
+                    },
                     "Token": {
                       "Type": "eof",
                       "Literal": "",
@@ -229,17 +229,17 @@
     "Errors": [
       {
         "Message": "Expected expression, got eof",
-        "Range": [
-          13,
-          13
-        ]
+        "Range": {
+          "Start": 13,
+          "End": 13
+        }
       },
       {
         "Message": "Expected right brace, got eof",
-        "Range": [
-          13,
-          13
-        ]
+        "Range": {
+          "Start": 13,
+          "End": 13
+        }
       }
     ]
   },
@@ -248,71 +248,71 @@
     "Input": "local tbl = {foo.bar = 'baz'}",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        29
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 29
+      },
       "Stmts": [
         {
           "Type": "LocalStatement",
-          "Range": [
-            0,
-            29
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 29
+          },
           "Names": [
             {
               "Type": "Identifier",
-              "Range": [
-                6,
-                9
-              ],
+              "Range": {
+                "Start": 6,
+                "End": 9
+              },
               "Literal": "tbl"
             }
           ],
           "Exps": [
             {
               "Type": "TableLiteral",
-              "Range": [
-                12,
-                29
-              ],
+              "Range": {
+                "Start": 12,
+                "End": 29
+              },
               "Fields": [
                 {
                   "Type": "TableField",
-                  "Range": [
-                    13,
-                    28
-                  ],
+                  "Range": {
+                    "Start": 13,
+                    "End": 28
+                  },
                   "Key": {
                     "Type": "IndexExpression",
-                    "Range": [
-                      13,
-                      20
-                    ],
+                    "Range": {
+                      "Start": 13,
+                      "End": 20
+                    },
                     "Left": {
                       "Type": "Identifier",
-                      "Range": [
-                        13,
-                        16
-                      ],
+                      "Range": {
+                        "Start": 13,
+                        "End": 16
+                      },
                       "Literal": "foo"
                     },
                     "Indexer": "dot",
                     "Inner": {
                       "Type": "Identifier",
-                      "Range": [
-                        17,
-                        20
-                      ],
+                      "Range": {
+                        "Start": 17,
+                        "End": 20
+                      },
                       "Literal": "bar"
                     }
                   },
                   "Value": {
                     "Type": "StringLiteral",
-                    "Range": [
-                      23,
-                      28
-                    ],
+                    "Range": {
+                      "Start": 23,
+                      "End": 28
+                    },
                     "Literal": "'baz'"
                   }
                 }
@@ -326,10 +326,10 @@
     "Errors": [
       {
         "Message": "Missing brackets around expression key",
-        "Range": [
-          13,
-          20
-        ]
+        "Range": {
+          "Start": 13,
+          "End": 20
+        }
       }
     ]
   }

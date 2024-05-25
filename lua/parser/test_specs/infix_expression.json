@@ -4,49 +4,49 @@
     "Input": "a = b == 5",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        10
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 10
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            10
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 10
+          },
           "Vars": [
             {
               "Type": "Identifier",
-              "Range": [
-                0,
-                1
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 1
+              },
               "Literal": "a"
             }
           ],
           "Exps": [
             {
               "Type": "InfixExpression",
-              "Range": [
-                4,
-                10
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 10
+              },
               "Left": {
                 "Type": "Identifier",
-                "Range": [
-                  4,
-                  5
-                ],
+                "Range": {
+                  "Start": 4,
+                  "End": 5
+                },
                 "Literal": "b"
               },
               "Operator": "equal",
               "Right": {
                 "Type": "NumberLiteral",
-                "Range": [
-                  9,
-                  10
-                ],
+                "Range": {
+                  "Start": 9,
+                  "End": 10
+                },
                 "Literal": "5",
                 "Value": 5
               }
@@ -61,49 +61,49 @@
     "Input": "a = b + 5",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        9
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 9
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            9
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 9
+          },
           "Vars": [
             {
               "Type": "Identifier",
-              "Range": [
-                0,
-                1
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 1
+              },
               "Literal": "a"
             }
           ],
           "Exps": [
             {
               "Type": "InfixExpression",
-              "Range": [
-                4,
-                9
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 9
+              },
               "Left": {
                 "Type": "Identifier",
-                "Range": [
-                  4,
-                  5
-                ],
+                "Range": {
+                  "Start": 4,
+                  "End": 5
+                },
                 "Literal": "b"
               },
               "Operator": "plus",
               "Right": {
                 "Type": "NumberLiteral",
-                "Range": [
-                  8,
-                  9
-                ],
+                "Range": {
+                  "Start": 8,
+                  "End": 9
+                },
                 "Literal": "5",
                 "Value": 5
               }
@@ -118,56 +118,56 @@
     "Input": "a = 2 + 2 + 2",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        13
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 13
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            13
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 13
+          },
           "Vars": [
             {
               "Type": "Identifier",
-              "Range": [
-                0,
-                1
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 1
+              },
               "Literal": "a"
             }
           ],
           "Exps": [
             {
               "Type": "InfixExpression",
-              "Range": [
-                4,
-                13
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 13
+              },
               "Left": {
                 "Type": "InfixExpression",
-                "Range": [
-                  4,
-                  9
-                ],
+                "Range": {
+                  "Start": 4,
+                  "End": 9
+                },
                 "Left": {
                   "Type": "NumberLiteral",
-                  "Range": [
-                    4,
-                    5
-                  ],
+                  "Range": {
+                    "Start": 4,
+                    "End": 5
+                  },
                   "Literal": "2",
                   "Value": 2
                 },
                 "Operator": "plus",
                 "Right": {
                   "Type": "NumberLiteral",
-                  "Range": [
-                    8,
-                    9
-                  ],
+                  "Range": {
+                    "Start": 8,
+                    "End": 9
+                  },
                   "Literal": "2",
                   "Value": 2
                 }
@@ -175,10 +175,10 @@
               "Operator": "plus",
               "Right": {
                 "Type": "NumberLiteral",
-                "Range": [
-                  12,
-                  13
-                ],
+                "Range": {
+                  "Start": 12,
+                  "End": 13
+                },
                 "Literal": "2",
                 "Value": 2
               }
@@ -193,64 +193,64 @@
     "Input": "a = 'foo'..'bar'..'baz'",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        23
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 23
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            23
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 23
+          },
           "Vars": [
             {
               "Type": "Identifier",
-              "Range": [
-                0,
-                1
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 1
+              },
               "Literal": "a"
             }
           ],
           "Exps": [
             {
               "Type": "InfixExpression",
-              "Range": [
-                4,
-                23
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 23
+              },
               "Left": {
                 "Type": "StringLiteral",
-                "Range": [
-                  4,
-                  9
-                ],
+                "Range": {
+                  "Start": 4,
+                  "End": 9
+                },
                 "Literal": "'foo'"
               },
               "Operator": "concat",
               "Right": {
                 "Type": "InfixExpression",
-                "Range": [
-                  11,
-                  23
-                ],
+                "Range": {
+                  "Start": 11,
+                  "End": 23
+                },
                 "Left": {
                   "Type": "StringLiteral",
-                  "Range": [
-                    11,
-                    16
-                  ],
+                  "Range": {
+                    "Start": 11,
+                    "End": 16
+                  },
                   "Literal": "'bar'"
                 },
                 "Operator": "concat",
                 "Right": {
                   "Type": "StringLiteral",
-                  "Range": [
-                    18,
-                    23
-                  ],
+                  "Range": {
+                    "Start": 18,
+                    "End": 23
+                  },
                   "Literal": "'baz'"
                 }
               }
@@ -265,62 +265,62 @@
     "Input": "a = 1 + 2 - 3 * -4 / 5 % 6 ^ 7 .. 8",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        35
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 35
+      },
       "Stmts": [
         {
           "Type": "AssignmentStatement",
-          "Range": [
-            0,
-            35
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 35
+          },
           "Vars": [
             {
               "Type": "Identifier",
-              "Range": [
-                0,
-                1
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 1
+              },
               "Literal": "a"
             }
           ],
           "Exps": [
             {
               "Type": "InfixExpression",
-              "Range": [
-                4,
-                35
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 35
+              },
               "Left": {
                 "Type": "InfixExpression",
-                "Range": [
-                  4,
-                  30
-                ],
+                "Range": {
+                  "Start": 4,
+                  "End": 30
+                },
                 "Left": {
                   "Type": "InfixExpression",
-                  "Range": [
-                    4,
-                    9
-                  ],
+                  "Range": {
+                    "Start": 4,
+                    "End": 9
+                  },
                   "Left": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      4,
-                      5
-                    ],
+                    "Range": {
+                      "Start": 4,
+                      "End": 5
+                    },
                     "Literal": "1",
                     "Value": 1
                   },
                   "Operator": "plus",
                   "Right": {
                     "Type": "NumberLiteral",
-                    "Range": [
-                      8,
-                      9
-                    ],
+                    "Range": {
+                      "Start": 8,
+                      "End": 9
+                    },
                     "Literal": "2",
                     "Value": 2
                   }
@@ -328,45 +328,45 @@
                 "Operator": "minus",
                 "Right": {
                   "Type": "InfixExpression",
-                  "Range": [
-                    12,
-                    30
-                  ],
+                  "Range": {
+                    "Start": 12,
+                    "End": 30
+                  },
                   "Left": {
                     "Type": "InfixExpression",
-                    "Range": [
-                      12,
-                      22
-                    ],
+                    "Range": {
+                      "Start": 12,
+                      "End": 22
+                    },
                     "Left": {
                       "Type": "InfixExpression",
-                      "Range": [
-                        12,
-                        18
-                      ],
+                      "Range": {
+                        "Start": 12,
+                        "End": 18
+                      },
                       "Left": {
                         "Type": "NumberLiteral",
-                        "Range": [
-                          12,
-                          13
-                        ],
+                        "Range": {
+                          "Start": 12,
+                          "End": 13
+                        },
                         "Literal": "3",
                         "Value": 3
                       },
                       "Operator": "mul",
                       "Right": {
                         "Type": "PrefixExpression",
-                        "Range": [
-                          16,
-                          18
-                        ],
+                        "Range": {
+                          "Start": 16,
+                          "End": 18
+                        },
                         "Operator": "minus",
                         "Right": {
                           "Type": "NumberLiteral",
-                          "Range": [
-                            17,
-                            18
-                          ],
+                          "Range": {
+                            "Start": 17,
+                            "End": 18
+                          },
                           "Literal": "4",
                           "Value": 4
                         }
@@ -375,10 +375,10 @@
                     "Operator": "slash",
                     "Right": {
                       "Type": "NumberLiteral",
-                      "Range": [
-                        21,
-                        22
-                      ],
+                      "Range": {
+                        "Start": 21,
+                        "End": 22
+                      },
                       "Literal": "5",
                       "Value": 5
                     }
@@ -386,26 +386,26 @@
                   "Operator": "mod",
                   "Right": {
                     "Type": "InfixExpression",
-                    "Range": [
-                      25,
-                      30
-                    ],
+                    "Range": {
+                      "Start": 25,
+                      "End": 30
+                    },
                     "Left": {
                       "Type": "NumberLiteral",
-                      "Range": [
-                        25,
-                        26
-                      ],
+                      "Range": {
+                        "Start": 25,
+                        "End": 26
+                      },
                       "Literal": "6",
                       "Value": 6
                     },
                     "Operator": "pow",
                     "Right": {
                       "Type": "NumberLiteral",
-                      "Range": [
-                        29,
-                        30
-                      ],
+                      "Range": {
+                        "Start": 29,
+                        "End": 30
+                      },
                       "Literal": "7",
                       "Value": 7
                     }
@@ -415,10 +415,10 @@
               "Operator": "concat",
               "Right": {
                 "Type": "NumberLiteral",
-                "Range": [
-                  34,
-                  35
-                ],
+                "Range": {
+                  "Start": 34,
+                  "End": 35
+                },
                 "Literal": "8",
                 "Value": 8
               }

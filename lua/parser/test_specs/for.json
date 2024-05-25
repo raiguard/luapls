@@ -4,50 +4,50 @@
     "Input": "for i = 1, 100 do end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        21
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 21
+      },
       "Stmts": [
         {
           "Type": "ForStatement",
-          "Range": [
-            0,
-            21
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 21
+          },
           "Name": {
             "Type": "Identifier",
-            "Range": [
-              4,
-              5
-            ],
+            "Range": {
+              "Start": 4,
+              "End": 5
+            },
             "Literal": "i"
           },
           "Start": {
             "Type": "NumberLiteral",
-            "Range": [
-              8,
-              9
-            ],
+            "Range": {
+              "Start": 8,
+              "End": 9
+            },
             "Literal": "1",
             "Value": 1
           },
           "Finish": {
             "Type": "NumberLiteral",
-            "Range": [
-              11,
-              14
-            ],
+            "Range": {
+              "Start": 11,
+              "End": 14
+            },
             "Literal": "100",
             "Value": 100
           },
           "Step": null,
           "Body": {
             "Type": "Block",
-            "Range": [
-              18,
-              18
-            ],
+            "Range": {
+              "Start": 18,
+              "End": 18
+            },
             "Stmts": []
           }
         }
@@ -59,58 +59,58 @@
     "Input": "for i = 1, 100, 5 do end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        24
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 24
+      },
       "Stmts": [
         {
           "Type": "ForStatement",
-          "Range": [
-            0,
-            24
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 24
+          },
           "Name": {
             "Type": "Identifier",
-            "Range": [
-              4,
-              5
-            ],
+            "Range": {
+              "Start": 4,
+              "End": 5
+            },
             "Literal": "i"
           },
           "Start": {
             "Type": "NumberLiteral",
-            "Range": [
-              8,
-              9
-            ],
+            "Range": {
+              "Start": 8,
+              "End": 9
+            },
             "Literal": "1",
             "Value": 1
           },
           "Finish": {
             "Type": "NumberLiteral",
-            "Range": [
-              11,
-              14
-            ],
+            "Range": {
+              "Start": 11,
+              "End": 14
+            },
             "Literal": "100",
             "Value": 100
           },
           "Step": {
             "Type": "NumberLiteral",
-            "Range": [
-              16,
-              17
-            ],
+            "Range": {
+              "Start": 16,
+              "End": 17
+            },
             "Literal": "5",
             "Value": 5
           },
           "Body": {
             "Type": "Block",
-            "Range": [
-              21,
-              21
-            ],
+            "Range": {
+              "Start": 21,
+              "End": 21
+            },
             "Stmts": []
           }
         }
@@ -122,74 +122,74 @@
     "Input": "for i = 100, -1, -2 do end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        26
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 26
+      },
       "Stmts": [
         {
           "Type": "ForStatement",
-          "Range": [
-            0,
-            26
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 26
+          },
           "Name": {
             "Type": "Identifier",
-            "Range": [
-              4,
-              5
-            ],
+            "Range": {
+              "Start": 4,
+              "End": 5
+            },
             "Literal": "i"
           },
           "Start": {
             "Type": "NumberLiteral",
-            "Range": [
-              8,
-              11
-            ],
+            "Range": {
+              "Start": 8,
+              "End": 11
+            },
             "Literal": "100",
             "Value": 100
           },
           "Finish": {
             "Type": "PrefixExpression",
-            "Range": [
-              13,
-              15
-            ],
+            "Range": {
+              "Start": 13,
+              "End": 15
+            },
             "Operator": "minus",
             "Right": {
               "Type": "NumberLiteral",
-              "Range": [
-                14,
-                15
-              ],
+              "Range": {
+                "Start": 14,
+                "End": 15
+              },
               "Literal": "1",
               "Value": 1
             }
           },
           "Step": {
             "Type": "PrefixExpression",
-            "Range": [
-              17,
-              19
-            ],
+            "Range": {
+              "Start": 17,
+              "End": 19
+            },
             "Operator": "minus",
             "Right": {
               "Type": "NumberLiteral",
-              "Range": [
-                18,
-                19
-              ],
+              "Range": {
+                "Start": 18,
+                "End": 19
+              },
               "Literal": "2",
               "Value": 2
             }
           },
           "Body": {
             "Type": "Block",
-            "Range": [
-              23,
-              23
-            ],
+            "Range": {
+              "Start": 23,
+              "End": 23
+            },
             "Stmts": []
           }
         }
@@ -201,57 +201,57 @@
     "Input": "for key, value in pairs({}) do end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        34
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 34
+      },
       "Stmts": [
         {
           "Type": "ForInStatement",
-          "Range": [
-            0,
-            34
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 34
+          },
           "Names": [
             {
               "Type": "Identifier",
-              "Range": [
-                4,
-                7
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 7
+              },
               "Literal": "key"
             },
             {
               "Type": "Identifier",
-              "Range": [
-                9,
-                14
-              ],
+              "Range": {
+                "Start": 9,
+                "End": 14
+              },
               "Literal": "value"
             }
           ],
           "Exps": [
             {
               "Type": "FunctionCall",
-              "Range": [
-                18,
-                27
-              ],
+              "Range": {
+                "Start": 18,
+                "End": 27
+              },
               "Left": {
                 "Type": "Identifier",
-                "Range": [
-                  18,
-                  23
-                ],
+                "Range": {
+                  "Start": 18,
+                  "End": 23
+                },
                 "Literal": "pairs"
               },
               "Args": [
                 {
                   "Type": "TableLiteral",
-                  "Range": [
-                    24,
-                    26
-                  ],
+                  "Range": {
+                    "Start": 24,
+                    "End": 26
+                  },
                   "Fields": [],
                   "StartPos": 24
                 }
@@ -260,10 +260,10 @@
           ],
           "Body": {
             "Type": "Block",
-            "Range": [
-              31,
-              31
-            ],
+            "Range": {
+              "Start": 31,
+              "End": 31
+            },
             "Stmts": []
           }
         }
@@ -275,75 +275,75 @@
     "Input": "for first, second, third, fourth, fifth in some_iterable_variable do end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        72
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 72
+      },
       "Stmts": [
         {
           "Type": "ForInStatement",
-          "Range": [
-            0,
-            72
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 72
+          },
           "Names": [
             {
               "Type": "Identifier",
-              "Range": [
-                4,
-                9
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 9
+              },
               "Literal": "first"
             },
             {
               "Type": "Identifier",
-              "Range": [
-                11,
-                17
-              ],
+              "Range": {
+                "Start": 11,
+                "End": 17
+              },
               "Literal": "second"
             },
             {
               "Type": "Identifier",
-              "Range": [
-                19,
-                24
-              ],
+              "Range": {
+                "Start": 19,
+                "End": 24
+              },
               "Literal": "third"
             },
             {
               "Type": "Identifier",
-              "Range": [
-                26,
-                32
-              ],
+              "Range": {
+                "Start": 26,
+                "End": 32
+              },
               "Literal": "fourth"
             },
             {
               "Type": "Identifier",
-              "Range": [
-                34,
-                39
-              ],
+              "Range": {
+                "Start": 34,
+                "End": 39
+              },
               "Literal": "fifth"
             }
           ],
           "Exps": [
             {
               "Type": "Identifier",
-              "Range": [
-                43,
-                65
-              ],
+              "Range": {
+                "Start": 43,
+                "End": 65
+              },
               "Literal": "some_iterable_variable"
             }
           ],
           "Body": {
             "Type": "Block",
-            "Range": [
-              69,
-              69
-            ],
+            "Range": {
+              "Start": 69,
+              "End": 69
+            },
             "Stmts": []
           }
         }

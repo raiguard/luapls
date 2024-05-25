@@ -4,96 +4,96 @@
     "Input": "local add = function(a, b) print(a + b) end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        43
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 43
+      },
       "Stmts": [
         {
           "Type": "LocalStatement",
-          "Range": [
-            0,
-            43
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 43
+          },
           "Names": [
             {
               "Type": "Identifier",
-              "Range": [
-                6,
-                9
-              ],
+              "Range": {
+                "Start": 6,
+                "End": 9
+              },
               "Literal": "add"
             }
           ],
           "Exps": [
             {
               "Type": "FunctionExpression",
-              "Range": [
-                12,
-                43
-              ],
+              "Range": {
+                "Start": 12,
+                "End": 43
+              },
               "Params": [
                 {
                   "Type": "Identifier",
-                  "Range": [
-                    21,
-                    22
-                  ],
+                  "Range": {
+                    "Start": 21,
+                    "End": 22
+                  },
                   "Literal": "a"
                 },
                 {
                   "Type": "Identifier",
-                  "Range": [
-                    24,
-                    25
-                  ],
+                  "Range": {
+                    "Start": 24,
+                    "End": 25
+                  },
                   "Literal": "b"
                 }
               ],
               "Vararg": false,
               "Body": {
                 "Type": "Block",
-                "Range": [
-                  27,
-                  39
-                ],
+                "Range": {
+                  "Start": 27,
+                  "End": 39
+                },
                 "Stmts": [
                   {
                     "Type": "FunctionCall",
-                    "Range": [
-                      27,
-                      39
-                    ],
+                    "Range": {
+                      "Start": 27,
+                      "End": 39
+                    },
                     "Left": {
                       "Type": "Identifier",
-                      "Range": [
-                        27,
-                        32
-                      ],
+                      "Range": {
+                        "Start": 27,
+                        "End": 32
+                      },
                       "Literal": "print"
                     },
                     "Args": [
                       {
                         "Type": "InfixExpression",
-                        "Range": [
-                          33,
-                          38
-                        ],
+                        "Range": {
+                          "Start": 33,
+                          "End": 38
+                        },
                         "Left": {
                           "Type": "Identifier",
-                          "Range": [
-                            33,
-                            34
-                          ],
+                          "Range": {
+                            "Start": 33,
+                            "End": 34
+                          },
                           "Literal": "a"
                         },
                         "Operator": "plus",
                         "Right": {
                           "Type": "Identifier",
-                          "Range": [
-                            37,
-                            38
-                          ],
+                          "Range": {
+                            "Start": 37,
+                            "End": 38
+                          },
                           "Literal": "b"
                         }
                       }
@@ -112,87 +112,87 @@
     "Input": "function add(a, b) print(a + b) end",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        35
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 35
+      },
       "Stmts": [
         {
           "Type": "FunctionStatement",
-          "Range": [
-            0,
-            35
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 35
+          },
           "Left": {
             "Type": "Identifier",
-            "Range": [
-              9,
-              12
-            ],
+            "Range": {
+              "Start": 9,
+              "End": 12
+            },
             "Literal": "add"
           },
           "Params": [
             {
               "Type": "Identifier",
-              "Range": [
-                13,
-                14
-              ],
+              "Range": {
+                "Start": 13,
+                "End": 14
+              },
               "Literal": "a"
             },
             {
               "Type": "Identifier",
-              "Range": [
-                16,
-                17
-              ],
+              "Range": {
+                "Start": 16,
+                "End": 17
+              },
               "Literal": "b"
             }
           ],
           "Vararg": false,
           "Body": {
             "Type": "Block",
-            "Range": [
-              19,
-              31
-            ],
+            "Range": {
+              "Start": 19,
+              "End": 31
+            },
             "Stmts": [
               {
                 "Type": "FunctionCall",
-                "Range": [
-                  19,
-                  31
-                ],
+                "Range": {
+                  "Start": 19,
+                  "End": 31
+                },
                 "Left": {
                   "Type": "Identifier",
-                  "Range": [
-                    19,
-                    24
-                  ],
+                  "Range": {
+                    "Start": 19,
+                    "End": 24
+                  },
                   "Literal": "print"
                 },
                 "Args": [
                   {
                     "Type": "InfixExpression",
-                    "Range": [
-                      25,
-                      30
-                    ],
+                    "Range": {
+                      "Start": 25,
+                      "End": 30
+                    },
                     "Left": {
                       "Type": "Identifier",
-                      "Range": [
-                        25,
-                        26
-                      ],
+                      "Range": {
+                        "Start": 25,
+                        "End": 26
+                      },
                       "Literal": "a"
                     },
                     "Operator": "plus",
                     "Right": {
                       "Type": "Identifier",
-                      "Range": [
-                        29,
-                        30
-                      ],
+                      "Range": {
+                        "Start": 29,
+                        "End": 30
+                      },
                       "Literal": "b"
                     }
                   }

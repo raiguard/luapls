@@ -4,32 +4,32 @@
     "Input": "print(foo)",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        10
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 10
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            10
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 10
+          },
           "Left": {
             "Type": "Identifier",
-            "Range": [
-              0,
-              5
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 5
+            },
             "Literal": "print"
           },
           "Args": [
             {
               "Type": "Identifier",
-              "Range": [
-                6,
-                9
-              ],
+              "Range": {
+                "Start": 6,
+                "End": 9
+              },
               "Literal": "foo"
             }
           ]
@@ -42,53 +42,53 @@
     "Input": "print{msg = 'foo'}",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        18
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 18
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            18
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 18
+          },
           "Left": {
             "Type": "Identifier",
-            "Range": [
-              0,
-              5
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 5
+            },
             "Literal": "print"
           },
           "Args": [
             {
               "Type": "TableLiteral",
-              "Range": [
-                5,
-                18
-              ],
+              "Range": {
+                "Start": 5,
+                "End": 18
+              },
               "Fields": [
                 {
                   "Type": "TableField",
-                  "Range": [
-                    6,
-                    17
-                  ],
+                  "Range": {
+                    "Start": 6,
+                    "End": 17
+                  },
                   "Key": {
                     "Type": "Identifier",
-                    "Range": [
-                      6,
-                      9
-                    ],
+                    "Range": {
+                      "Start": 6,
+                      "End": 9
+                    },
                     "Literal": "msg"
                   },
                   "Value": {
                     "Type": "StringLiteral",
-                    "Range": [
-                      12,
-                      17
-                    ],
+                    "Range": {
+                      "Start": 12,
+                      "End": 17
+                    },
                     "Literal": "'foo'"
                   }
                 }
@@ -105,32 +105,32 @@
     "Input": "print 'foo'",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        11
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 11
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            11
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 11
+          },
           "Left": {
             "Type": "Identifier",
-            "Range": [
-              0,
-              5
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 5
+            },
             "Literal": "print"
           },
           "Args": [
             {
               "Type": "StringLiteral",
-              "Range": [
-                6,
-                11
-              ],
+              "Range": {
+                "Start": 6,
+                "End": 11
+              },
               "Literal": "'foo'"
             }
           ]
@@ -143,38 +143,38 @@
     "Input": "print 'foo' 'bar'",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        17
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 17
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            17
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 17
+          },
           "Left": {
             "Type": "FunctionCall",
-            "Range": [
-              0,
-              11
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 11
+            },
             "Left": {
               "Type": "Identifier",
-              "Range": [
-                0,
-                5
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 5
+              },
               "Literal": "print"
             },
             "Args": [
               {
                 "Type": "StringLiteral",
-                "Range": [
-                  6,
-                  11
-                ],
+                "Range": {
+                  "Start": 6,
+                  "End": 11
+                },
                 "Literal": "'foo'"
               }
             ]
@@ -182,10 +182,10 @@
           "Args": [
             {
               "Type": "StringLiteral",
-              "Range": [
-                12,
-                17
-              ],
+              "Range": {
+                "Start": 12,
+                "End": 17
+              },
               "Literal": "'bar'"
             }
           ]
@@ -198,48 +198,48 @@
     "Input": "foo:bar('baz')",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        14
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 14
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            14
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 14
+          },
           "Left": {
             "Type": "IndexExpression",
-            "Range": [
-              0,
-              7
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 7
+            },
             "Left": {
               "Type": "Identifier",
-              "Range": [
-                0,
-                3
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 3
+              },
               "Literal": "foo"
             },
             "Indexer": "colon",
             "Inner": {
               "Type": "Identifier",
-              "Range": [
-                4,
-                7
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 7
+              },
               "Literal": "bar"
             }
           },
           "Args": [
             {
               "Type": "StringLiteral",
-              "Range": [
-                8,
-                13
-              ],
+              "Range": {
+                "Start": 8,
+                "End": 13
+              },
               "Literal": "'baz'"
             }
           ]
@@ -252,69 +252,69 @@
     "Input": "foo:bar{msg = 'baz'}",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        20
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 20
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            20
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 20
+          },
           "Left": {
             "Type": "IndexExpression",
-            "Range": [
-              0,
-              7
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 7
+            },
             "Left": {
               "Type": "Identifier",
-              "Range": [
-                0,
-                3
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 3
+              },
               "Literal": "foo"
             },
             "Indexer": "colon",
             "Inner": {
               "Type": "Identifier",
-              "Range": [
-                4,
-                7
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 7
+              },
               "Literal": "bar"
             }
           },
           "Args": [
             {
               "Type": "TableLiteral",
-              "Range": [
-                7,
-                20
-              ],
+              "Range": {
+                "Start": 7,
+                "End": 20
+              },
               "Fields": [
                 {
                   "Type": "TableField",
-                  "Range": [
-                    8,
-                    19
-                  ],
+                  "Range": {
+                    "Start": 8,
+                    "End": 19
+                  },
                   "Key": {
                     "Type": "Identifier",
-                    "Range": [
-                      8,
-                      11
-                    ],
+                    "Range": {
+                      "Start": 8,
+                      "End": 11
+                    },
                     "Literal": "msg"
                   },
                   "Value": {
                     "Type": "StringLiteral",
-                    "Range": [
-                      14,
-                      19
-                    ],
+                    "Range": {
+                      "Start": 14,
+                      "End": 19
+                    },
                     "Literal": "'baz'"
                   }
                 }
@@ -331,48 +331,48 @@
     "Input": "foo:bar 'baz'",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        13
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 13
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            13
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 13
+          },
           "Left": {
             "Type": "IndexExpression",
-            "Range": [
-              0,
-              7
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 7
+            },
             "Left": {
               "Type": "Identifier",
-              "Range": [
-                0,
-                3
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 3
+              },
               "Literal": "foo"
             },
             "Indexer": "colon",
             "Inner": {
               "Type": "Identifier",
-              "Range": [
-                4,
-                7
-              ],
+              "Range": {
+                "Start": 4,
+                "End": 7
+              },
               "Literal": "bar"
             }
           },
           "Args": [
             {
               "Type": "StringLiteral",
-              "Range": [
-                8,
-                13
-              ],
+              "Range": {
+                "Start": 8,
+                "End": 13
+              },
               "Literal": "'baz'"
             }
           ]
@@ -385,60 +385,60 @@
     "Input": "foo:bar 'baz' :bar 'lorem'",
     "AST": {
       "Type": "Block",
-      "Range": [
-        0,
-        26
-      ],
+      "Range": {
+        "Start": 0,
+        "End": 26
+      },
       "Stmts": [
         {
           "Type": "FunctionCall",
-          "Range": [
-            0,
-            26
-          ],
+          "Range": {
+            "Start": 0,
+            "End": 26
+          },
           "Left": {
             "Type": "IndexExpression",
-            "Range": [
-              0,
-              18
-            ],
+            "Range": {
+              "Start": 0,
+              "End": 18
+            },
             "Left": {
               "Type": "FunctionCall",
-              "Range": [
-                0,
-                13
-              ],
+              "Range": {
+                "Start": 0,
+                "End": 13
+              },
               "Left": {
                 "Type": "IndexExpression",
-                "Range": [
-                  0,
-                  7
-                ],
+                "Range": {
+                  "Start": 0,
+                  "End": 7
+                },
                 "Left": {
                   "Type": "Identifier",
-                  "Range": [
-                    0,
-                    3
-                  ],
+                  "Range": {
+                    "Start": 0,
+                    "End": 3
+                  },
                   "Literal": "foo"
                 },
                 "Indexer": "colon",
                 "Inner": {
                   "Type": "Identifier",
-                  "Range": [
-                    4,
-                    7
-                  ],
+                  "Range": {
+                    "Start": 4,
+                    "End": 7
+                  },
                   "Literal": "bar"
                 }
               },
               "Args": [
                 {
                   "Type": "StringLiteral",
-                  "Range": [
-                    8,
-                    13
-                  ],
+                  "Range": {
+                    "Start": 8,
+                    "End": 13
+                  },
                   "Literal": "'baz'"
                 }
               ]
@@ -446,20 +446,20 @@
             "Indexer": "colon",
             "Inner": {
               "Type": "Identifier",
-              "Range": [
-                15,
-                18
-              ],
+              "Range": {
+                "Start": 15,
+                "End": 18
+              },
               "Literal": "bar"
             }
           },
           "Args": [
             {
               "Type": "StringLiteral",
-              "Range": [
-                19,
-                26
-              ],
+              "Range": {
+                "Start": 19,
+                "End": 26
+              },
               "Literal": "'lorem'"
             }
           ]
