@@ -146,6 +146,9 @@ func checkFile(path string) {
 
 	checker := types.NewChecker(&file)
 	checker.Run()
+	for _, err := range checker.Errors {
+		fmt.Printf("ERROR: %s\n", err.String())
+	}
 	for node, typ := range checker.Types {
 		fmt.Printf("%s: %s\n", node, typ)
 	}

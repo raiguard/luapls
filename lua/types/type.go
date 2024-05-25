@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 type Type interface {
 	isType()
 	String() string
@@ -8,7 +10,7 @@ type Type interface {
 type (
 	Boolean  struct{}
 	Function struct {
-		Params []Type
+		Params []FunctionParameter
 		Return Type
 	}
 	Number  struct{}
@@ -40,3 +42,16 @@ func (f *Function) String() string {
 func (n *Number) String() string  { return "number" }
 func (s *String) String() string  { return "string" }
 func (u *Unknown) String() string { return "unknown" }
+
+type FunctionParameter struct {
+	Name string
+	Type Type
+}
+
+func (f *FunctionParameter) String() string {
+	typ := f.Type
+	if typ == nil {
+		typ = &Unknown{}
+	}
+	return fmt.Sprintf("%s: %s", f.Name, f.Type)
+}

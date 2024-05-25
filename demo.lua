@@ -1,9 +1,13 @@
+local num = 3
+local other_num = num
+local other_other_num = other_num
+local other_other_other_num = other_other_num
+
 --- @type number
 local uninitialized
 
-local num, bool = 3, true
-local str = "foo"
+local str, bool = "foo", true
 local unknown = nil
-local func = function() end
+local func = function(foo, bar) end
 
-local should_error = num + str -- Cannot add a 'number' with a 'string'.
+local type_error = num + str -- Cannot add a 'number' with a 'string'.
