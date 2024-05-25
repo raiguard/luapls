@@ -10,7 +10,7 @@ type Node interface {
 }
 
 func Range(n Node) token.Range {
-	return token.Range{n.Pos(), n.End()}
+	return token.Range{Start: n.Pos(), End: n.End()}
 }
 
 type Block struct {

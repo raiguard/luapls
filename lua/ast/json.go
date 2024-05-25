@@ -14,7 +14,7 @@ func (node *AssignmentStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "AssignmentStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -27,7 +27,7 @@ func (node *Block) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "Block",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -40,7 +40,7 @@ func (node *BooleanLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "BooleanLiteral",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -53,7 +53,7 @@ func (node *BreakStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "BreakStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -66,7 +66,7 @@ func (node *DoStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "DoStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -79,7 +79,7 @@ func (node *ForInStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "ForInStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -92,7 +92,7 @@ func (node *ForStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "ForStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -105,7 +105,7 @@ func (node *FunctionCall) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "FunctionCall",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -118,7 +118,7 @@ func (node *FunctionExpression) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "FunctionExpression",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -131,7 +131,7 @@ func (node *FunctionStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "FunctionStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -144,7 +144,7 @@ func (node *GotoStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "GotoStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -157,7 +157,7 @@ func (node *Identifier) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "Identifier",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -170,7 +170,7 @@ func (node *IfClause) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "IfClause",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -183,7 +183,7 @@ func (node *IfStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "IfStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -196,7 +196,7 @@ func (node *IndexExpression) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "IndexExpression",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -209,7 +209,7 @@ func (node *InfixExpression) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "InfixExpression",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -222,7 +222,7 @@ func (node *LabelStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "LabelStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -235,7 +235,7 @@ func (node *Invalid) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "Invalid",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -248,7 +248,7 @@ func (node *LocalStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "LocalStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -261,7 +261,7 @@ func (node *NilLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "NilLiteral",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -274,7 +274,7 @@ func (node *NumberLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "NumberLiteral",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -287,7 +287,7 @@ func (node *PrefixExpression) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "PrefixExpression",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -300,7 +300,7 @@ func (node *RepeatStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "RepeatStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -313,7 +313,7 @@ func (node *ReturnStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "ReturnStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -326,7 +326,7 @@ func (node *StringLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "StringLiteral",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -339,7 +339,7 @@ func (node *TableField) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "TableField",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -352,7 +352,7 @@ func (node *TableLiteral) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "TableLiteral",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -365,7 +365,7 @@ func (node *Vararg) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "Vararg",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
@@ -378,7 +378,7 @@ func (node *WhileStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "WhileStatement",
-		Range: token.Range{node.Pos(), node.End()},
+		Range: Range(node),
 		Alias: (*Alias)(node),
 	})
 }
