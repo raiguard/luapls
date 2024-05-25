@@ -59,8 +59,9 @@ func (p *Parser) parseAssignmentStatement(vars []ast.Expression) *ast.Assignment
 	exps := p.parseExpressionList()
 
 	return &ast.AssignmentStatement{
-		Vars: vars,
-		Exps: exps,
+		Comments: p.collectComments(),
+		Vars:     vars,
+		Exps:     exps,
 	}
 }
 
@@ -68,17 +69,20 @@ func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 	pos := p.tok.Pos
 	p.expect(token.BREAK)
 	return &ast.BreakStatement{
+		Comments: p.collectComments(),
 		StartPos: pos,
 	}
 }
 
 func (p *Parser) parseDoStatement() *ast.DoStatement {
+	comments := p.collectComments()
 	pos := p.tok.Pos
 	p.expect(token.DO)
 	block := p.parseBlock()
 	end := p.tok.End()
 	p.expect(token.END)
 	return &ast.DoStatement{
+		Comments: comments,
 		Body:     block,
 		StartPos: pos,
 		EndPos:   end,
@@ -86,6 +90,7 @@ func (p *Parser) parseDoStatement() *ast.DoStatement {
 }
 
 func (p *Parser) parseForStatement() ast.Statement {
+	comments := p.collectComments()
 	pos := p.tok.Pos
 	p.expect(token.FOR)
 	names := p.parseNameList()
@@ -119,6 +124,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 			step = exps[2]
 		}
 		return &ast.ForStatement{
+			Comments: comments,
 			Name:     names[0],
 			Start:    start,
 			Finish:   finish,
@@ -130,6 +136,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 	}
 
 	return &ast.ForInStatement{
+		Comments: comments,
 		Names:    names,
 		Exps:     exps,
 		Body:     body,
@@ -139,6 +146,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 }
 
 func (p *Parser) parseFunctionStatement(pos token.Pos, isLocal bool) *ast.FunctionStatement {
+	comments := p.collectComments()
 	p.expect(token.FUNCTION)
 	left := p.parseExpression(LOWEST, false)
 	p.expect(token.LPAREN)
@@ -149,6 +157,7 @@ func (p *Parser) parseFunctionStatement(pos token.Pos, isLocal bool) *ast.Functi
 	p.expect(token.END)
 
 	return &ast.FunctionStatement{
+		Comments: comments,
 		Left:     left,
 		Params:   params,
 		Vararg:   vararg,
@@ -164,12 +173,14 @@ func (p *Parser) parseGotoStatement() *ast.GotoStatement {
 	p.expect(token.GOTO)
 	name := p.parseIdentifier()
 	return &ast.GotoStatement{
+		Comments: p.collectComments(),
 		Name:     name,
 		StartPos: pos,
 	}
 }
 
 func (p *Parser) parseIfStatement() *ast.IfStatement {
+	comments := p.collectComments()
 	pos := p.tok.Pos
 	p.expect(token.IF)
 
@@ -191,9 +202,15 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 	end := p.tok.End()
 	p.expect(token.END)
 
-	return &ast.IfStatement{Clauses: clauses, StartPos: pos, EndPos: end}
+	return &ast.IfStatement{
+		Comments: comments,
+		Clauses:  clauses,
+		StartPos: pos,
+		EndPos:   end,
+	}
 }
 
+// TODO: Comments
 func (p *Parser) parseIfClause(pos token.Pos) *ast.IfClause {
 	condition := p.parseExpression(LOWEST, true)
 	p.expect(token.THEN)
@@ -212,13 +229,20 @@ func (p *Parser) parseLabelStatement() *ast.LabelStatement {
 	name := p.parseIdentifier()
 	end := p.tok.End()
 	p.expect(token.LABEL)
-	return &ast.LabelStatement{Name: name, StartPos: pos, EndPos: end}
+	return &ast.LabelStatement{
+		Comments: p.collectComments(),
+		Name:     name,
+		StartPos: pos,
+		EndPos:   end,
+	}
 }
 
 func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
+	comments := p.collectComments()
 	names := p.parseNameList()
 	if !p.tokIs(token.ASSIGN) {
 		return &ast.LocalStatement{
+			Comments: comments,
 			Names:    names,
 			Exps:     []ast.Expression{},
 			StartPos: pos,
@@ -229,6 +253,7 @@ func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
 	exps := p.parseExpressionList()
 
 	return &ast.LocalStatement{
+		Comments: comments,
 		Names:    names,
 		Exps:     exps,
 		StartPos: pos,
@@ -236,12 +261,14 @@ func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
 }
 
 func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
+	comments := p.collectComments()
 	pos := p.tok.Pos
 	p.expect(token.REPEAT)
 	body := p.parseBlock()
 	p.expect(token.UNTIL)
 	condition := p.parseExpression(LOWEST, true)
 	return &ast.RepeatStatement{
+		Comments:  comments,
 		Body:      body,
 		Condition: condition,
 		StartPos:  pos,
@@ -249,15 +276,18 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	comments := p.collectComments()
 	pos := p.tok.Pos
 	p.expect(token.RETURN)
 	if !blockEnd[p.tok.Type] {
 		return &ast.ReturnStatement{
+			Comments: comments,
 			Exps:     p.parseExpressionList(),
 			StartPos: pos,
 		}
 	} else {
 		return &ast.ReturnStatement{
+			Comments: comments,
 			Exps:     []ast.Expression{},
 			StartPos: pos,
 		}
@@ -265,6 +295,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {
+	comments := p.collectComments()
 	pos := p.tok.Pos
 	p.expect(token.WHILE)
 	condition := p.parseExpression(LOWEST, true)
@@ -273,6 +304,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	end := p.tok.End()
 	p.expect(token.END)
 	return &ast.WhileStatement{
+		Comments:  comments,
 		Condition: condition,
 		Body:      body,
 		StartPos:  pos,

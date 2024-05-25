@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/types"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -13,23 +14,23 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if file == nil {
 		return nil, nil
 	}
-	node, _ := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
+	node, parents := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
-	contents := fmt.Sprintf(
-		"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`",
-		node,
-		file.File.ToProtocolRange(ast.Range(node)).Start.Line,
-		file.File.ToProtocolRange(ast.Range(node)).Start.Character,
-		node.Pos(),
-		file.File.ToProtocolRange(ast.Range(node)).End.Line,
-		file.File.ToProtocolRange(ast.Range(node)).End.Character,
-		node.End(),
-	)
 	typ, ok := file.Env.Types[node]
-	if ok {
-		contents = fmt.Sprintf("%s\n\nType: %s", contents, typ)
+	if !ok {
+		typ = &types.Unknown{}
+	}
+	contents := fmt.Sprintf("## %s: %s", node.String(), typ)
+	comments := node.GetComments()
+	i := len(parents) - 1
+	for comments == "" && i >= 0 {
+		comments = parents[i].GetComments()
+		i--
+	}
+	if comments != "" {
+		contents += "\n\n-----\n\n" + comments
 	}
 	return &protocol.Hover{
 		Contents: contents,

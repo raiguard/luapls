@@ -24,15 +24,17 @@ func (pe *ParserError) String() string {
 }
 
 type Parser struct {
-	lexer  *lexer.Lexer
-	errors []ParserError
-	tok    token.Token
+	lexer    *lexer.Lexer
+	errors   []ParserError
+	tok      token.Token
+	comments []token.Token
 }
 
 func New(input string) *Parser {
 	p := &Parser{
-		lexer:  lexer.New(input),
-		errors: []ParserError{},
+		lexer:    lexer.New(input),
+		errors:   []ParserError{},
+		comments: []token.Token{},
 	}
 
 	p.next()
@@ -48,6 +50,7 @@ func (p *Parser) next() {
 	p.tok = p.lexer.NextToken()
 	// TODO: Parse type annotations
 	for p.tokIs(token.COMMENT) {
+		p.comments = append(p.comments, p.tok)
 		p.tok = p.lexer.NextToken()
 	}
 }
@@ -62,8 +65,11 @@ func (p *Parser) ParseFile() File {
 
 func (p *Parser) parseBlock() ast.Block {
 	block := ast.Block{
+		// TODO: Is this needed somewhere?
+		// Comments: p.collectComments(),
 		Stmts:    []ast.Statement{},
 		StartPos: p.tok.Pos,
+		EndPos:   0,
 	}
 
 	for !blockEnd[p.tok.Type] {
@@ -160,4 +166,13 @@ var blockEnd = map[token.TokenType]bool{
 	token.END:    true,
 	token.EOF:    true,
 	token.UNTIL:  true,
+}
+
+func (p *Parser) collectComments() ast.Comments {
+	base := ast.Comments{CommentsBefore: p.comments}
+	// for _, comment := range p.comments {
+	// 	base.CommentsBefore = append(base.CommentsBefore, comment)
+	// }
+	p.comments = []token.Token{}
+	return base
 }
