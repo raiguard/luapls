@@ -32,11 +32,11 @@ type TableField struct {
 	StartPos token.Pos `json:"-"` // Needed in case of bracketed keys
 }
 
-func (rf *TableField) Pos() token.Pos {
-	return rf.StartPos
+func (tf *TableField) Pos() token.Pos {
+	return tf.StartPos
 }
-func (rf *TableField) End() token.Pos {
-	return rf.Value.End()
+func (tf *TableField) End() token.Pos {
+	return tf.Value.End()
 }
 
 type Invalid struct {

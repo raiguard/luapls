@@ -1,3 +1,5 @@
+--- @diagnostic disable:unused-local,unused-function
+
 local num = 3
 local other_num = num
 local other_other_num = other_num
@@ -10,4 +12,4 @@ local str, bool = "foo", true
 local unknown = nil
 local func = function(foo, bar) end
 
-local type_error = num + str -- Cannot add a 'number' with a 'string'.
+local type_error = num + str
