@@ -5,25 +5,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
-	"github.com/raiguard/luapls/lsp"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/repl"
-	"github.com/tliron/kutil/util"
 )
 
 func main() {
 	args := os.Args
-	task := "lsp"
-	if len(args) > 1 {
-		task = args[1]
+	if len(args) < 2 {
+		fmt.Fprintf(os.Stderr, "Available subcommands: lex, parse, make-test, repl, check\n")
+		os.Exit(1)
 	}
 
+	task := args[1]
 	switch task {
 	case "lex":
 		if len(args) < 3 {
@@ -31,12 +29,6 @@ func main() {
 			os.Exit(1)
 		}
 		lexFile(args[2])
-	case "lsp":
-		level := int64(0)
-		if len(args) > 2 {
-			level, _ = strconv.ParseInt(args[2], 0, 8)
-		}
-		lsp.Run(int(level))
 	case "parse":
 		if len(args) < 3 {
 			fmt.Fprintln(os.Stderr, "Did not provide a filename")
@@ -56,8 +48,6 @@ func main() {
 	default:
 		fmt.Fprintf(os.Stderr, "%s: unrecognized subcommand\n", task)
 	}
-
-	util.Exit(0)
 }
 
 func lexFile(filename string) {
