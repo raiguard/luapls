@@ -12,22 +12,22 @@ func (s *Server) textDocumentDefinition(ctx *glsp.Context, params *protocol.Defi
 		return nil, nil
 	}
 
-	pos := file.ToPos(params.Position)
+	pos := file.File.ToPos(params.Position)
 
-	node, _ := ast.GetNode(&file.Block, pos)
+	node, _ := ast.GetNode(&file.File.Block, pos)
 	ident, ok := node.(*ast.Identifier)
 	if !ok {
 		return nil, nil
 	}
 
-	def := getDefinition(&file.Block, ident)
+	def := file.Env.FindDefinition(ident, true)
 	if def == nil {
 		return nil, nil
 	}
 
 	return &protocol.Location{
 		URI:   params.TextDocument.URI,
-		Range: file.ToProtocolRange(ast.Range(def)),
+		Range: file.File.ToProtocolRange(ast.Range(def)),
 	}, nil
 }
 

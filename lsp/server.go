@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/raiguard/luapls/lua/parser"
+	"github.com/raiguard/luapls/lua/types"
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -16,11 +17,15 @@ import (
 
 const LS_NAME = "luapls"
 
+type File struct {
+	File *parser.File
+	Env  types.Environment
+	Path string
+}
+
 // Type Server contains the state for the LSP session.
 type Server struct {
-	config   Config
-	envs     map[string]*Env
-	files    map[string]*parser.File
+	files    map[string]*File
 	handler  protocol.Handler
 	log      commonlog.Logger
 	rootPath string
@@ -33,8 +38,7 @@ func Run(logLevel int) {
 	commonlog.Configure(logLevel, ptr("/tmp/luapls.log"))
 
 	s := Server{
-		envs:  map[string]*Env{},
-		files: map[string]*parser.File{},
+		files: map[string]*File{},
 	}
 
 	s.handler.Initialize = s.initialize
@@ -43,10 +47,9 @@ func Run(logLevel int) {
 	s.handler.SetTrace = s.setTrace
 	s.handler.TextDocumentDidOpen = s.textDocumentDidOpen
 	s.handler.TextDocumentDidChange = s.textDocumentDidChange
+	s.handler.TextDocumentDidClose = s.textDocumentDidClose
 	s.handler.TextDocumentDocumentHighlight = s.textDocumentHighlight
 	s.handler.TextDocumentHover = s.textDocumentHover
-	s.handler.TextDocumentCompletion = s.textDocumentCompletion
-	s.handler.TextDocumentSelectionRange = s.textDocumentSelectionRange
 	s.handler.TextDocumentDefinition = s.textDocumentDefinition
 
 	s.server = glspserv.NewServer(&s.handler, LS_NAME, logLevel > 2)
@@ -68,36 +71,9 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 	go func() {
-		s.getConfiguration(ctx)
-
-		s.log.Debug("Parsing files")
-		allTimer := time.Now()
-		for _, env := range s.envs {
-			for _, uri := range env.getFiles() {
-				if s.files[uri] != nil {
-					continue
-				}
-				path, err := uriToPath(uri)
-				if err != nil {
-					s.log.Errorf("%s", err)
-					continue
-				}
-				src, err := os.ReadFile(path)
-				if err != nil {
-					s.log.Errorf("Failed to parse file %s: %s", uri, err)
-					continue
-				}
-				timer := time.Now()
-				file := parser.New(string(src)).ParseFile()
-				s.files[uri] = &file
-				s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
-			}
-		}
 		s.isInitialized = true
-		s.log.Debugf("Initialization took %s", time.Since(allTimer).String())
-
-		for uri := range s.files {
-			s.publishDiagnostics(ctx, uri)
+		for _, file := range s.files {
+			s.publishDiagnostics(ctx, file)
 		}
 	}()
 	return nil
@@ -113,13 +89,32 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri protocol.URI) *parser.File {
+func (s *Server) getFile(uri protocol.URI) *File {
 	if !s.isInitialized {
 		return nil
 	}
-	file := s.files[uri]
-	if file == nil {
-		s.log.Errorf("File '%s' does not belong to any environment", uri)
+	existing := s.files[uri]
+	if existing != nil {
+		return existing
 	}
+
+	// Otherwise, create, parse, and check it
+	path, err := uriToPath(uri)
+	if err != nil {
+		s.log.Errorf("%s", err)
+		return nil
+	}
+	src, err := os.ReadFile(path)
+	if err != nil {
+		s.log.Errorf("Failed to parse file %s: %s", uri, err)
+		return nil
+	}
+	timer := time.Now()
+	parserFile := parser.New(string(src)).ParseFile()
+	file := &File{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
+	file.Env.ResolveTypes()
+	s.files[uri] = file
+	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
+
 	return file
 }

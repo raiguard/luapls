@@ -11,19 +11,19 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 	if file == nil {
 		return nil, nil
 	}
-	node, _ := ast.GetNode(&file.Block, file.ToPos(params.Position))
+	node, _ := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
 	if node == nil {
 		return nil, nil
 	}
 	highlights := []protocol.DocumentHighlight{}
 	// TODO: Labels
 	if _, ok := node.(ast.LeafNode); ok {
-		highlights = append(highlights, protocol.DocumentHighlight{Range: file.ToProtocolRange(ast.Range(node))})
+		highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(node))})
 	}
 	if ident, ok := node.(*ast.Identifier); ok {
-		def := getDefinition(&file.Block, ident)
+		def := file.Env.FindDefinition(ident, true)
 		if def != nil {
-			highlights = append(highlights, protocol.DocumentHighlight{Range: file.ToProtocolRange(ast.Range(def))})
+			highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(def))})
 		}
 	}
 	return highlights, nil

@@ -22,6 +22,9 @@ func NewEnvironment(file *parser.File) Environment {
 }
 
 func (c *Environment) ResolveTypes() {
+	clear(c.Types)
+	clear(c.Errors)
+
 	ast.Walk(&c.file.Block, func(node ast.Node) bool {
 		switch node := node.(type) {
 		case ast.Expression:
