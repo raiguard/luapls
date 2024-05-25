@@ -108,7 +108,14 @@ func (t *Token) String() string {
 	return fmt.Sprintf("[%s] %s %v", TokenStr[t.Type], t.Literal, t.Pos)
 }
 
-type Range = [2]Pos
+type Range struct {
+	Start int
+	End   int
+}
+
+func (r *Range) String() string {
+	return fmt.Sprintf("%v:%v", r.Start, r.End)
+}
 
 var TokenStr = map[TokenType]string{
 	INVALID: "invalid",

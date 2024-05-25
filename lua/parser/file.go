@@ -56,7 +56,7 @@ func (f *File) ToProtocolPos(pos token.Pos) protocol.Position {
 
 func (f *File) ToProtocolRange(rng token.Range) protocol.Range {
 	return protocol.Range{
-		Start: f.ToProtocolPos(rng[0]),
-		End:   f.ToProtocolPos(rng[1]),
+		Start: f.ToProtocolPos(rng.Start),
+		End:   f.ToProtocolPos(rng.End),
 	}
 }

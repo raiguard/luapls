@@ -12,6 +12,7 @@ import (
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
+	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/repl"
 	"github.com/tliron/kutil/util"
 )
@@ -50,6 +51,10 @@ func main() {
 		makeTest(args[2], args[3], args[4])
 	case "repl":
 		repl.Run()
+	case "check":
+		checkFile(args[2])
+	default:
+		fmt.Fprintf(os.Stderr, "%s: unrecognized subcommand\n", task)
 	}
 
 	util.Exit(0)
@@ -121,4 +126,27 @@ func readOrMakeSpecs(path string) []testSpec {
 		json.Unmarshal(file, &specs)
 	}
 	return specs
+}
+
+func checkFile(path string) {
+	src, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	p := parser.New(string(src))
+	file := p.ParseFile()
+	if len(file.Errors) > 0 {
+		fmt.Println("Parsing errors:")
+		for _, err := range file.Errors {
+			fmt.Println(&err)
+		}
+		return // TODO: Support partial type checking
+	}
+
+	checker := types.NewChecker(&file)
+	checker.Run()
+	for node, typ := range checker.Types {
+		fmt.Printf("%s: %s\n", node, typ)
+	}
 }

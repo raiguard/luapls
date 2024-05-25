@@ -1,12 +1,7 @@
--- Why does this function exist?
-local function add(a, b)
-  return a + b
-end
+--- @type number
+local uninitialized
 
-print(add(3, 4))
+local num = 3
+local str = "foo"
 
-local items = {5, 10, 15}
-
-for i = 1, #items do
-  print(add(i, items[i]))
-end
+local should_error = num + str -- Cannot add a 'number' with a 'string'.

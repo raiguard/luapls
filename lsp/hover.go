@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/types"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -17,17 +18,24 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if node == nil {
 		return nil, nil
 	}
+	contents := fmt.Sprintf(
+		"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`",
+		node,
+		file.ToProtocolRange(ast.Range(node)).Start.Line,
+		file.ToProtocolRange(ast.Range(node)).Start.Character,
+		node.Pos(),
+		file.ToProtocolRange(ast.Range(node)).End.Line,
+		file.ToProtocolRange(ast.Range(node)).End.Character,
+		node.End(),
+	)
+	checker := types.NewChecker(file)
+	checker.Run()
+	typ, ok := checker.Types[node]
+	if ok {
+		contents = fmt.Sprintf("%s\n\nType: %s", contents, typ)
+	}
 	return &protocol.Hover{
-		Contents: fmt.Sprintf(
-			"# %T\n\nRange: `{%d, %d, %d}` `{%d, %d, %d}`",
-			node,
-			file.ToProtocolRange(ast.Range(node)).Start.Line,
-			file.ToProtocolRange(ast.Range(node)).Start.Character,
-			node.Pos(),
-			file.ToProtocolRange(ast.Range(node)).End.Line,
-			file.ToProtocolRange(ast.Range(node)).End.Character,
-			node.End(),
-		),
-		Range: ptr(file.ToProtocolRange(ast.Range(node))),
+		Contents: contents,
+		Range:    ptr(file.ToProtocolRange(ast.Range(node))),
 	}, nil
 }

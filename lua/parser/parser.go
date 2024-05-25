@@ -19,6 +19,10 @@ type ParserError struct {
 	Range   token.Range
 }
 
+func (pe *ParserError) String() string {
+	return fmt.Sprintf("%s: %s", &pe.Range, pe.Message)
+}
+
 type Parser struct {
 	lexer  *lexer.Lexer
 	errors []ParserError
