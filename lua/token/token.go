@@ -200,6 +200,7 @@ var Reserved = map[string]TokenType{
 	"if":       IF,
 	"in":       IN,
 	"local":    LOCAL,
+	"nil":      NIL,
 	"not":      NOT,
 	"or":       OR,
 	"repeat":   REPEAT,

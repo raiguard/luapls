@@ -115,6 +115,19 @@ func (i *Identifier) End() token.Pos {
 }
 func (i *Identifier) leaf() {}
 
+type NilLiteral struct {
+	StartPos token.Pos `json:"-"`
+}
+
+func (i *NilLiteral) expressionNode() {}
+func (i *NilLiteral) Pos() token.Pos {
+	return i.StartPos
+}
+func (i *NilLiteral) End() token.Pos {
+	return i.StartPos + len("nil")
+}
+func (n *NilLiteral) leaf() {}
+
 type NumberLiteral struct {
 	Literal  string
 	Value    float64

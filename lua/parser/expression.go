@@ -25,6 +25,8 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		left = p.parseNumberLiteral()
 	case token.STRING, token.RAWSTRING:
 		left = p.parseStringLiteral()
+	case token.NIL:
+		left = p.parseNilLiteral()
 	case token.TRUE, token.FALSE:
 		left = p.parseBooleanLiteral()
 	case token.VARARG:
@@ -189,6 +191,12 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 	ident := ast.Identifier{StartPos: p.tok.Pos, Literal: p.tok.Literal}
 	p.expect(token.IDENT)
 	return &ident
+}
+
+func (p *Parser) parseNilLiteral() *ast.NilLiteral {
+	tok := ast.NilLiteral{StartPos: p.tok.Pos}
+	p.expect(token.NIL)
+	return &tok
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {

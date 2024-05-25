@@ -90,6 +90,9 @@ func Walk(node Node, visitor Visitor) {
 		WalkList(node.Names, visitor)
 		WalkList(node.Exps, visitor)
 
+	case *NilLiteral:
+		// Leaf
+
 	case *NumberLiteral:
 		// Leaf
 

@@ -253,6 +253,19 @@ func (node *LocalStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (node *NilLiteral) MarshalJSON() ([]byte, error) {
+	type Alias NilLiteral
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "NilLiteral",
+		Range: token.Range{node.Pos(), node.End()},
+		Alias: (*Alias)(node),
+	})
+}
+
 func (node *NumberLiteral) MarshalJSON() ([]byte, error) {
 	type Alias NumberLiteral
 	return json.Marshal(&struct {
