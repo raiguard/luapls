@@ -22,4 +22,14 @@ local foo = "foo"
 local bar = 123
 foo = bar
 
+do
+  local hidden = true
+end
+
+hidden = false
+
 local bar = "baz"
+
+for i = 1, 10 do
+  print(i)
+end

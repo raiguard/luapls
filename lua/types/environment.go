@@ -59,6 +59,27 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				e.addType(leftVar, &Unknown{})
 			}
 		}
+	case *ast.ForStatement:
+		typ := e.resolveExprType(stmt.Start)
+		if typ == nil {
+			e.addType(stmt.Name, &Unknown{})
+			return
+		}
+		if _, ok := typ.(*Number); !ok {
+			e.addError(stmt.Start, "Range expressions must be of type 'number'")
+			return
+		}
+		e.addType(stmt.Name, typ)
+		finishTyp := e.resolveExprType(stmt.Finish)
+		if typ != finishTyp {
+			e.addError(stmt.Finish, "Range end must be of type '%s'", typ)
+		}
+		if stmt.Step != nil {
+			stepTyp := e.resolveExprType(stmt.Step)
+			if typ != stepTyp {
+				e.addError(stmt.Step, "Range step must be of type '%s'", typ)
+			}
+		}
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names); i++ {
 			ident := stmt.Names[i]
@@ -186,4 +207,11 @@ func (e *Environment) FindDefinition(identFor *ast.Identifier, includeSelf bool)
 		return true
 	})
 	return def
+}
+
+func (e *Environment) addError(node ast.Node, messageFmt string, messageArgs ...any) {
+	e.Errors = append(e.Errors, parser.ParserError{
+		Message: fmt.Sprintf(messageFmt, messageArgs...),
+		Range:   ast.Range(node),
+	})
 }
