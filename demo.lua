@@ -24,7 +24,6 @@ end
 
 local baz = add(true, 3)
 
-
 --- @param input string
 local function print(input) end
 
@@ -36,3 +35,4 @@ local tbl = {
 
 print(tbl.second)
 print(tbl.third)
+tbl.fourth = {"property1", "property2"}

@@ -31,7 +31,7 @@ func (c *Comments) GetComments() string {
 	var output string
 	for _, comment := range c.CommentsBefore {
 		// TODO: Preserve indentation
-		output += strings.TrimSpace(strings.TrimPrefix(comment.Literal, "--")) + "  \n"
+		output += strings.TrimSpace(strings.TrimPrefix(comment.Literal, "---")) + "  \n"
 	}
 	return output
 }

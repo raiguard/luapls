@@ -26,18 +26,13 @@ func (c *Environment) ResolveTypes() {
 	clear(c.Types)
 	clear(c.Errors)
 
-	ast.Walk(&c.file.Block, func(node ast.Node) bool {
-		if c.Types[node] != nil {
-			return false
-		}
-		switch node := node.(type) {
-		case ast.Expression:
-			c.resolveExprType(node)
-		case ast.Statement:
-			c.resolveStmtType(node)
-		}
-		return true
-	})
+	c.resolveBlockTypes(&c.file.Block)
+}
+
+func (e *Environment) resolveBlockTypes(block *ast.Block) {
+	for _, stmt := range block.Stmts {
+		e.resolveStmtType(stmt)
+	}
 }
 
 func (e *Environment) resolveStmtType(stmt ast.Statement) {
@@ -84,6 +79,8 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				e.addError(stmt.Step, "Range step must be of type '%s'", typ)
 			}
 		}
+	case *ast.FunctionCall:
+		e.resolveFunctionCall(stmt)
 	case *ast.FunctionStatement:
 		typ := &Function{
 			Params: []NameAndType{},
@@ -193,34 +190,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 		return e.addType(expr, typ)
 	case *ast.FunctionCall:
-		typ := e.resolveExprType(expr.Left)
-		if typ == nil {
-			return nil // TODO: Index expressions
-		}
-		e.addType(expr, typ)
-		function, ok := typ.(*Function)
-		if !ok {
-			e.addError(expr, "'%s' is not a function", expr.Left)
-			return typ
-		}
-		for i := 0; i < len(expr.Args); i++ {
-			arg := expr.Args[i]
-			argTyp := e.resolveExprType(arg)
-			if i >= len(function.Params) {
-				e.addError(arg, "Unused parameter")
-				break // TODO:
-			}
-			if argTyp == nil {
-				continue // TODO:
-			}
-			if argTyp != function.Params[i].Type {
-				e.addError(arg, "Cannot use '%s' as '%s' in argument.", argTyp, function.Params[i].Type)
-			}
-		}
-		if len(expr.Args) < len(function.Params) {
-			e.addError(expr, "Too few function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
-		}
-		return function.Return
+		return e.resolveFunctionCall(expr)
 	case *ast.IndexExpression:
 		leftTyp := e.resolveExprType(expr.Left)
 		if leftTyp == nil {
@@ -228,7 +198,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 		tbl, ok := leftTyp.(*Table)
 		if !ok {
-			e.addError(expr, "Attempting to index a non-table")
+			e.addError(expr.Inner, "Attempting to index a non-table")
 			return nil
 		}
 
@@ -251,6 +221,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 				return typ
 			}
 		}
+		e.addError(expr.Inner, "Unknown field '%s'", key)
 	case *ast.TableLiteral:
 		typ := Table{
 			Fields: []NameAndType{},
@@ -275,6 +246,38 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 	}
 
 	return nil
+}
+
+func (e *Environment) resolveFunctionCall(fc *ast.FunctionCall) Type {
+	typ := e.resolveExprType(fc.Left)
+	if typ == nil {
+		return nil
+	}
+	e.addType(fc, typ)
+	function, ok := typ.(*Function)
+	if !ok {
+		e.addError(fc, "'%s' is not a function", fc.Left)
+		return typ
+	}
+	for i := 0; i < len(fc.Args); i++ {
+		arg := fc.Args[i]
+		argTyp := e.resolveExprType(arg)
+		if i >= len(function.Params) {
+			e.addError(arg, "Unused parameter")
+			break // TODO:
+		}
+		if argTyp == nil {
+			continue // TODO:
+		}
+		if argTyp != function.Params[i].Type {
+			e.addError(arg, "Cannot use '%s' as '%s' in argument.", argTyp, function.Params[i].Type)
+		}
+		e.addType(arg, argTyp)
+	}
+	if len(fc.Args) < len(function.Params) {
+		e.addError(fc, "Too few function parameters, expected %v, got %v", len(function.Params), len(fc.Args))
+	}
+	return function.Return
 }
 
 func (e *Environment) addType(node ast.Node, typ Type) Type {
