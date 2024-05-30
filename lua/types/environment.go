@@ -86,7 +86,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 		}
 	case *ast.FunctionStatement:
 		typ := &Function{
-			Params: []FunctionParameter{},
+			Params: []NameAndType{},
 			Return: nil,
 		}
 		comments := stmt.GetComments()
@@ -111,7 +111,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				paramTyp = &String{}
 			}
 			e.addType(param, paramTyp)
-			typ.Params = append(typ.Params, FunctionParameter{
+			typ.Params = append(typ.Params, NameAndType{
 				Name: param.Literal,
 				Type: paramTyp,
 			})
@@ -120,21 +120,19 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 		{
 			template := "@return"
 			defStart := strings.Index(comments, template)
-			if defStart == -1 {
-				typ.Return = &Unknown{}
-				return
-			}
-			// This is awful
-			def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
-			switch def {
-			case "any":
-				typ.Return = &Any{}
-			case "boolean":
-				typ.Return = &Boolean{}
-			case "number":
-				typ.Return = &Number{}
-			case "string":
-				typ.Return = &String{}
+			if defStart != -1 {
+				// This is awful
+				def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
+				switch def {
+				case "any":
+					typ.Return = &Any{}
+				case "boolean":
+					typ.Return = &Boolean{}
+				case "number":
+					typ.Return = &Number{}
+				case "string":
+					typ.Return = &String{}
+				}
 			}
 		}
 		e.addType(stmt, typ)
@@ -188,10 +186,10 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 
 	case *ast.FunctionExpression:
-		typ := &Function{Params: []FunctionParameter{}}
+		typ := &Function{Params: []NameAndType{}}
 		for _, param := range expr.Params {
 			// TODO: Function parameter types - requires parsing doc comments
-			typ.Params = append(typ.Params, FunctionParameter{Name: param.Literal, Type: &Unknown{}})
+			typ.Params = append(typ.Params, NameAndType{Name: param.Literal, Type: &Unknown{}})
 		}
 		return e.addType(expr, typ)
 	case *ast.FunctionCall:
@@ -223,6 +221,57 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			e.addError(expr, "Too few function parameters, expected %v, got %v", len(function.Params), len(expr.Args))
 		}
 		return function.Return
+	case *ast.IndexExpression:
+		leftTyp := e.resolveExprType(expr.Left)
+		if leftTyp == nil {
+			return e.addType(expr, &Unknown{})
+		}
+		tbl, ok := leftTyp.(*Table)
+		if !ok {
+			e.addError(expr, "Attempting to index a non-table")
+			return nil
+		}
+
+		var key string
+		switch inner := expr.Inner.(type) {
+		case *ast.Identifier:
+			key = inner.Literal
+		case *ast.StringLiteral:
+			key = inner.Literal
+		default:
+			e.addError(inner, "Unimplemented")
+			return nil
+		}
+
+		for i := 0; i < len(tbl.Fields); i++ {
+			if tbl.Fields[i].Name == key {
+				typ := tbl.Fields[i].Type
+				e.addType(expr, typ)
+				e.addType(expr.Inner, typ)
+				return typ
+			}
+		}
+	case *ast.TableLiteral:
+		typ := Table{
+			Fields: []NameAndType{},
+		}
+		for _, fieldNode := range expr.Fields {
+			ident, ok := fieldNode.Key.(*ast.Identifier)
+			if !ok {
+				// TODO:
+				continue
+			}
+			valueTyp := e.resolveExprType(fieldNode.Value)
+			field := NameAndType{
+				Name: ident.Literal,
+				Type: valueTyp,
+			}
+			typ.Fields = append(typ.Fields, field)
+			e.addType(fieldNode, valueTyp)
+			e.addType(ident, valueTyp)
+		}
+		e.addType(expr, &typ)
+		return &typ
 	}
 
 	return nil

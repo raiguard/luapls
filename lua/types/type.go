@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Type interface {
 	isType()
@@ -11,11 +14,14 @@ type (
 	Any      struct{}
 	Boolean  struct{}
 	Function struct {
-		Params []FunctionParameter
+		Params []NameAndType
 		Return Type
 	}
-	Number  struct{}
-	String  struct{}
+	Number struct{}
+	String struct{}
+	Table  struct {
+		Fields []NameAndType
+	}
 	Unknown struct{}
 )
 
@@ -24,6 +30,7 @@ func (b *Boolean) isType()  {}
 func (f *Function) isType() {}
 func (n *Number) isType()   {}
 func (s *String) isType()   {}
+func (t *Table) isType()    {}
 func (u *Unknown) isType()  {}
 
 func (b *Any) String() string     { return "any" }
@@ -42,19 +49,32 @@ func (f *Function) String() string {
 	}
 	return output
 }
-func (n *Number) String() string  { return "number" }
-func (s *String) String() string  { return "string" }
+func (n *Number) String() string { return "number" }
+func (s *String) String() string { return "string" }
+func (t *Table) String() string {
+	var sb strings.Builder
+	sb.WriteByte('{')
+	for i := 0; i < len(t.Fields); i++ {
+		if i > 0 {
+			fmt.Fprint(&sb, ", ")
+		}
+		fmt.Fprintf(&sb, "%s", &t.Fields[i])
+	}
+	sb.WriteByte('}')
+
+	return sb.String()
+}
 func (u *Unknown) String() string { return "unknown" }
 
-type FunctionParameter struct {
+type NameAndType struct {
 	Name string
 	Type Type
 }
 
-func (f *FunctionParameter) String() string {
-	typ := f.Type
+func (n *NameAndType) String() string {
+	typ := n.Type
 	if typ == nil {
 		typ = &Unknown{}
 	}
-	return fmt.Sprintf("%s: %s", f.Name, f.Type)
+	return fmt.Sprintf("%s: %s", n.Name, n.Type)
 }

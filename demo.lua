@@ -23,4 +23,16 @@ local function add(a, b)
 end
 
 local baz = add(true, 3)
-baz = "lorem ipsum"
+
+
+--- @param input string
+local function print(input) end
+
+local tbl = {
+  first = 1,
+  second = "two",
+  third = true,
+}
+
+print(tbl.second)
+print(tbl.third)
