@@ -17,10 +17,14 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 	}
 	highlights := []protocol.DocumentHighlight{}
 	// TODO: Labels
-	if _, ok := node.(ast.LeafNode); ok {
-		highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(node))})
+	leaf, ok := node.(ast.LeafNode)
+	if !ok {
+		return nil, nil
 	}
-	if ident, ok := node.(*ast.Identifier); ok {
+	// TODO: References
+	highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(node))})
+
+	if ident, ok := leaf.(*ast.Identifier); ok {
 		def := file.Env.FindDefinition(ident, true)
 		if def != nil {
 			highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(def))})

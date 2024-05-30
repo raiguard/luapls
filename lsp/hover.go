@@ -18,12 +18,16 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if node == nil {
 		return nil, nil
 	}
-	typ, ok := file.Env.Types[node]
+	ident, ok := node.(*ast.Identifier)
+	if !ok {
+		return nil, nil
+	}
+	typ, ok := file.Env.Types[ident]
 	if !ok {
 		typ = &types.Unknown{}
 	}
-	contents := fmt.Sprintf("## %s: %s\n\n-----", node.String(), typ)
-	comments := node.GetComments()
+	contents := fmt.Sprintf("```lua\n(variable) %s: %s\n```", ident.Literal, typ)
+	comments := ident.GetComments()
 	i := len(parents) - 1
 	for comments == "" && i >= 0 {
 		comments = parents[i].GetComments()
@@ -37,6 +41,6 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	}
 	return &protocol.Hover{
 		Contents: contents,
-		Range:    ptr(file.File.ToProtocolRange(ast.Range(node))),
+		Range:    ptr(file.File.ToProtocolRange(ast.Range(ident))),
 	}, nil
 }

@@ -38,7 +38,7 @@ func (f *Function) String() string {
 	}
 	output = output + ")"
 	if f.Return != nil {
-		output = output + " -> " + f.Return.String()
+		output = output + " → " + f.Return.String()
 	}
 	return output
 }
