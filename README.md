@@ -13,21 +13,16 @@ This project is under very heavy development and is not ready for use.
 go build
 ```
 
-## Features
-
-- Parsing of every Lua file in the directory where it is opened.
-- Extremely basic, locals-only, file-local missing variable diagnostics, go-to-definition, and autocompletion.
-
 ## TODO (always in flux, not necessarily in order)
 
-- Bring parser into alignment with the Lua specification (don't successfully parse illegal things)
-- Add parent back-references to AST nodes
-- Improve parser error handling
-- Instrumentation for resolving types in the parser
+- Rewrite parser for better error tolerance, semantic info (whitespace, comments), and unicode support
+- Expand lexer and parser tests to cover as many cases as I can think of
+- Implement doc comment parsing in the AST
 - Basic types (literals, simple expressions)
 - Table types (structs/classes)
 - Union types
 - Intersection types
+- Interface types
 - Inheritance
 - Metatable handling
 - As much type inference as possible
