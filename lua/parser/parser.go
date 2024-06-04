@@ -69,7 +69,6 @@ func (p *Parser) parseBlock() ast.Block {
 		// Comments: p.collectComments(),
 		Stmts:    []ast.Statement{},
 		StartPos: p.tok.Pos,
-		EndPos:   0,
 	}
 
 	for !blockEnd[p.tok.Type] {
@@ -78,14 +77,6 @@ func (p *Parser) parseBlock() ast.Block {
 		for p.tokIs(token.SEMICOLON) {
 			p.next()
 		}
-	}
-
-	if p.tokIs(token.EOF) {
-		block.EndPos = p.tok.Pos
-	} else if len(block.Stmts) > 0 {
-		block.EndPos = block.Stmts[len(block.Stmts)-1].End()
-	} else {
-		block.EndPos = block.StartPos
 	}
 
 	return block

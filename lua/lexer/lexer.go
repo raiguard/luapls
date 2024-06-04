@@ -5,6 +5,7 @@ import (
 )
 
 // TODO: Support unicode
+// TODO: Take an io.Reader instead of a string
 type Lexer struct {
 	input string
 	pos   int

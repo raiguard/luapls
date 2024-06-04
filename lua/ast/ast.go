@@ -23,6 +23,7 @@ type Comments struct {
 	CommentsBefore []token.Token `json:",omitempty"`
 }
 
+// TODO: Remove this
 func (c *Comments) GetComments() string {
 	if c == nil || c.CommentsBefore == nil {
 		return ""
@@ -40,14 +41,16 @@ type Block struct {
 	Comments
 	Stmts    []Statement
 	StartPos token.Pos `json:"-"`
-	EndPos   token.Pos `json:"-"`
 }
 
 func (b *Block) Pos() token.Pos {
 	return b.StartPos
 }
 func (b *Block) End() token.Pos {
-	return b.EndPos
+	if len(b.Stmts) == 0 {
+		return b.StartPos
+	}
+	return b.Stmts[len(b.Stmts)-1].End()
 }
 
 type TableField struct {
