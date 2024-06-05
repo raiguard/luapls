@@ -29,10 +29,11 @@ func (l *Lexer) Next() token.Token {
 	l.acceptRun(whitespace)
 	l.ignore()
 
-	tok := token.EOF
+	tok := token.INVALID
 
 	switch r := l.read(); r {
 	case 0: // EOF
+		tok = token.EOF
 	case '=':
 		if l.accept("=") {
 			tok = token.EQUAL
