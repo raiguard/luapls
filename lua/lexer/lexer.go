@@ -26,10 +26,10 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) Next() token.Token {
-	l.accept(whitespace)
+	l.acceptRun(whitespace)
+	l.ignore()
 
 	tok := token.EOF
-	l.start = l.pos
 
 	switch r := l.read(); r {
 	case 0: // EOF
@@ -264,7 +264,7 @@ func (l *Lexer) readString(quote rune) bool {
 		}
 		if l.accept("\\") {
 			if l.accept("z") {
-				l.accept(whitespace)
+				l.acceptRun(whitespace)
 				continue
 			}
 			if l.accept(string(quote)) || l.accept("abfnrtvz\r\n") {
