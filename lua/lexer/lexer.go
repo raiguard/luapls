@@ -1,95 +1,82 @@
 package lexer
 
 import (
+	"strings"
+	"unicode"
+	"unicode/utf8"
+
 	"github.com/raiguard/luapls/lua/token"
 )
 
-// TODO: Support unicode
-// TODO: Take an io.Reader instead of a string
+const digits string = "0123456789"
+const hexDigits string = digits + "abcdefABCDEF"
+const whitespace string = " \t\r\n"
+
 type Lexer struct {
-	input string
-	pos   int
-	char  byte
+	input string // the string being scanned.
+	start int    // start position of this token.
+	pos   int    // current position in the input.
+	width int    // width of last rune read.
 
 	lineBreaks []int
 }
 
 func New(input string) *Lexer {
-	l := &Lexer{input: input, pos: -1, lineBreaks: []int{}}
-	l.readChar()
-	return l
+	return &Lexer{input: input, pos: 0, lineBreaks: []int{}}
 }
 
-func (l *Lexer) NextToken() token.Token {
-	l.skipWhitespace()
+func (l *Lexer) Next() token.Token {
+	l.accept(whitespace)
 
-	pos := l.pos
 	tok := token.EOF
+	l.start = l.pos
 
-	switch l.char {
+	switch r := l.read(); r {
 	case 0: // EOF
 	case '=':
-		l.readChar()
-		if l.char == '=' {
+		if l.accept("=") {
 			tok = token.EQUAL
-			l.readChar()
 		} else {
 			tok = token.ASSIGN
 		}
 	case '^':
 		tok = token.POW
-		l.readChar()
 	case '>':
-		l.readChar()
-		if l.char == '=' {
+		if l.accept("=") {
 			tok = token.GEQ
-			l.readChar()
 		} else {
 			tok = token.GT
 		}
 	case '<':
-		l.readChar()
-		if l.char == '=' {
+		if l.accept("=") {
 			tok = token.LEQ
-			l.readChar()
 		} else {
 			tok = token.LT
 		}
 	case '#':
-		l.readChar()
 		tok = token.LEN
 	case '-':
-		l.readChar()
-		if l.char == '-' {
+		if l.accept("-") {
 			tok = token.COMMENT
-			l.readChar()
 			l.readComment()
 		} else {
 			tok = token.MINUS
 		}
 	case '%':
-		l.readChar()
 		tok = token.MOD
 	case '+':
-		l.readChar()
 		tok = token.PLUS
 	case '/':
-		l.readChar()
 		tok = token.SLASH
 	case '*':
-		l.readChar()
 		tok = token.MUL
 	case '~':
-		l.readChar()
-		if l.char == '=' {
-			l.readChar()
+		if l.accept("=") {
 			tok = token.NEQ
 		}
 	case '(':
-		l.readChar()
 		tok = token.LPAREN
 	case ')':
-		l.readChar()
 		tok = token.RPAREN
 	case '[':
 		if l.readRawString() {
@@ -98,69 +85,63 @@ func (l *Lexer) NextToken() token.Token {
 			tok = token.LBRACK
 		}
 	case ']':
-		l.readChar()
 		tok = token.RBRACK
 	case '{':
-		l.readChar()
 		tok = token.LBRACE
 	case '}':
-		l.readChar()
 		tok = token.RBRACE
 	case ':':
-		l.readChar()
-		if l.char == ':' {
-			l.readChar()
+		if l.accept(":") {
 			tok = token.LABEL
 		} else {
 			tok = token.COLON
 		}
 	case ',':
-		l.readChar()
 		tok = token.COMMA
 	case '.':
-		l.readChar()
-		if l.char == '.' {
-			l.readChar()
-			if l.char == '.' {
-				l.readChar()
+		if l.accept(".") {
+			if l.accept(".") {
 				tok = token.VARARG
 			} else {
 				tok = token.CONCAT
 			}
-		} else if isDigit(l.char) {
-			l.readNumber(true)
+			// TODO:
+		} else if unicode.IsDigit(l.peek()) {
+			l.backup()
+			l.readNumber()
 			tok = token.NUMBER
 		} else {
 			tok = token.DOT
 		}
 	case ';':
-		l.readChar()
 		tok = token.SEMICOLON
 	case '\'', '"':
-		if l.readString() {
+		if l.readString(r) {
 			tok = token.STRING
 		}
 	default:
-		if isDigit(l.char) {
-			if l.readNumber(false) {
+		if unicode.IsDigit(r) {
+			l.backup()
+			if l.readNumber() {
 				tok = token.NUMBER
+			} else {
+				l.ignore()
 			}
 		} else if l.readIdentifier() {
-			lit := l.input[pos:l.pos]
-			if reserved, ok := token.Reserved[lit]; ok {
+			if reserved, ok := token.Reserved[l.input[l.start:l.pos]]; ok {
 				tok = reserved
 			} else {
 				tok = token.IDENT
 			}
 		} else {
-			l.readChar()
+			l.read() // Always make progress
 		}
 	}
 
 	return token.Token{
 		Type:    tok,
-		Literal: l.input[pos:l.pos],
-		Pos:     pos,
+		Literal: l.input[l.start:l.pos],
+		Pos:     l.start,
 	}
 }
 
@@ -168,193 +149,165 @@ func (l *Lexer) GetLineBreaks() []int {
 	return l.lineBreaks
 }
 
-func (l *Lexer) readChar() {
-	l.pos++
+// read returns the next rune in the input.
+func (l *Lexer) read() (r rune) {
 	if l.pos >= len(l.input) {
-		l.char = 0
-		return
+		l.width = 0
+		return 0
 	}
-	l.char = l.input[l.pos]
-	if l.char == '\n' {
+	r, l.width = utf8.DecodeRuneInString(l.input[l.pos:])
+	if r == '\n' && (len(l.lineBreaks) == 0 || l.lineBreaks[len(l.lineBreaks)-1] != l.pos) {
 		l.lineBreaks = append(l.lineBreaks, l.pos)
+	}
+	l.pos += l.width
+	return r
+}
+
+// ignore skips over the pending input before this point.
+func (l *Lexer) ignore() {
+	l.start = l.pos
+}
+
+// backup steps back one rune.
+// Can only be called once per call of next.
+func (l *Lexer) backup() {
+	l.pos -= l.width
+}
+
+// peek returns but does not consume the next rune in the input.
+func (l *Lexer) peek() rune {
+	rune := l.read()
+	l.backup()
+	return rune
+}
+
+// accept consumes the next rune if it is from the valid set.
+func (l *Lexer) accept(valid string) bool {
+	if strings.IndexRune(valid, l.read()) >= 0 {
+		return true
+	}
+	l.backup()
+	return false
+}
+
+// acceptRun accepts a run of runes from the valid set.
+func (l *Lexer) acceptRun(valid string) {
+	for l.accept(valid) {
+	}
+}
+
+// acceptNot consumes the next rune if it is from the valid set.
+func (l *Lexer) acceptNot(valid string) bool {
+	r := l.read()
+	if r != 0 && strings.IndexRune(valid, r) == -1 {
+		return true
+	}
+	l.backup()
+	return false
+}
+
+// acceptNotRun acceptNots a run of runes from the valid set.
+func (l *Lexer) acceptNotRun(valid string) {
+	for l.acceptNot(valid) {
 	}
 }
 
 // TODO: Type annotations
 func (l *Lexer) readComment() {
-	if l.char == '[' && l.readRawString() {
+	if l.accept("[") && l.readRawString() {
 		return
 	}
-	for l.char != 0 && l.char != '\n' {
-		l.readChar()
+	for l.acceptNot("\n") {
 	}
 	return
 }
 
-func (l *Lexer) skipWhitespace() {
-	for isWhitespace(l.char) {
-		l.readChar()
+func (l *Lexer) readNumber() bool {
+	useDigits := digits
+	if l.accept("0") && l.accept("xX") {
+		useDigits = hexDigits
 	}
-}
+	l.acceptRun(useDigits)
 
-func (l *Lexer) readNumber(inDecimal bool) bool {
-	isZero := !inDecimal && l.char == '0'
+	if l.accept(".") {
+		l.acceptRun(useDigits)
+	}
 
-	inExponent := false
-	hexNum := false
-
-	for {
-		l.readChar()
-		if l.char == 'x' || l.char == 'X' {
-			if hexNum || !isZero {
-				return false
-			}
-			hexNum = true
-			continue
-		}
-
-		if l.char == '.' {
-			if inDecimal {
-				return false
-			}
-			inDecimal = true
-			l.readChar()
-			continue
-		}
-
-		if isExponentLiteral(l.char, hexNum) {
-			if inExponent {
-				return false
-			}
-			inExponent = true
-			l.readChar()
-			if l.char == '+' || l.char == '-' {
-				l.readChar()
-			}
-			continue
-		}
-
-		if !isNumberLiteral(l.char, hexNum) {
-			break
-		}
+	if l.accept("eE") {
+		l.acceptRun(digits)
+		l.accept("+-")
+		l.acceptRun(digits)
+	} else if l.accept("pP") {
+		l.acceptRun(hexDigits)
+		l.accept("+-")
+		l.acceptRun(hexDigits)
 	}
 
 	return true
 }
 
 func (l *Lexer) readIdentifier() bool {
-	if !isIdentifier(l.char) {
-		return false
+	for isIdentifier(l.read()) {
 	}
-	for isIdentifier(l.char) {
-		l.readChar()
-	}
+	l.backup()
 	return true
 }
 
-var escapes = map[byte]bool{
-	'a':  true,
-	'b':  true,
-	'f':  true,
-	'n':  true,
-	'r':  true,
-	't':  true,
-	'v':  true,
-	'z':  true,
-	'\n': true,
-}
-
-func (l *Lexer) readString() bool {
-	quote := l.char
+func (l *Lexer) readString(quote rune) bool {
 	for {
-		l.readChar()
-		if l.char == '\n' {
-			return false
-		}
-		if l.char == '\\' {
-			l.readChar()
-			if l.char == 'z' {
-				l.readChar()
-				l.skipWhitespace()
-				continue
-			}
-			if l.char == quote || escapes[l.char] {
-				continue
-			}
-		}
-		if l.char == quote {
+		if l.accept(string(quote)) {
 			break
 		}
+		if l.accept("\n") {
+			// TODO: Lexing error
+			return false
+		}
+		if l.accept("\\") {
+			if l.accept("z") {
+				l.accept(whitespace)
+				continue
+			}
+			if l.accept(string(quote)) || l.accept("abfnrtvz\r\n") {
+				continue
+			}
+		}
+		l.read()
 	}
-	l.readChar()
 	return true
 }
 
 func (l *Lexer) readRawString() bool {
-	if l.char != '[' {
+	if !l.accept("[=") {
 		return false
 	}
+	l.backup()
 	level := 0
-	l.readChar()
-	for l.char == '=' {
+	for l.accept("=") {
 		level++
-		l.readChar()
 	}
-	if l.char != '[' {
+	if !l.accept("[") {
 		return false
 	}
 	for {
-		for l.char != ']' {
-			if l.char == 0 {
-				return false
-			}
-			l.readChar()
+		l.acceptNotRun("]")
+		if !l.accept("]") {
+			return false
 		}
 		thisLevel := 0
-		l.readChar()
-		for l.char == '=' {
+		for l.accept("=") {
 			thisLevel++
-			l.readChar()
 		}
-		if l.char != ']' {
+		if !l.accept("]") {
 			continue
 		}
 		if thisLevel == level {
 			break
 		}
+		l.backup()
 	}
-	l.readChar()
 	return true
 }
 
-func isDigit(lit byte) bool {
-	return lit >= '0' && lit <= '9'
-}
-
-func isHex(lit byte) bool {
-	return lit >= 'a' && lit <= 'f' || lit >= '0' && lit <= '9' || lit >= 'A' && lit <= 'F'
-}
-
-func isIdentifier(lit byte) bool {
-	return (lit >= 'a' && lit <= 'z') || (lit >= 'A' && lit <= 'Z') || lit == '_' || isDigit(lit)
-}
-
-func isWhitespace(lit byte) bool {
-	return lit == '\n' || lit == '\r' || lit == '\t' || lit == ' '
-}
-
-func isExponentLiteral(lit byte, hexNum bool) bool {
-	if hexNum {
-		return lit == 'p' || lit == 'P'
-	} else {
-		return lit == 'e' || lit == 'E'
-	}
-}
-
-func isNumberLiteral(lit byte, hexNum bool) bool {
-	if hexNum {
-		return isHex(lit)
-	} else {
-		return isDigit(lit)
-	}
+func isIdentifier(rune rune) bool {
+	return unicode.IsLetter(rune) || unicode.IsDigit(rune) || rune == '_'
 }

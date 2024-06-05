@@ -27,7 +27,7 @@ func Run() {
 		l := lexer.New(line)
 
 		fmt.Println("TOKENS:")
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
+		for tok := l.Next(); tok.Type != token.EOF; tok = l.Next() {
 			fmt.Println(tok.String())
 		}
 

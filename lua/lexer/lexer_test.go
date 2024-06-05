@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"slices"
 	"testing"
 
 	"github.com/raiguard/luapls/lua/token"
@@ -102,9 +101,9 @@ func TestRawStrings(t *testing.T) {
 	testLexer(t, input, tokens)
 
 	l := New(input)
-	for l.NextToken().Type != token.EOF {
+	for l.Next().Type != token.EOF {
 	}
-	require.Equal(t, 0, slices.Compare(l.GetLineBreaks(), []int{24, 45, 77}))
+	require.ElementsMatch(t, []int{24, 45, 77}, l.GetLineBreaks())
 }
 
 func TestLabel(t *testing.T) {
@@ -121,7 +120,7 @@ func TestLabel(t *testing.T) {
 func testLexer(t *testing.T, input string, tokens []token.Token) {
 	l := New(input)
 	for _, expected := range tokens {
-		actual := l.NextToken()
+		actual := l.Next()
 		// Compare strings for better test output
 		assert.Equal(t, expected.Type.String(), actual.Type.String())
 		assert.Equal(t, expected.Literal, actual.Literal)

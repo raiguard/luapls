@@ -17,20 +17,12 @@ bar(i)
 `
 	p := New(input)
 	file := p.ParseFile()
-	assertSlicesEqual(t, []int{9, 33, 46, 50, 57}, file.LineBreaks)
+	assert.ElementsMatch(t, []int{9, 33, 46, 50, 57}, file.LineBreaks)
 
 	assertPositionsMatch(t, &file, protocol.Position{Line: 0, Character: 2}, 2)
 	assertPositionsMatch(t, &file, protocol.Position{Line: 2, Character: 7}, 41)
 
 	assertPositionsMatch(t, &file, protocol.Position{Line: 1, Character: 0}, file.Block.Stmts[1].Pos())
-}
-
-func assertSlicesEqual[T comparable](t *testing.T, expected []T, actual []T) {
-	assert.Equal(t, len(expected), len(actual))
-
-	for i, expected := range expected {
-		assert.Equal(t, expected, actual[i])
-	}
 }
 
 func assertPositionsMatch(t *testing.T, file *File, position protocol.Position, pos token.Pos) {

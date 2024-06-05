@@ -67,7 +67,7 @@ func lexFile(filename string) {
 	}
 	l := lexer.New(string(src))
 	for {
-		tok := l.NextToken()
+		tok := l.Next()
 		if tok.Type == token.EOF || tok.Type == token.INVALID {
 			break
 		}

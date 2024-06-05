@@ -47,11 +47,11 @@ func (p *Parser) Errors() []ParserError {
 }
 
 func (p *Parser) next() {
-	p.tok = p.lexer.NextToken()
+	p.tok = p.lexer.Next()
 	// TODO: Parse type annotations
 	for p.tokIs(token.COMMENT) {
 		p.comments = append(p.comments, p.tok)
-		p.tok = p.lexer.NextToken()
+		p.tok = p.lexer.Next()
 	}
 }
 
