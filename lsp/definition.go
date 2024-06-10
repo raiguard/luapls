@@ -14,13 +14,9 @@ func (s *Server) textDocumentDefinition(ctx *glsp.Context, params *protocol.Defi
 
 	pos := file.File.ToPos(params.Position)
 
-	node, _ := ast.GetNode(&file.File.Block, pos)
-	ident, ok := node.(*ast.Identifier)
-	if !ok {
-		return nil, nil
-	}
+	nodePath := ast.GetNode(&file.File.Block, pos)
 
-	def := file.Env.FindDefinition(ident, true)
+	def := file.Env.FindDefinition(nodePath)
 	if def == nil {
 		return nil, nil
 	}
@@ -29,8 +25,4 @@ func (s *Server) textDocumentDefinition(ctx *glsp.Context, params *protocol.Defi
 		URI:   params.TextDocument.URI,
 		Range: file.File.ToProtocolRange(ast.Range(def)),
 	}, nil
-}
-
-func getDefinition(node ast.Node, ident *ast.Identifier) *ast.Identifier {
-	return getLocals(node, ident.Pos(), true)[ident.Literal]
 }

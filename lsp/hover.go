@@ -14,11 +14,11 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if file == nil {
 		return nil, nil
 	}
-	node, parents := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
-	if node == nil {
+	nodePath := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
+	if nodePath.Node == nil {
 		return nil, nil
 	}
-	ident, ok := node.(*ast.Identifier)
+	ident, ok := nodePath.Node.(*ast.Identifier)
 	if !ok {
 		return nil, nil
 	}
@@ -28,10 +28,10 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	}
 	contents := fmt.Sprintf("```lua\n(variable) %s: %s\n```", ident.Literal, typ)
 	comments := ident.GetComments()
-	i := len(parents) - 1
+	i := len(nodePath.Parents) - 1
 	for comments == "" && i >= 0 {
-		comments = parents[i].GetComments()
-		if _, ok := parents[i].(ast.Statement); ok {
+		comments = nodePath.Parents[i].GetComments()
+		if _, ok := nodePath.Parents[i].(ast.Statement); ok {
 			break
 		}
 		i--

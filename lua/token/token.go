@@ -117,6 +117,14 @@ func (r *Range) String() string {
 	return fmt.Sprintf("%v:%v", r.Start, r.End)
 }
 
+func (r *Range) ContainsPos(pos Pos) bool {
+	return r.Start <= pos && r.End > pos
+}
+
+func (r *Range) ContainsRange(rng Range) bool {
+	return r.Start <= rng.Start && r.End >= rng.End
+}
+
 var TokenStr = map[TokenType]string{
 	INVALID: "invalid",
 	EOF:     "eof",

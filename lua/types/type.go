@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/raiguard/luapls/lua/ast"
 )
 
 type Type interface {
@@ -68,6 +70,7 @@ func (u *Unknown) String() string { return "unknown" }
 
 type NameAndType struct {
 	Name string
+	Def  ast.Node
 	Type Type
 }
 

@@ -106,7 +106,6 @@ func (l *Lexer) Next() token.Token {
 			} else {
 				tok = token.CONCAT
 			}
-			// TODO:
 		} else if unicode.IsDigit(l.peek()) {
 			l.backup()
 			l.readNumber()

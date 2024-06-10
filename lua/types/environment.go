@@ -80,7 +80,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			}
 		}
 	case *ast.FunctionCall:
-		e.resolveFunctionCall(stmt)
+		e.resolveFunctionCallType(stmt)
 	case *ast.FunctionStatement:
 		typ := &Function{
 			Params: []NameAndType{},
@@ -172,7 +172,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		return e.addType(expr, &String{})
 
 	case *ast.Identifier:
-		def := e.FindDefinition(expr, true)
+		def := e.FindDefinition(ast.NodePath{Node: expr})
 		if def != nil {
 			typ := e.Types[def]
 			if typ != nil {
@@ -190,7 +190,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 		return e.addType(expr, typ)
 	case *ast.FunctionCall:
-		return e.resolveFunctionCall(expr)
+		return e.resolveFunctionCallType(expr)
 	case *ast.IndexExpression:
 		leftTyp := e.resolveExprType(expr.Left)
 		if leftTyp == nil {
@@ -248,7 +248,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 	return nil
 }
 
-func (e *Environment) resolveFunctionCall(fc *ast.FunctionCall) Type {
+func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
 	typ := e.resolveExprType(fc.Left)
 	if typ == nil {
 		return nil
@@ -285,15 +285,22 @@ func (e *Environment) addType(node ast.Node, typ Type) Type {
 	return typ
 }
 
-func (e *Environment) FindDefinition(identFor *ast.Identifier, includeSelf bool) *ast.Identifier {
-	pos := identFor.StartPos
+func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
+	if path.Node == nil {
+		return nil
+	}
+	identFor, ok := path.Node.(*ast.Identifier)
+	if !ok {
+		return nil
+	}
+
+	pos := identFor.Pos()
 	var def *ast.Identifier
 	ast.Walk(&e.file.Block, func(node ast.Node) bool {
 		isAfter := node.Pos() > pos && pos < node.End()
 		if isAfter {
 			return false
 		}
-		isBefore := node.Pos() <= pos && pos > node.End()
 		isInside := node.Pos() <= pos && pos < node.End()
 		switch node := node.(type) {
 		case *ast.ForInStatement:
@@ -326,19 +333,15 @@ func (e *Environment) FindDefinition(identFor *ast.Identifier, includeSelf bool)
 					}
 				}
 			}
-			if isBefore || includeSelf {
-				if ident, ok := node.Left.(*ast.Identifier); ok {
-					if ident.Literal == identFor.Literal {
-						def = ident
-					}
+			if ident, ok := node.Left.(*ast.Identifier); ok {
+				if ident.Literal == identFor.Literal {
+					def = ident
 				}
 			}
 		case *ast.LocalStatement:
-			if isBefore || includeSelf {
-				for _, ident := range node.Names {
-					if ident.Literal == identFor.Literal {
-						def = ident
-					}
+			for _, ident := range node.Names {
+				if ident.Literal == identFor.Literal {
+					def = ident
 				}
 			}
 		default:

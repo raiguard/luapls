@@ -136,8 +136,13 @@ func WalkList[N Node](nodes []N, v Visitor) {
 	}
 }
 
+type NodePath struct {
+	Node    Node
+	Parents []Node
+}
+
 // GetNode returns the innermost node at the given position, and its parent nodes.
-func GetNode(base Node, pos token.Pos) (Node, []Node) {
+func GetNode(base Node, pos token.Pos) NodePath {
 	var node Node
 	parents := []Node{}
 	Walk(base, func(n Node) bool {
@@ -150,5 +155,5 @@ func GetNode(base Node, pos token.Pos) (Node, []Node) {
 		}
 		return false
 	})
-	return node, parents
+	return NodePath{node, parents}
 }
