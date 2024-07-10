@@ -12,6 +12,7 @@ type Environment struct {
 	file   *parser.File
 	Types  map[ast.Node]Type
 	Errors []parser.ParserError
+	Nodes  []ast.Node
 }
 
 func NewEnvironment(file *parser.File) Environment {
@@ -19,23 +20,29 @@ func NewEnvironment(file *parser.File) Environment {
 		file:   file,
 		Types:  map[ast.Node]Type{},
 		Errors: []parser.ParserError{},
+		Nodes:  []ast.Node{},
 	}
 }
 
 func (c *Environment) ResolveTypes() {
 	clear(c.Types)
 	clear(c.Errors)
+	c.Nodes = []ast.Node{}
 
 	c.resolveBlockTypes(&c.file.Block)
 }
 
 func (e *Environment) resolveBlockTypes(block *ast.Block) {
+	e.pushNode(block)
+	defer e.popNode()
 	for _, stmt := range block.Stmts {
 		e.resolveStmtType(stmt)
 	}
 }
 
 func (e *Environment) resolveStmtType(stmt ast.Statement) {
+	e.pushNode(stmt)
+	defer e.popNode()
 	switch stmt := stmt.(type) {
 	case *ast.AssignmentStatement:
 		for i := 0; i < len(stmt.Vars); i++ {
@@ -135,6 +142,8 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 		e.addType(stmt, typ)
 		// TODO: Parse index expression
 		e.addType(stmt.Left, typ)
+
+		e.resolveExprType(stmt.Left)
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names); i++ {
 			ident := stmt.Names[i]
@@ -156,10 +165,18 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				e.addType(ident, &Unknown{})
 			}
 		}
+	case *ast.ReturnStatement:
+		for _, expr := range stmt.Exps {
+			e.resolveExprType(expr)
+		}
+	default:
+		e.addError(stmt, "Unimplemented")
 	}
 }
 
 func (e *Environment) resolveExprType(expr ast.Expression) Type {
+	e.pushNode(expr)
+	defer e.popNode()
 	switch expr := expr.(type) {
 	// Literals
 	case *ast.BooleanLiteral:
@@ -202,6 +219,8 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			return nil
 		}
 
+		// e.resolveExprType(expr.Inner)
+
 		var key string
 		switch inner := expr.Inner.(type) {
 		case *ast.Identifier:
@@ -221,6 +240,35 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 				return typ
 			}
 		}
+
+		for i := len(e.Nodes) - 1; i >= 0; i-- {
+			switch node := e.Nodes[i].(type) {
+			case *ast.AssignmentStatement:
+				for j, leftVar := range node.Vars {
+					if leftVar == expr {
+						tbl.Fields = append(tbl.Fields, NameAndType{
+							Name: key,
+							Def:  node.Exps[j], // TODO: Out of bounds checking
+							Type: e.Types[node.Exps[j]],
+						})
+						e.addType(expr, e.Types[node.Exps[j]])
+						e.addType(expr.Inner, e.Types[node.Exps[j]])
+						return nil
+					}
+				}
+			case *ast.FunctionStatement:
+				tbl.Fields = append(tbl.Fields, NameAndType{
+					Name: key,
+					Def:  node,
+					Type: e.Types[node],
+				})
+				e.addType(expr, e.Types[node])
+				e.addType(expr.Inner, e.Types[node])
+				return nil
+
+			}
+		}
+
 		e.addError(expr.Inner, "Unknown field '%s'", key)
 	case *ast.TableLiteral:
 		typ := Table{
@@ -243,6 +291,8 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 		e.addType(expr, &typ)
 		return &typ
+	default:
+		e.addError(expr, "Unimplemented")
 	}
 
 	return nil
@@ -358,4 +408,15 @@ func (e *Environment) addError(node ast.Node, messageFmt string, messageArgs ...
 		Message: fmt.Sprintf(messageFmt, messageArgs...),
 		Range:   ast.Range(node),
 	})
+}
+
+func (e *Environment) pushNode(node ast.Node) {
+	e.Nodes = append(e.Nodes, node)
+}
+
+func (e *Environment) popNode() {
+	if len(e.Nodes) == 0 {
+		return
+	}
+	e.Nodes = e.Nodes[:len(e.Nodes)-1]
 }

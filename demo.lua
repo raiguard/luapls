@@ -33,6 +33,9 @@ local tbl = {
   third = true,
 }
 
-print(tbl.second)
-print(tbl.third)
-tbl.fourth = {"property1", "property2"}
+tbl.fourth = function() end
+
+print(tbl.fourth)
+
+--- @param first string
+function tbl.fifth(first) end

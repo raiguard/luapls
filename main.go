@@ -146,10 +146,11 @@ func checkFile(path string) {
 
 	env := types.NewEnvironment(&file)
 	env.ResolveTypes()
-	for _, err := range env.Errors {
-		fmt.Printf("ERROR: %s\n", err.String())
-	}
-	for node, typ := range env.Types {
-		fmt.Printf("%s: %s\n", node, typ)
+	if len(env.Errors) > 0 {
+		fmt.Println("ERRORS:")
+		for _, err := range env.Errors {
+			fmt.Println(err.String())
+		}
+		os.Exit(1)
 	}
 }
