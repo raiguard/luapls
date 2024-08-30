@@ -11,6 +11,7 @@ const (
 	INVALID TokenType = iota
 	EOF
 	COMMENT
+	WHITESPACE
 
 	// Variable
 	IDENT
@@ -105,7 +106,7 @@ func (t *Token) Range() Range {
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("[%s] %s %v", TokenStr[t.Type], t.Literal, t.Pos)
+	return fmt.Sprintf("[%s] `%s` %v", TokenStr[t.Type], t.Literal, t.Pos)
 }
 
 type Range struct {
@@ -126,11 +127,12 @@ func (r *Range) ContainsRange(rng Range) bool {
 }
 
 var TokenStr = map[TokenType]string{
-	INVALID: "invalid",
-	EOF:     "eof",
-	IDENT:   "identifier",
-	LABEL:   "label",
-	COMMENT: "comment",
+	INVALID:    "invalid",
+	EOF:        "eof",
+	IDENT:      "identifier",
+	LABEL:      "label",
+	COMMENT:    "comment",
+	WHITESPACE: "whitespace",
 
 	// Keywords
 	BREAK:    "break",

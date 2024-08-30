@@ -26,8 +26,11 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) Next() token.Token {
-	l.acceptRun(whitespace)
 	l.ignore()
+
+	if l.acceptRun(whitespace) {
+		return l.makeToken(token.WHITESPACE)
+	}
 
 	tok := token.INVALID
 
@@ -138,15 +141,19 @@ func (l *Lexer) Next() token.Token {
 		}
 	}
 
-	return token.Token{
-		Type:    tok,
-		Literal: l.input[l.start:l.pos],
-		Pos:     l.start,
-	}
+	return l.makeToken(tok)
 }
 
 func (l *Lexer) GetLineBreaks() []int {
 	return l.lineBreaks
+}
+
+func (l *Lexer) makeToken(typ token.TokenType) token.Token {
+	return token.Token{
+		Type:    typ,
+		Literal: l.input[l.start:l.pos],
+		Pos:     l.start,
+	}
 }
 
 // read returns the next rune in the input.
@@ -191,9 +198,12 @@ func (l *Lexer) accept(valid string) bool {
 }
 
 // acceptRun accepts a run of runes from the valid set.
-func (l *Lexer) acceptRun(valid string) {
+func (l *Lexer) acceptRun(valid string) bool {
+	success := false
 	for l.accept(valid) {
+		success = true
 	}
+	return success
 }
 
 // acceptNot consumes the next rune if it is from the valid set.

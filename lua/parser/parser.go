@@ -46,20 +46,21 @@ func (p *Parser) Errors() []ParserError {
 	return p.errors
 }
 
-func (p *Parser) next() {
-	p.tok = p.lexer.Next()
-	// TODO: Parse type annotations
-	for p.tokIs(token.COMMENT) {
-		p.comments = append(p.comments, p.tok)
-		p.tok = p.lexer.Next()
-	}
-}
-
 func (p *Parser) ParseFile() File {
 	return File{
 		Block:      p.parseBlock(),
 		Errors:     p.errors,
 		LineBreaks: p.lexer.GetLineBreaks(),
+	}
+}
+
+func (p *Parser) next() {
+	p.tok = p.lexer.Next()
+	// TODO: Parse type annotations
+	// TODO: Collect whitespace
+	for p.tokIs(token.COMMENT) || p.tokIs(token.WHITESPACE) {
+		p.comments = append(p.comments, p.tok)
+		p.tok = p.lexer.Next()
 	}
 }
 

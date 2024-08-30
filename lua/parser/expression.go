@@ -21,12 +21,12 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		left = p.parsePrefixExpression()
 	case token.LPAREN:
 		left = p.parseSurroundingExpression()
+	case token.NIL:
+		left = p.parseNilLiteral()
 	case token.NUMBER:
 		left = p.parseNumberLiteral()
 	case token.STRING, token.RAWSTRING:
 		left = p.parseStringLiteral()
-	case token.NIL:
-		left = p.parseNilLiteral()
 	case token.TRUE, token.FALSE:
 		left = p.parseBooleanLiteral()
 	case token.VARARG:
