@@ -37,19 +37,21 @@ func (fc *FunctionCall) End() token.Pos {
 }
 
 type FunctionExpression struct {
-	Params   []*Identifier
-	Vararg   bool
-	Body     Block
-	StartPos token.Pos `json:"-"`
-	EndPos   token.Pos `json:"-"`
+	Function   Unit
+	LeftParen  Unit
+	Params     []*Identifier
+	Vararg     *Unit
+	RightParen Unit
+	Body       Block
+	EndUnit    Unit
 }
 
 func (fe *FunctionExpression) expressionNode() {}
 func (fe *FunctionExpression) Pos() token.Pos {
-	return fe.StartPos
+	return fe.Function.Pos()
 }
 func (fe *FunctionExpression) End() token.Pos {
-	return fe.EndPos
+	return fe.EndUnit.End()
 }
 
 type IndexExpression struct {

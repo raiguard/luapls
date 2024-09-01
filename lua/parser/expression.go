@@ -96,35 +96,36 @@ func (p *Parser) parseNameList() []*ast.Identifier {
 }
 
 // Parses a namelist, then an optional vararg
-func (p *Parser) parseParameterList() ([]*ast.Identifier, bool) {
+func (p *Parser) parseParameterList() ([]*ast.Identifier, *ast.Unit) {
 	names := p.parseNameList()
-	vararg := p.tokIs(token.VARARG)
-	if vararg {
+	if p.tokIs(token.VARARG) {
+		vararg := p.unit
 		p.next()
+		return names, &vararg
 	}
-	return names, vararg
+	return names, nil
 }
 
 func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
-	pos := p.unit.Token.Pos
-	p.expect(token.FUNCTION)
-	p.expect(token.LPAREN)
+	function := p.expect(token.FUNCTION)
+	lparen := p.expect(token.LPAREN)
 
 	params, vararg := p.parseParameterList()
 
-	p.expect(token.RPAREN)
+	rparen := p.expect(token.RPAREN)
 
 	body := p.parseBlock()
 
-	end := p.unit.Token.End()
-	p.expect(token.END)
+	end := p.expect(token.END)
 
 	return &ast.FunctionExpression{
-		Params:   params,
-		Vararg:   vararg,
-		Body:     body,
-		StartPos: pos,
-		EndPos:   end,
+		Function:   function,
+		LeftParen:  lparen,
+		Params:     params,
+		Vararg:     vararg,
+		RightParen: rparen,
+		Body:       body,
+		EndUnit:    end,
 	}
 }
 

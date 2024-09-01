@@ -39,3 +39,7 @@ print(tbl.fourth)
 
 --- @param first string
 function tbl.fifth(first) end
+
+tbl.sixth = function(first, ...)
+  print"bar"
+end

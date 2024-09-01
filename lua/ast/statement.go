@@ -85,7 +85,7 @@ func (fs *ForInStatement) End() token.Pos {
 type FunctionStatement struct {
 	Left     Expression
 	Params   []*Identifier
-	Vararg   bool
+	Vararg   *Unit
 	Body     Block
 	IsLocal  bool
 	StartPos token.Pos `json:"-"`
