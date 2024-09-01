@@ -225,7 +225,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		case *ast.Identifier:
 			key = inner.Literal
 		case *ast.StringLiteral:
-			key = inner.Literal
+			key = inner.Unit.Token.Literal
 		default:
 			e.addError(inner, "Unimplemented")
 			return nil
@@ -298,14 +298,14 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 }
 
 func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
-	typ := e.resolveExprType(fc.Left)
+	typ := e.resolveExprType(fc.Name)
 	if typ == nil {
 		return nil
 	}
 	e.addType(fc, typ)
 	function, ok := typ.(*Function)
 	if !ok {
-		e.addError(fc, "'%s' is not a function", fc.Left)
+		e.addError(fc, "'%s' is not a function", fc.Name)
 		return typ
 	}
 	for i := 0; i < len(fc.Args); i++ {

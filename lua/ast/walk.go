@@ -45,7 +45,7 @@ func Walk(node Node, visitor Visitor) {
 		Walk(&node.Body, visitor)
 
 	case *FunctionCall:
-		Walk(node.Left, visitor)
+		Walk(node.Name, visitor)
 		WalkList(node.Args, visitor)
 
 	case *FunctionExpression:

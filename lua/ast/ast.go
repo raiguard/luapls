@@ -20,6 +20,18 @@ type Unit struct {
 	TrailingTrivia []token.Token // Comments and whitespace up to the next newline
 }
 
+func (u *Unit) Type() token.TokenType {
+	return u.Token.Type
+}
+
+func (u *Unit) Pos() token.Pos {
+	return u.Token.Pos
+}
+
+func (u *Unit) End() token.Pos {
+	return u.Token.End()
+}
+
 type Block struct {
 	Stmts    []Statement
 	StartPos token.Pos `json:"-"`

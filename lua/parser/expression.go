@@ -216,10 +216,7 @@ func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 }
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
-	lit := &ast.StringLiteral{
-		Literal:  p.unit.Token.Literal,
-		StartPos: p.unit.Token.Pos,
-	}
+	lit := &ast.StringLiteral{Unit: p.unit}
 	p.next()
 	return lit
 }

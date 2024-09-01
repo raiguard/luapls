@@ -12,18 +12,28 @@ type Expression interface {
 }
 
 type FunctionCall struct {
-	Left   Expression
-	Args   []Expression
-	EndPos token.Pos `json:"-"`
+	Name       Expression
+	LeftParen  *Unit // Optional
+	Args       []Expression
+	RightParen *Unit // Optional
 }
 
 func (fc *FunctionCall) expressionNode() {}
 func (fc *FunctionCall) statementNode()  {}
 func (fc *FunctionCall) Pos() token.Pos {
-	return fc.Left.Pos()
+	return fc.Name.Pos()
 }
 func (fc *FunctionCall) End() token.Pos {
-	return fc.EndPos
+	if fc.RightParen != nil {
+		return fc.RightParen.End()
+	}
+	if len(fc.Args) > 0 {
+		return fc.Args[len(fc.Args)-1].End()
+	}
+	if fc.LeftParen != nil {
+		return fc.LeftParen.End()
+	}
+	return fc.Name.End()
 }
 
 type FunctionExpression struct {
@@ -144,17 +154,16 @@ func (nl *NumberLiteral) End() token.Pos {
 func (nl *NumberLiteral) leaf() {}
 
 type StringLiteral struct {
-	Literal  string
-	StartPos token.Pos `json:"-"`
+	Unit Unit
 	// TODO: Store type of quote
 }
 
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) Pos() token.Pos {
-	return sl.StartPos
+	return sl.Unit.Pos()
 }
 func (sl *StringLiteral) End() token.Pos {
-	return sl.StartPos + len(sl.Literal)
+	return sl.Unit.End()
 }
 func (sl *StringLiteral) leaf() {}
 

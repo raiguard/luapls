@@ -99,7 +99,7 @@ func (node *ReturnStatement) String() string {
 }
 
 func (node *StringLiteral) String() string {
-	return fmt.Sprintf("%s(%s)@%v", "StringLiteral", node.Literal, node.Pos())
+	return fmt.Sprintf("%s(%s)@%v", "StringLiteral", node.Unit.Token.Literal, node.Pos())
 }
 
 func (node *TableField) String() string {

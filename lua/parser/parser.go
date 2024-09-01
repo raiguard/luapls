@@ -56,7 +56,7 @@ func (p *Parser) ParseFile() File {
 	}
 }
 
-func (p *Parser) next() {
+func (p *Parser) next() ast.Unit {
 	u := ast.Unit{
 		LeadingTrivia:  []token.Token{},
 		Token:          token.Token{},
@@ -78,6 +78,7 @@ func (p *Parser) next() {
 		}
 	}
 	p.unit = u
+	return u
 }
 
 func (p *Parser) parseBlock() ast.Block {
@@ -99,40 +100,35 @@ func (p *Parser) parseBlock() ast.Block {
 
 func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 	if p.tokIs(token.STRING) {
-		end := p.unit.Token.End()
-		args := []ast.Expression{p.parseStringLiteral()}
-		return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
+		return &ast.FunctionCall{Name: left, Args: []ast.Expression{p.parseStringLiteral()}}
 	}
 
 	if p.tokIs(token.LBRACE) {
 		lit := p.parseTableLiteral()
 		return &ast.FunctionCall{
-			Left:   left,
-			Args:   []ast.Expression{lit},
-			EndPos: lit.End(),
+			Name: left,
+			Args: []ast.Expression{lit},
 		}
 	}
 
-	p.expect(token.LPAREN)
+	lparen := p.expect(token.LPAREN)
 
 	args := []ast.Expression{}
 	if !p.tokIs(token.RPAREN) {
 		args = p.parseExpressionList()
 	}
 
-	end := p.unit.Token.End()
+	rparen := p.expect(token.RPAREN)
 
-	p.expect(token.RPAREN)
-
-	return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
+	return &ast.FunctionCall{Name: left, LeftParen: &lparen, Args: args, RightParen: &rparen}
 }
 
-func (p *Parser) expect(tokenType token.TokenType) {
+func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 	if !p.tokIs(tokenType) {
 		p.expectedTokenError(tokenType)
 	}
 	// TODO: Smart error recovery
-	p.next()
+	return p.next()
 }
 
 func (p *Parser) expectedTokenError(expected token.TokenType) {
@@ -156,7 +152,7 @@ func (p *Parser) addErrorForNode(node ast.Node, message string) {
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {
-	return p.unit.Token.Type == tokenType
+	return p.unit.Type() == tokenType
 }
 
 func (p *Parser) tokPrecedence() operatorPrecedence {
