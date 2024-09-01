@@ -12,7 +12,6 @@ type Expression interface {
 }
 
 type FunctionCall struct {
-	Comments
 	Left   Expression
 	Args   []Expression
 	EndPos token.Pos `json:"-"`
@@ -28,7 +27,6 @@ func (fc *FunctionCall) End() token.Pos {
 }
 
 type FunctionExpression struct {
-	Comments
 	Params   []*Identifier
 	Vararg   bool
 	Body     Block
@@ -45,7 +43,6 @@ func (fe *FunctionExpression) End() token.Pos {
 }
 
 type IndexExpression struct {
-	Comments
 	Left    Expression
 	Indexer token.TokenType
 	Inner   Expression
@@ -61,7 +58,6 @@ func (ie *IndexExpression) End() token.Pos {
 }
 
 type InfixExpression struct {
-	Comments
 	Left     Expression
 	Operator token.TokenType
 	Right    Expression
@@ -76,7 +72,6 @@ func (be *InfixExpression) End() token.Pos {
 }
 
 type PrefixExpression struct {
-	Comments
 	Operator token.TokenType
 	Right    Expression
 	StartPos token.Pos `json:"-"`
@@ -93,7 +88,6 @@ func (pe *PrefixExpression) End() token.Pos {
 // Literals (also expressions)
 
 type BooleanLiteral struct {
-	Comments
 	Value    bool
 	StartPos token.Pos `json:"-"`
 }
@@ -108,7 +102,6 @@ func (bl *BooleanLiteral) End() token.Pos {
 func (bl *BooleanLiteral) leaf() {}
 
 type Identifier struct {
-	Comments
 	Literal  string
 	StartPos token.Pos `json:"-"`
 }
@@ -123,7 +116,6 @@ func (i *Identifier) End() token.Pos {
 func (i *Identifier) leaf() {}
 
 type NilLiteral struct {
-	Comments
 	StartPos token.Pos `json:"-"`
 }
 
@@ -137,7 +129,6 @@ func (i *NilLiteral) End() token.Pos {
 func (n *NilLiteral) leaf() {}
 
 type NumberLiteral struct {
-	Comments
 	Literal  string
 	Value    float64
 	StartPos token.Pos `json:"-"`
@@ -153,7 +144,6 @@ func (nl *NumberLiteral) End() token.Pos {
 func (nl *NumberLiteral) leaf() {}
 
 type StringLiteral struct {
-	Comments
 	Literal  string
 	StartPos token.Pos `json:"-"`
 	// TODO: Store type of quote
@@ -169,7 +159,6 @@ func (sl *StringLiteral) End() token.Pos {
 func (sl *StringLiteral) leaf() {}
 
 type TableLiteral struct {
-	Comments
 	Fields   []*TableField
 	StartPos token.Pos
 	EndPos   token.Pos `json:"-"`
@@ -184,7 +173,6 @@ func (tl *TableLiteral) End() token.Pos {
 }
 
 type Vararg struct {
-	Comments
 	StartPos token.Pos `json:"-"`
 }
 

@@ -10,7 +10,6 @@ type Statement interface {
 }
 
 type AssignmentStatement struct {
-	Comments
 	Vars []Expression
 	Exps []Expression
 }
@@ -24,7 +23,6 @@ func (as *AssignmentStatement) End() token.Pos {
 }
 
 type BreakStatement struct {
-	Comments
 	StartPos token.Pos `json:"-"`
 }
 
@@ -37,7 +35,6 @@ func (bs *BreakStatement) End() token.Pos {
 }
 
 type DoStatement struct {
-	Comments
 	Body     Block
 	StartPos token.Pos `json:"-"`
 	EndPos   token.Pos `json:"-"`
@@ -52,7 +49,6 @@ func (ds *DoStatement) End() token.Pos {
 }
 
 type ForStatement struct {
-	Comments
 	Name     *Identifier
 	Start    Expression
 	Finish   Expression
@@ -71,7 +67,6 @@ func (fs *ForStatement) End() token.Pos {
 }
 
 type ForInStatement struct {
-	Comments
 	Names    []*Identifier
 	Exps     []Expression
 	Body     Block
@@ -88,7 +83,6 @@ func (fs *ForInStatement) End() token.Pos {
 }
 
 type FunctionStatement struct {
-	Comments
 	Left     Expression
 	Params   []*Identifier
 	Vararg   bool
@@ -107,7 +101,6 @@ func (fs *FunctionStatement) End() token.Pos {
 }
 
 type GotoStatement struct {
-	Comments
 	Name     *Identifier
 	StartPos token.Pos `json:"-"`
 }
@@ -121,7 +114,6 @@ func (gs *GotoStatement) End() token.Pos {
 }
 
 type IfStatement struct {
-	Comments
 	Clauses  []*IfClause
 	StartPos token.Pos
 	EndPos   token.Pos `json:"-"`
@@ -136,7 +128,6 @@ func (is *IfStatement) End() token.Pos {
 }
 
 type IfClause struct {
-	Comments
 	Condition Expression
 	Body      Block
 	StartPos  token.Pos `json:"-"`
@@ -152,7 +143,6 @@ func (ic *IfClause) End() token.Pos {
 }
 
 type LabelStatement struct {
-	Comments
 	Name     *Identifier
 	StartPos token.Pos `json:"-"`
 	EndPos   token.Pos `json:"-"`
@@ -168,7 +158,6 @@ func (ls *LabelStatement) End() token.Pos {
 func (ls *LabelStatement) leaf() {}
 
 type LocalStatement struct {
-	Comments
 	Names    []*Identifier
 	Exps     []Expression
 	StartPos token.Pos `json:"-"`
@@ -186,7 +175,6 @@ func (ls *LocalStatement) End() token.Pos {
 }
 
 type RepeatStatement struct {
-	Comments
 	Body      Block
 	Condition Expression
 	StartPos  token.Pos `json:"-"`
@@ -201,7 +189,6 @@ func (rs *RepeatStatement) End() token.Pos {
 }
 
 type ReturnStatement struct {
-	Comments
 	Exps     []Expression
 	StartPos token.Pos `json:"-"`
 }
@@ -218,7 +205,6 @@ func (rs *ReturnStatement) End() token.Pos {
 }
 
 type WhileStatement struct {
-	Comments
 	Condition Expression
 	Body      Block
 	StartPos  token.Pos `json:"-"`

@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/parser"
@@ -89,61 +88,61 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 	case *ast.FunctionCall:
 		e.resolveFunctionCallType(stmt)
 	case *ast.FunctionStatement:
-		typ := &Function{
-			Params: []NameAndType{},
-			Return: nil,
-		}
-		comments := stmt.GetComments()
-		for _, param := range stmt.Params {
-			template := fmt.Sprintf("@param %s", param.Literal)
-			defStart := strings.Index(comments, template)
-			if defStart == -1 {
-				e.addType(param, &Any{})
-				continue
-			}
-			// This is awful
-			def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
-			var paramTyp Type = &Unknown{}
-			switch def {
-			case "any":
-				paramTyp = &Any{}
-			case "boolean":
-				paramTyp = &Boolean{}
-			case "number":
-				paramTyp = &Number{}
-			case "string":
-				paramTyp = &String{}
-			}
-			e.addType(param, paramTyp)
-			typ.Params = append(typ.Params, NameAndType{
-				Name: param.Literal,
-				Type: paramTyp,
-			})
-			// TODO: Custom types
-		}
-		{
-			template := "@return"
-			defStart := strings.Index(comments, template)
-			if defStart != -1 {
-				// This is awful
-				def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
-				switch def {
-				case "any":
-					typ.Return = &Any{}
-				case "boolean":
-					typ.Return = &Boolean{}
-				case "number":
-					typ.Return = &Number{}
-				case "string":
-					typ.Return = &String{}
-				}
-			}
-		}
-		e.addType(stmt, typ)
-		// TODO: Parse index expression
-		e.addType(stmt.Left, typ)
+		// typ := &Function{
+		// 	Params: []NameAndType{},
+		// 	Return: nil,
+		// }
+		// comments := stmt.GetComments()
+		// for _, param := range stmt.Params {
+		// 	template := fmt.Sprintf("@param %s", param.Literal)
+		// 	defStart := strings.Index(comments, template)
+		// 	if defStart == -1 {
+		// 		e.addType(param, &Any{})
+		// 		continue
+		// 	}
+		// 	// This is awful
+		// 	def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
+		// 	var paramTyp Type = &Unknown{}
+		// 	switch def {
+		// 	case "any":
+		// 		paramTyp = &Any{}
+		// 	case "boolean":
+		// 		paramTyp = &Boolean{}
+		// 	case "number":
+		// 		paramTyp = &Number{}
+		// 	case "string":
+		// 		paramTyp = &String{}
+		// 	}
+		// 	e.addType(param, paramTyp)
+		// 	typ.Params = append(typ.Params, NameAndType{
+		// 		Name: param.Literal,
+		// 		Type: paramTyp,
+		// 	})
+		// 	// TODO: Custom types
+		// }
+		// {
+		// 	template := "@return"
+		// 	defStart := strings.Index(comments, template)
+		// 	if defStart != -1 {
+		// 		// This is awful
+		// 		def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
+		// 		switch def {
+		// 		case "any":
+		// 			typ.Return = &Any{}
+		// 		case "boolean":
+		// 			typ.Return = &Boolean{}
+		// 		case "number":
+		// 			typ.Return = &Number{}
+		// 		case "string":
+		// 			typ.Return = &String{}
+		// 		}
+		// 	}
+		// }
+		// e.addType(stmt, typ)
+		// // TODO: Parse index expression
+		// e.addType(stmt.Left, typ)
 
-		e.resolveExprType(stmt.Left)
+		// e.resolveExprType(stmt.Left)
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names); i++ {
 			ident := stmt.Names[i]

@@ -27,18 +27,18 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 		typ = &types.Unknown{}
 	}
 	contents := fmt.Sprintf("```lua\n(variable) %s: %s\n```", ident.Literal, typ)
-	comments := ident.GetComments()
-	i := len(nodePath.Parents) - 1
-	for comments == "" && i >= 0 {
-		comments = nodePath.Parents[i].GetComments()
-		if _, ok := nodePath.Parents[i].(ast.Statement); ok {
-			break
-		}
-		i--
-	}
-	if comments != "" {
-		contents += "\n\n" + comments
-	}
+	// comments := ident.GetComments()
+	// i := len(nodePath.Parents) - 1
+	// for comments == "" && i >= 0 {
+	// 	comments = nodePath.Parents[i].GetComments()
+	// 	if _, ok := nodePath.Parents[i].(ast.Statement); ok {
+	// 		break
+	// 	}
+	// 	i--
+	// }
+	// if comments != "" {
+	// 	contents += "\n\n" + comments
+	// }
 	return &protocol.Hover{
 		Contents: contents,
 		Range:    ptr(file.File.ToProtocolRange(ast.Range(ident))),

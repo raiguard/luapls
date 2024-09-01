@@ -1,8 +1,6 @@
 package ast
 
 import (
-	"strings"
-
 	"github.com/raiguard/luapls/lua/token"
 )
 
@@ -10,35 +8,19 @@ type Node interface {
 	Pos() token.Pos
 	End() token.Pos
 	String() string
-
-	GetComments() string
-	// CommentsAfter() string
 }
 
 func Range(n Node) token.Range {
 	return token.Range{Start: n.Pos(), End: n.End()}
 }
 
-type Comments struct {
-	CommentsBefore []token.Token `json:",omitempty"`
-}
-
-// TODO: Remove this
-func (c *Comments) GetComments() string {
-	if c == nil || c.CommentsBefore == nil {
-		return ""
-	}
-
-	var output string
-	for _, comment := range c.CommentsBefore {
-		// TODO: Preserve indentation
-		output += strings.TrimSpace(strings.TrimPrefix(comment.Literal, "---")) + "  \n"
-	}
-	return output
+type Unit struct {
+	LeadingTrivia  []token.Token
+	Token          token.Token
+	TrailingTrivia []token.Token // Comments and whitespace up to the next newline
 }
 
 type Block struct {
-	Comments
 	Stmts    []Statement
 	StartPos token.Pos `json:"-"`
 }
@@ -54,7 +36,6 @@ func (b *Block) End() token.Pos {
 }
 
 type TableField struct {
-	Comments
 	Key      Expression
 	Value    Expression
 	StartPos token.Pos `json:"-"` // Needed in case of bracketed keys
@@ -68,7 +49,6 @@ func (tf *TableField) End() token.Pos {
 }
 
 type Invalid struct {
-	Comments
 	Exps []Expression `json:",omitempty"`
 	// OR
 	Token *token.Token `json:",omitempty"`

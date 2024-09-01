@@ -26,6 +26,7 @@ func (pe *ParserError) String() string {
 type Parser struct {
 	lexer    *lexer.Lexer
 	errors   []ParserError
+	unit     ast.Unit
 	tok      token.Token
 	comments []token.Token
 }
@@ -37,6 +38,7 @@ func New(input string) *Parser {
 		comments: []token.Token{},
 	}
 
+	p.tok = p.lexer.Next()
 	p.next()
 
 	return p
@@ -55,24 +57,36 @@ func (p *Parser) ParseFile() File {
 }
 
 func (p *Parser) next() {
-	p.tok = p.lexer.Next()
+	u := ast.Unit{
+		LeadingTrivia:  []token.Token{},
+		Token:          token.Token{},
+		TrailingTrivia: []token.Token{},
+	}
 	// TODO: Parse type annotations
-	// TODO: Collect whitespace
-	for p.tokIs(token.COMMENT) || p.tokIs(token.WHITESPACE) {
-		p.comments = append(p.comments, p.tok)
+	for p.tok.Type == token.COMMENT || p.tok.Type == token.WHITESPACE {
+		u.LeadingTrivia = append(u.LeadingTrivia, p.tok)
 		p.tok = p.lexer.Next()
 	}
+	u.Token = p.tok
+	p.tok = p.lexer.Next()
+	for p.tok.Type == token.COMMENT || p.tok.Type == token.WHITESPACE {
+		lit := p.tok.Literal
+		u.TrailingTrivia = append(u.TrailingTrivia, p.tok)
+		p.tok = p.lexer.Next()
+		if lit == "\n" {
+			break
+		}
+	}
+	p.unit = u
 }
 
 func (p *Parser) parseBlock() ast.Block {
 	block := ast.Block{
-		// TODO: Is this needed somewhere?
-		// Comments: p.collectComments(),
 		Stmts:    []ast.Statement{},
-		StartPos: p.tok.Pos,
+		StartPos: p.unit.Token.Pos,
 	}
 
-	for !blockEnd[p.tok.Type] {
+	for !blockEnd[p.unit.Token.Type] {
 		stat := p.parseStatement()
 		block.Stmts = append(block.Stmts, stat)
 		for p.tokIs(token.SEMICOLON) {
@@ -85,7 +99,7 @@ func (p *Parser) parseBlock() ast.Block {
 
 func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 	if p.tokIs(token.STRING) {
-		end := p.tok.End()
+		end := p.unit.Token.End()
 		args := []ast.Expression{p.parseStringLiteral()}
 		return &ast.FunctionCall{Left: left, Args: args, EndPos: end}
 	}
@@ -106,7 +120,7 @@ func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
 		args = p.parseExpressionList()
 	}
 
-	end := p.tok.End()
+	end := p.unit.Token.End()
 
 	p.expect(token.RPAREN)
 
@@ -125,16 +139,16 @@ func (p *Parser) expectedTokenError(expected token.TokenType) {
 	p.addError(
 		fmt.Sprintf("Expected %s, got %s",
 			token.TokenStr[expected],
-			token.TokenStr[p.tok.Type]),
+			token.TokenStr[p.unit.Token.Type]),
 	)
 }
 
 func (p *Parser) invalidTokenError() {
-	p.addError(fmt.Sprintf("Unexpected %s", token.TokenStr[p.tok.Type]))
+	p.addError(fmt.Sprintf("Unexpected %s", token.TokenStr[p.unit.Token.Type]))
 }
 
 func (p *Parser) addError(message string) {
-	p.errors = append(p.errors, ParserError{Range: p.tok.Range(), Message: message})
+	p.errors = append(p.errors, ParserError{Range: p.unit.Token.Range(), Message: message})
 }
 
 func (p *Parser) addErrorForNode(node ast.Node, message string) {
@@ -142,11 +156,11 @@ func (p *Parser) addErrorForNode(node ast.Node, message string) {
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {
-	return p.tok.Type == tokenType
+	return p.unit.Token.Type == tokenType
 }
 
 func (p *Parser) tokPrecedence() operatorPrecedence {
-	if p, ok := precedences[p.tok.Type]; ok {
+	if p, ok := precedences[p.unit.Token.Type]; ok {
 		return p
 	}
 	return LOWEST
@@ -158,13 +172,4 @@ var blockEnd = map[token.TokenType]bool{
 	token.END:    true,
 	token.EOF:    true,
 	token.UNTIL:  true,
-}
-
-func (p *Parser) collectComments() ast.Comments {
-	base := ast.Comments{CommentsBefore: p.comments}
-	// for _, comment := range p.comments {
-	// 	base.CommentsBefore = append(base.CommentsBefore, comment)
-	// }
-	p.comments = []token.Token{}
-	return base
 }

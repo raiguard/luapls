@@ -10,7 +10,7 @@ import (
 
 func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) ast.Expression {
 	var left ast.Expression
-	switch p.tok.Type {
+	switch p.unit.Token.Type {
 	case token.FUNCTION:
 		left = p.parseFunctionExpression()
 	case token.IDENT:
@@ -32,14 +32,14 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	case token.VARARG:
 		left = p.parseVararg()
 	default:
-		p.addError(fmt.Sprintf("Expected expression, got %s", token.TokenStr[p.tok.Type]))
-		invalid := ast.Invalid{Token: &p.tok}
+		p.addError(fmt.Sprintf("Expected expression, got %s", token.TokenStr[p.unit.Token.Type]))
+		invalid := ast.Invalid{Token: &p.unit.Token}
 		p.next()
 		return &invalid
 	}
 
-	for isSuffixOperator(p.tok.Type) {
-		switch p.tok.Type {
+	for isSuffixOperator(p.unit.Token.Type) {
+		switch p.unit.Token.Type {
 		case token.LPAREN, token.LBRACE, token.STRING:
 			if !allowCall {
 				return left
@@ -50,9 +50,9 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		}
 	}
 
-	for isInfixOperator(p.tok.Type) {
+	for isInfixOperator(p.unit.Token.Type) {
 		tokPrecedence := p.tokPrecedence()
-		if isRightAssociative(p.tok.Type) {
+		if isRightAssociative(p.unit.Token.Type) {
 			tokPrecedence++
 		}
 		if precedence >= tokPrecedence {
@@ -106,7 +106,7 @@ func (p *Parser) parseParameterList() ([]*ast.Identifier, bool) {
 }
 
 func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
-	pos := p.tok.Pos
+	pos := p.unit.Token.Pos
 	p.expect(token.FUNCTION)
 	p.expect(token.LPAREN)
 
@@ -116,7 +116,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 
 	body := p.parseBlock()
 
-	end := p.tok.End()
+	end := p.unit.Token.End()
 	p.expect(token.END)
 
 	return &ast.FunctionExpression{
@@ -129,14 +129,14 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression {
-	indexer := p.tok.Type
+	indexer := p.unit.Token.Type
 	p.next()
 
 	var end token.Pos
 	var inner ast.Expression
 	if indexer == token.LBRACK {
 		inner = p.parseExpression(LOWEST, true)
-		end = p.tok.Pos
+		end = p.unit.Token.Pos
 		p.expect(token.RBRACK)
 	} else {
 		inner = p.parseIdentifier()
@@ -154,7 +154,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) *ast.IndexExpression 
 func (p *Parser) parseInfixExpression(left ast.Expression) *ast.InfixExpression {
 	expression := &ast.InfixExpression{
 		Left:     left,
-		Operator: p.tok.Type,
+		Operator: p.unit.Token.Type,
 		Right:    nil,
 	}
 
@@ -173,8 +173,8 @@ func (p *Parser) parseSurroundingExpression() ast.Expression {
 }
 
 func (p *Parser) parsePrefixExpression() *ast.PrefixExpression {
-	operator := p.tok.Type
-	pos := p.tok.Pos
+	operator := p.unit.Token.Type
+	pos := p.unit.Token.Pos
 	p.next()
 	right := p.parseExpression(PREFIX, true)
 	return &ast.PrefixExpression{Operator: operator, Right: right, StartPos: pos}
@@ -182,31 +182,31 @@ func (p *Parser) parsePrefixExpression() *ast.PrefixExpression {
 
 func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
 	value := p.tokIs(token.TRUE)
-	pos := p.tok.Pos
+	pos := p.unit.Token.Pos
 	p.next()
 	return &ast.BooleanLiteral{Value: value, StartPos: pos}
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	ident := ast.Identifier{StartPos: p.tok.Pos, Literal: p.tok.Literal}
+	ident := ast.Identifier{StartPos: p.unit.Token.Pos, Literal: p.unit.Token.Literal}
 	p.expect(token.IDENT)
 	return &ident
 }
 
 func (p *Parser) parseNilLiteral() *ast.NilLiteral {
-	tok := ast.NilLiteral{StartPos: p.tok.Pos}
+	tok := ast.NilLiteral{StartPos: p.unit.Token.Pos}
 	p.expect(token.NIL)
 	return &tok
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
-	lit := p.tok.Literal
-	pos := p.tok.Pos
+	lit := p.unit.Token.Literal
+	pos := p.unit.Token.Pos
 
 	// TODO: Parse all formats of number
-	value, err := strconv.ParseFloat(p.tok.Literal, 64)
+	value, err := strconv.ParseFloat(p.unit.Token.Literal, 64)
 	if err != nil {
-		// msg := fmt.Sprintf("could not parse %q", p.tok.Literal)
+		// msg := fmt.Sprintf("could not parse %q", p.unit.Token.Literal)
 		// p.errors = append(p.errors, msg)
 	}
 
@@ -217,29 +217,29 @@ func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	lit := &ast.StringLiteral{
-		Literal:  p.tok.Literal,
-		StartPos: p.tok.Pos,
+		Literal:  p.unit.Token.Literal,
+		StartPos: p.unit.Token.Pos,
 	}
 	p.next()
 	return lit
 }
 
 func (p *Parser) parseTableLiteral() *ast.TableLiteral {
-	pos := p.tok.Pos
+	pos := p.unit.Token.Pos
 
 	p.expect(token.LBRACE)
 
 	fields := []*ast.TableField{}
 
 	if p.tokIs(token.RBRACE) {
-		end := p.tok.End()
+		end := p.unit.Token.End()
 		p.next()
 		return &ast.TableLiteral{Fields: fields, StartPos: pos, EndPos: end}
 	}
 
 	fields = append(fields, p.parseTableField())
 
-	for tableSep[p.tok.Type] {
+	for tableSep[p.unit.Token.Type] {
 		p.next()
 		// Trailing separator
 		if p.tokIs(token.RBRACE) {
@@ -248,7 +248,7 @@ func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 		fields = append(fields, p.parseTableField())
 	}
 
-	end := p.tok.End()
+	end := p.unit.Token.End()
 	p.expect(token.RBRACE)
 
 	return &ast.TableLiteral{Fields: fields, StartPos: pos, EndPos: end}
@@ -257,7 +257,7 @@ func (p *Parser) parseTableLiteral() *ast.TableLiteral {
 func (p *Parser) parseTableField() *ast.TableField {
 	var leftExp ast.Expression
 	hasKeyBrackets := false
-	pos := p.tok.Pos
+	pos := p.unit.Token.Pos
 	if p.tokIs(token.LBRACK) {
 		hasKeyBrackets = true
 		p.next()
@@ -268,7 +268,7 @@ func (p *Parser) parseTableField() *ast.TableField {
 	}
 	// Expression keys require values
 	if !hasKeyBrackets {
-		if tableSep[p.tok.Type] || p.tokIs(token.RBRACE) || isType[ast.Invalid](leftExp) {
+		if tableSep[p.unit.Token.Type] || p.tokIs(token.RBRACE) || isType[ast.Invalid](leftExp) {
 			return &ast.TableField{Value: leftExp, StartPos: leftExp.Pos()}
 		}
 		if !isType[ast.Identifier](leftExp) {
@@ -294,7 +294,7 @@ func isType[T any](thing any) bool {
 }
 
 func (p *Parser) parseVararg() *ast.Vararg {
-	pos := p.tok.Pos
+	pos := p.unit.Token.Pos
 	p.expect(token.VARARG)
 	return &ast.Vararg{StartPos: pos}
 }
