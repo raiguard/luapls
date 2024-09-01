@@ -3,6 +3,7 @@ package token
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type TokenType int
@@ -106,7 +107,7 @@ func (t *Token) Range() Range {
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("[%s] `%s` %v", TokenStr[t.Type], t.Literal, t.Pos)
+	return fmt.Sprintf("[%s] `%s` %v", TokenStr[t.Type], strings.NewReplacer("\n", "\\n", "\t", "\\t").Replace(t.Literal), t.Pos)
 }
 
 type Range struct {
