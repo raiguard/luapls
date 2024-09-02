@@ -6,7 +6,6 @@ import (
 
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
-	"github.com/raiguard/luapls/lua/token"
 
 	"github.com/chzyer/readline"
 )
@@ -27,7 +26,8 @@ func Run() {
 		l := lexer.New(line)
 
 		fmt.Println("TOKENS:")
-		for tok := l.Next(); tok.Type != token.EOF; tok = l.Next() {
+		tokens, _ := l.Run()
+		for _, tok := range tokens {
 			fmt.Println(tok.String())
 		}
 

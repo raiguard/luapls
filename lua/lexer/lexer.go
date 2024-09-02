@@ -148,6 +148,16 @@ func (l *Lexer) GetLineBreaks() []int {
 	return l.lineBreaks
 }
 
+func (l *Lexer) Run() ([]token.Token, []int) {
+	tokens := []token.Token{}
+	var tok token.Token
+	for tok.Type != token.EOF {
+		tok = l.Next()
+		tokens = append(tokens, tok)
+	}
+	return tokens, l.lineBreaks
+}
+
 func (l *Lexer) makeToken(typ token.TokenType) token.Token {
 	return token.Token{
 		Type:    typ,
