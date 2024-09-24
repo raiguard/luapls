@@ -11,7 +11,7 @@ func (node *Block) String() string {
 }
 
 func (node *BooleanLiteral) String() string {
-	return fmt.Sprintf("%s(%v)@%v", "BooleanLiteral", node.Value, node.Pos())
+	return fmt.Sprintf("%s(%s)@%v", "BooleanLiteral", node.Token.Literal, node.Pos())
 }
 
 func (node *BreakStatement) String() string {
@@ -47,7 +47,7 @@ func (node *GotoStatement) String() string {
 }
 
 func (node *Identifier) String() string {
-	return fmt.Sprintf("%s(%s)@%v", "Identifier", node.Literal, node.Pos())
+	return fmt.Sprintf("%s(%s)@%v", "Identifier", node.Token.Literal, node.Pos())
 }
 
 func (node *IfClause) String() string {
@@ -83,7 +83,7 @@ func (node *NilLiteral) String() string {
 }
 
 func (node *NumberLiteral) String() string {
-	return fmt.Sprintf("%s(%s)@%v", "NumberLiteral", node.Literal, node.Pos())
+	return fmt.Sprintf("%s(%s)@%v", "NumberLiteral", node.Token.Literal, node.Pos())
 }
 
 func (node *PrefixExpression) String() string {

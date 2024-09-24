@@ -195,14 +195,14 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 				return e.addType(expr, typ)
 			}
 		} else {
-			e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Unknown variable '%s'", expr.Literal), Range: ast.Range(expr)})
+			e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Unknown variable '%s'", expr.Token.Literal), Range: ast.Range(expr)})
 		}
 
 	case *ast.FunctionExpression:
 		typ := &Function{Params: []NameAndType{}}
 		for _, param := range expr.Params {
 			// TODO: Function parameter types - requires parsing doc comments
-			typ.Params = append(typ.Params, NameAndType{Name: param.Literal, Type: &Unknown{}})
+			typ.Params = append(typ.Params, NameAndType{Name: param.Token.Literal, Type: &Unknown{}})
 		}
 		return e.addType(expr, typ)
 	case *ast.FunctionCall:
@@ -223,7 +223,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		var key string
 		switch inner := expr.Inner.(type) {
 		case *ast.Identifier:
-			key = inner.Literal
+			key = inner.Token.Literal
 		case *ast.StringLiteral:
 			key = inner.Unit.Token.Literal
 		default:
@@ -281,7 +281,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			}
 			valueTyp := e.resolveExprType(fieldNode.Value)
 			field := NameAndType{
-				Name: ident.Literal,
+				Name: ident.Token.Literal,
 				Type: valueTyp,
 			}
 			typ.Fields = append(typ.Fields, field)
@@ -355,21 +355,21 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 		case *ast.ForInStatement:
 			if isInside {
 				for _, ident := range node.Names {
-					if ident.Literal == identFor.Literal {
+					if ident.Token.Literal == identFor.Token.Literal {
 						def = ident
 					}
 				}
 			}
 		case *ast.ForStatement:
 			if isInside {
-				if node.Name != nil && node.Name.Literal == identFor.Literal {
+				if node.Name != nil && node.Name.Token.Literal == identFor.Token.Literal {
 					def = node.Name
 				}
 			}
 		case *ast.FunctionExpression:
 			if isInside {
 				for _, ident := range node.Params {
-					if ident.Literal == identFor.Literal {
+					if ident.Token.Literal == identFor.Token.Literal {
 						def = ident
 					}
 				}
@@ -377,19 +377,19 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 		case *ast.FunctionStatement:
 			if isInside {
 				for _, ident := range node.Params {
-					if ident.Literal == identFor.Literal {
+					if ident.Token.Literal == identFor.Token.Literal {
 						def = ident
 					}
 				}
 			}
 			if ident, ok := node.Left.(*ast.Identifier); ok {
-				if ident.Literal == identFor.Literal {
+				if ident.Token.Literal == identFor.Token.Literal {
 					def = ident
 				}
 			}
 		case *ast.LocalStatement:
 			for _, ident := range node.Names {
-				if ident.Literal == identFor.Literal {
+				if ident.Token.Literal == identFor.Token.Literal {
 					def = ident
 				}
 			}

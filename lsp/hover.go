@@ -26,7 +26,7 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if !ok {
 		typ = &types.Unknown{}
 	}
-	contents := fmt.Sprintf("```lua\n(variable) %s: %s\n```", ident.Literal, typ)
+	contents := fmt.Sprintf("```lua\n(variable) %s: %s\n```", ident.Token.Literal, typ)
 	// comments := ident.GetComments()
 	// i := len(nodePath.Parents) - 1
 	// for comments == "" && i >= 0 {

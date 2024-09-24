@@ -24,18 +24,16 @@ func (pe *ParserError) String() string {
 }
 
 type Parser struct {
-	lexer    *lexer.Lexer
-	errors   []ParserError
-	unit     ast.Unit
-	tok      token.Token
-	comments []token.Token
+	lexer  *lexer.Lexer
+	errors []ParserError
+	unit   ast.Unit
+	tok    token.Token
 }
 
 func New(input string) *Parser {
 	p := &Parser{
-		lexer:    lexer.New(input),
-		errors:   []ParserError{},
-		comments: []token.Token{},
+		lexer:  lexer.New(input),
+		errors: []ParserError{},
 	}
 
 	p.tok = p.lexer.Next()

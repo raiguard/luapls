@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
@@ -182,14 +181,13 @@ func (p *Parser) parsePrefixExpression() *ast.PrefixExpression {
 }
 
 func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
-	value := p.tokIs(token.TRUE)
-	pos := p.unit.Token.Pos
+	bl := ast.BooleanLiteral(p.unit)
 	p.next()
-	return &ast.BooleanLiteral{Value: value, StartPos: pos}
+	return &bl
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	ident := ast.Identifier{StartPos: p.unit.Token.Pos, Literal: p.unit.Token.Literal}
+	ident := ast.Identifier(p.unit)
 	p.expect(token.IDENT)
 	return &ident
 }
@@ -201,19 +199,9 @@ func (p *Parser) parseNilLiteral() *ast.NilLiteral {
 }
 
 func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
-	lit := p.unit.Token.Literal
-	pos := p.unit.Token.Pos
-
-	// TODO: Parse all formats of number
-	value, err := strconv.ParseFloat(p.unit.Token.Literal, 64)
-	if err != nil {
-		// msg := fmt.Sprintf("could not parse %q", p.unit.Token.Literal)
-		// p.errors = append(p.errors, msg)
-	}
-
-	p.next()
-
-	return &ast.NumberLiteral{Literal: lit, Value: float64(value), StartPos: pos}
+	nl := ast.NumberLiteral(p.unit)
+	p.expect(token.NUMBER)
+	return &nl
 }
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {

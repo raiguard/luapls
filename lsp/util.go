@@ -35,36 +35,36 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 		case *ast.ForInStatement:
 			if isInside {
 				for _, ident := range node.Names {
-					locals[ident.Literal] = ident
+					locals[ident.Token.Literal] = ident
 				}
 			}
 		case *ast.ForStatement:
 			if isInside {
 				if node.Name != nil {
-					locals[node.Name.Literal] = node.Name
+					locals[node.Name.Token.Literal] = node.Name
 				}
 			}
 		case *ast.FunctionExpression:
 			if isInside {
 				for _, ident := range node.Params {
-					locals[ident.Literal] = ident
+					locals[ident.Token.Literal] = ident
 				}
 			}
 		case *ast.FunctionStatement:
 			if isInside {
 				for _, ident := range node.Params {
-					locals[ident.Literal] = ident
+					locals[ident.Token.Literal] = ident
 				}
 			}
 			if isBefore || includeSelf {
 				if ident, ok := node.Left.(*ast.Identifier); ok {
-					locals[ident.Literal] = ident
+					locals[ident.Token.Literal] = ident
 				}
 			}
 		case *ast.LocalStatement:
 			if isBefore || includeSelf {
 				for _, ident := range node.Names {
-					locals[ident.Literal] = ident
+					locals[ident.Token.Literal] = ident
 				}
 			}
 		default:

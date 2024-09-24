@@ -28,7 +28,10 @@ func New(input string) *Lexer {
 func (l *Lexer) Next() token.Token {
 	l.ignore()
 
-	if l.acceptRun(whitespace) {
+	if l.acceptRun(" \t") {
+		return l.makeToken(token.WHITESPACE)
+	}
+	if l.acceptRun("\r\n") {
 		return l.makeToken(token.WHITESPACE)
 	}
 

@@ -1,8 +1,6 @@
 package ast
 
 import (
-	"strconv"
-
 	"github.com/raiguard/luapls/lua/token"
 )
 
@@ -99,31 +97,25 @@ func (pe *PrefixExpression) End() token.Pos {
 
 // Literals (also expressions)
 
-type BooleanLiteral struct {
-	Value    bool
-	StartPos token.Pos `json:"-"`
-}
+type BooleanLiteral Unit
 
 func (bl *BooleanLiteral) expressionNode() {}
 func (bl *BooleanLiteral) Pos() token.Pos {
-	return bl.StartPos
+	return bl.Token.Pos
 }
 func (bl *BooleanLiteral) End() token.Pos {
-	return bl.StartPos + len(strconv.FormatBool(bl.Value))
+	return bl.Token.End()
 }
 func (bl *BooleanLiteral) leaf() {}
 
-type Identifier struct {
-	Literal  string
-	StartPos token.Pos `json:"-"`
-}
+type Identifier Unit
 
 func (i *Identifier) expressionNode() {}
 func (i *Identifier) Pos() token.Pos {
-	return i.StartPos
+	return i.Token.Pos
 }
 func (i *Identifier) End() token.Pos {
-	return i.StartPos + len(i.Literal)
+	return i.Token.End()
 }
 func (i *Identifier) leaf() {}
 
@@ -140,18 +132,14 @@ func (i *NilLiteral) End() token.Pos {
 }
 func (n *NilLiteral) leaf() {}
 
-type NumberLiteral struct {
-	Literal  string
-	Value    float64
-	StartPos token.Pos `json:"-"`
-}
+type NumberLiteral Unit
 
 func (nl *NumberLiteral) expressionNode() {}
 func (nl *NumberLiteral) Pos() token.Pos {
-	return nl.StartPos
+	return nl.Token.Pos
 }
 func (nl *NumberLiteral) End() token.Pos {
-	return nl.StartPos + len(nl.Literal)
+	return nl.Token.End()
 }
 func (nl *NumberLiteral) leaf() {}
 
