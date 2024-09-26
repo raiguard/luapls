@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	"github.com/raiguard/luapls/lsp"
 	"github.com/raiguard/luapls/lua/lexer"
@@ -77,26 +76,32 @@ func lexFile(filename string) {
 }
 
 func parseFile(filename string) {
-	before := time.Now()
+	// before := time.Now()
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	p := parser.New(string(src))
-	file := p.ParseFile()
-	bytes, err := json.MarshalIndent(struct {
-		Duration string
-		File     parser.File
-	}{
-		Duration: time.Since(before).String(),
-		File:     file,
-	}, "", "  ")
+	units, _ := parser.Run(string(src))
+	bytes, err := json.MarshalIndent(units, "", "  ")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		panic(err)
 	}
 	fmt.Println(string(bytes))
+	// p := parser.New(string(src))
+	// file := p.ParseFile()
+	// bytes, err := json.MarshalIndent(struct {
+	// 	Duration string
+	// 	File     parser.File
+	// }{
+	// 	Duration: time.Since(before).String(),
+	// 	File:     file,
+	// }, "", "  ")
+	// if err != nil {
+	// 	fmt.Fprintln(os.Stderr, err)
+	// 	os.Exit(1)
+	// }
+	// fmt.Println(string(bytes))
 }
 
 type testSpec struct {

@@ -8,6 +8,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
@@ -40,6 +41,49 @@ func New(input string) *Parser {
 	p.next()
 
 	return p
+}
+
+func Run(input string) ([]ast.Unit, []int) {
+	// Consume all tokens and convert them into units
+	tokens, lineBreaks := lexer.New(input).Run()
+	units := []ast.Unit{}
+	u := ast.Unit{
+		LeadingTrivia:  []token.Token{},
+		Token:          token.Token{},
+		TrailingTrivia: []token.Token{},
+	}
+	state := "leading"
+	newUnit := func() {
+		units = append(units, u)
+		u = ast.Unit{
+			LeadingTrivia:  []token.Token{},
+			Token:          token.Token{},
+			TrailingTrivia: []token.Token{},
+		}
+	}
+	for _, tok := range tokens {
+		if tok.Type == token.COMMENT || tok.Type == token.WHITESPACE {
+			if state == "leading" {
+				u.LeadingTrivia = append(u.LeadingTrivia, tok)
+			} else {
+				u.TrailingTrivia = append(u.TrailingTrivia, tok)
+				if strings.Contains(tok.Literal, "\n") {
+					newUnit()
+					state = "leading"
+				}
+			}
+		} else {
+			if state == "leading" {
+				state = "trailing"
+				u.Token = tok
+			} else {
+				newUnit()
+				u.Token = tok
+			}
+		}
+	}
+
+	return units, lineBreaks
 }
 
 func (p *Parser) Errors() []ParserError {
