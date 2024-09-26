@@ -151,7 +151,8 @@ func (l *Lexer) GetLineBreaks() []int {
 	return l.lineBreaks
 }
 
-func (l *Lexer) Run() ([]token.Token, []int) {
+func Run(input string) ([]token.Token, []int) {
+	l := New(input)
 	tokens := []token.Token{}
 	for {
 		tok := l.Next()

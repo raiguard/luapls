@@ -45,7 +45,7 @@ func New(input string) *Parser {
 
 func Run(input string) ([]ast.Unit, []int) {
 	// Consume all tokens and convert them into units
-	tokens, lineBreaks := lexer.New(input).Run()
+	tokens, lineBreaks := lexer.Run(input)
 	units := []ast.Unit{}
 	u := ast.Unit{
 		LeadingTrivia:  []token.Token{},

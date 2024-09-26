@@ -23,10 +23,8 @@ func Run() {
 			break
 		}
 
-		l := lexer.New(line)
-
 		fmt.Println("TOKENS:")
-		tokens, _ := l.Run()
+		tokens, _ := lexer.Run(line)
 		for _, tok := range tokens {
 			fmt.Println(tok.String())
 		}
