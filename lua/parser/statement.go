@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
+	"github.com/raiguard/luapls/util"
 )
 
 func (p *Parser) parseStatement() ast.Statement {
@@ -68,11 +69,9 @@ func (p *Parser) parseAssignmentStatement(vars ast.Punctuated[ast.Expression]) *
 }
 
 func (p *Parser) parseBreakStatement() *ast.BreakStatement {
-	pos := p.unit().Token.Pos
+	node := util.Ptr(ast.BreakStatement(*p.unit()))
 	p.expect(token.BREAK)
-	return &ast.BreakStatement{
-		StartPos: pos,
-	}
+	return node
 }
 
 func (p *Parser) parseDoStatement() *ast.DoStatement {

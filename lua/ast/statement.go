@@ -23,16 +23,14 @@ func (as *AssignmentStatement) End() token.Pos {
 	return as.Exps.End()
 }
 
-type BreakStatement struct {
-	StartPos token.Pos `json:"-"`
-}
+type BreakStatement Unit
 
 func (bs *BreakStatement) statementNode() {}
 func (bs *BreakStatement) Pos() token.Pos {
-	return bs.StartPos
+	return bs.Token.Pos
 }
 func (bs *BreakStatement) End() token.Pos {
-	return bs.StartPos + len(token.BREAK.String())
+	return bs.Token.End()
 }
 
 type DoStatement struct {
