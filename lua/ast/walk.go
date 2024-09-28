@@ -36,8 +36,8 @@ func Walk(node Node, visitor Visitor) {
 
 	case *ForStatement:
 		Walk(node.Name, visitor)
-		Walk(node.Start, visitor)
-		Walk(node.Finish, visitor)
+		Walk(&node.Start, visitor)
+		Walk(&node.Finish, visitor)
 		Walk(node.Step, visitor)
 		Walk(&node.Body, visitor)
 

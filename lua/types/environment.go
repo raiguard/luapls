@@ -65,22 +65,22 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			}
 		}
 	case *ast.ForStatement:
-		typ := e.resolveExprType(stmt.Start)
+		typ := e.resolveExprType(stmt.Start.Node)
 		if typ == nil {
 			e.addType(stmt.Name, &Unknown{})
 			return
 		}
 		if _, ok := typ.(*Number); !ok {
-			e.addError(stmt.Start, "Range expressions must be of type 'number'")
+			e.addError(&stmt.Start, "Range expressions must be of type 'number'")
 			return
 		}
 		e.addType(stmt.Name, typ)
-		finishTyp := e.resolveExprType(stmt.Finish)
+		finishTyp := e.resolveExprType(stmt.Finish.Node)
 		if typ != finishTyp {
-			e.addError(stmt.Finish, "Range end must be of type '%s'", typ)
+			e.addError(&stmt.Finish, "Range end must be of type '%s'", typ)
 		}
 		if stmt.Step != nil {
-			stepTyp := e.resolveExprType(stmt.Step)
+			stepTyp := e.resolveExprType(stmt.Step.Node)
 			if typ != stepTyp {
 				e.addError(stmt.Step, "Range step must be of type '%s'", typ)
 			}

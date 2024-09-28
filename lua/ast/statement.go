@@ -48,37 +48,41 @@ func (ds *DoStatement) End() token.Pos {
 }
 
 type ForStatement struct {
-	Name     *Identifier
-	Start    Expression
-	Finish   Expression
-	Step     Expression
-	Body     Block
-	StartPos token.Pos `json:"-"`
-	EndPos   token.Pos `json:"-"`
+	ForTok    Unit
+	Name      *Identifier
+	AssignTok Unit
+	Start     Pair[Expression]
+	Finish    Pair[Expression]
+	Step      *Pair[Expression]
+	DoTok     Unit
+	Body      Block
+	EndTok    Unit
 }
 
 func (fs *ForStatement) statementNode() {}
 func (fs *ForStatement) Pos() token.Pos {
-	return fs.StartPos
+	return fs.ForTok.Pos()
 }
 func (fs *ForStatement) End() token.Pos {
-	return fs.EndPos
+	return fs.EndTok.End()
 }
 
 type ForInStatement struct {
-	Names    Punctuated[*Identifier]
-	Exps     Punctuated[Expression]
-	Body     Block
-	StartPos token.Pos `json:"-"`
-	EndPos   token.Pos `json:"-"`
+	ForTok Unit
+	Names  Punctuated[*Identifier]
+	InTok  Unit
+	Exps   Punctuated[Expression]
+	DoTok  Unit
+	Body   Block
+	EndTok Unit
 }
 
 func (fs *ForInStatement) statementNode() {}
 func (fs *ForInStatement) Pos() token.Pos {
-	return fs.StartPos
+	return fs.ForTok.Pos()
 }
 func (fs *ForInStatement) End() token.Pos {
-	return fs.EndPos
+	return fs.EndTok.End()
 }
 
 type FunctionStatement struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
+	"github.com/raiguard/luapls/util"
 )
 
 func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) ast.Expression {
@@ -198,9 +199,7 @@ func (p *Parser) parseBooleanLiteral() *ast.BooleanLiteral {
 }
 
 func (p *Parser) parseIdentifier() *ast.Identifier {
-	ident := ast.Identifier(*p.unit())
-	p.expect(token.IDENT)
-	return &ident
+	return util.Ptr(ast.Identifier(p.expect(token.IDENT)))
 }
 
 func (p *Parser) parseNilLiteral() *ast.NilLiteral {

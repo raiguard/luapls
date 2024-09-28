@@ -86,55 +86,55 @@ func (p *Parser) parseDoStatement() *ast.DoStatement {
 }
 
 func (p *Parser) parseForStatement() ast.Statement {
-	pos := p.unit().Token.Pos
-	p.expect(token.FOR)
+	forTok := p.expect(token.FOR)
 	names := p.parseNameList()
+
+	var sepTok ast.Unit
 
 	bareLoop := len(names.Pairs) == 1 && p.tokIs(token.ASSIGN)
 	if bareLoop {
-		p.next()
+		sepTok = p.expect(token.ASSIGN)
 	} else {
-		p.expect(token.IN)
+		sepTok = p.expect(token.IN)
 	}
 
 	exps := p.parseExpressionList()
-
-	p.expect(token.DO)
-
+	doTok := p.expect(token.DO)
 	body := p.parseBlock()
-
-	end := p.unit().Token.End()
-	p.expect(token.END)
+	endTok := p.expect(token.END)
 
 	if bareLoop {
-		var start, finish, step ast.Expression
-		if len(exps.Pairs) < 1 || len(exps.Pairs) > 3 {
-			p.addError("Expected 1 to 3 expressions")
+		var start, finish ast.Pair[ast.Expression]
+		if len(exps.Pairs) < 2 || len(exps.Pairs) > 3 {
+			p.addError("Expected 2 to 3 expressions")
 		}
-		start = exps.Pairs[0].Node
-		if len(exps.Pairs) > 1 {
-			finish = exps.Pairs[1].Node
-		}
+		start = exps.Pairs[0]
+		finish = exps.Pairs[1]
+		var step *ast.Pair[ast.Expression]
 		if len(exps.Pairs) > 2 {
-			step = exps.Pairs[2].Node
+			step = &exps.Pairs[2]
 		}
 		return &ast.ForStatement{
-			Name:     names.Pairs[0].Node,
-			Start:    start,
-			Finish:   finish,
-			Step:     step,
-			Body:     body,
-			StartPos: pos,
-			EndPos:   end,
+			ForTok:    forTok,
+			Name:      names.Pairs[0].Node,
+			AssignTok: sepTok,
+			Start:     start,
+			Finish:    finish,
+			Step:      step,
+			DoTok:     doTok,
+			Body:      body,
+			EndTok:    endTok,
 		}
 	}
 
 	return &ast.ForInStatement{
-		Names:    names,
-		Exps:     exps,
-		Body:     body,
-		StartPos: pos,
-		EndPos:   end,
+		ForTok: forTok,
+		Names:  names,
+		InTok:  sepTok,
+		Exps:   exps,
+		DoTok:  doTok,
+		Body:   body,
+		EndTok: endTok,
 	}
 }
 
