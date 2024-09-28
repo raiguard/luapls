@@ -10,16 +10,17 @@ type Statement interface {
 }
 
 type AssignmentStatement struct {
-	Vars []Expression
-	Exps []Expression
+	Vars   Punctuated[Expression]
+	Assign Unit
+	Exps   Punctuated[Expression]
 }
 
 func (as *AssignmentStatement) statementNode() {}
 func (as *AssignmentStatement) Pos() token.Pos {
-	return as.Vars[0].Pos()
+	return as.Vars.Pos()
 }
 func (as *AssignmentStatement) End() token.Pos {
-	return as.Exps[len(as.Exps)-1].End()
+	return as.Exps.End()
 }
 
 type BreakStatement struct {
@@ -67,8 +68,8 @@ func (fs *ForStatement) End() token.Pos {
 }
 
 type ForInStatement struct {
-	Names    []*Identifier
-	Exps     []Expression
+	Names    Punctuated[*Identifier]
+	Exps     Punctuated[Expression]
 	Body     Block
 	StartPos token.Pos `json:"-"`
 	EndPos   token.Pos `json:"-"`
@@ -84,7 +85,7 @@ func (fs *ForInStatement) End() token.Pos {
 
 type FunctionStatement struct {
 	Left     Expression
-	Params   []*Identifier
+	Params   Punctuated[*Identifier]
 	Vararg   *Unit
 	Body     Block
 	IsLocal  bool
@@ -158,8 +159,8 @@ func (ls *LabelStatement) End() token.Pos {
 func (ls *LabelStatement) leaf() {}
 
 type LocalStatement struct {
-	Names    []*Identifier
-	Exps     []Expression
+	Names    Punctuated[*Identifier]
+	Exps     Punctuated[Expression]
 	StartPos token.Pos `json:"-"`
 }
 
@@ -168,10 +169,7 @@ func (ls *LocalStatement) Pos() token.Pos {
 	return ls.StartPos
 }
 func (ls *LocalStatement) End() token.Pos {
-	if len(ls.Exps) > 0 {
-		return ls.Exps[len(ls.Exps)-1].End()
-	}
-	return ls.Names[len(ls.Names)-1].End()
+	return ls.Exps.End()
 }
 
 type RepeatStatement struct {
@@ -189,7 +187,7 @@ func (rs *RepeatStatement) End() token.Pos {
 }
 
 type ReturnStatement struct {
-	Exps     []Expression
+	Exps     Punctuated[Expression]
 	StartPos token.Pos `json:"-"`
 }
 
@@ -198,10 +196,19 @@ func (rs *ReturnStatement) Pos() token.Pos {
 	return rs.StartPos
 }
 func (rs *ReturnStatement) End() token.Pos {
-	if len(rs.Exps) > 0 {
-		return rs.Exps[len(rs.Exps)-1].End()
-	}
-	return rs.StartPos + len(token.RETURN.String())
+	return rs.Exps.End()
+}
+
+type SemicolonStatement struct {
+	Unit Unit
+}
+
+func (ss *SemicolonStatement) statementNode() {}
+func (ss *SemicolonStatement) Pos() token.Pos {
+	return ss.Unit.Pos()
+}
+func (ss *SemicolonStatement) End() token.Pos {
+	return ss.Unit.End()
 }
 
 type WhileStatement struct {

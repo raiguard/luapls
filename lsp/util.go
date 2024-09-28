@@ -15,11 +15,6 @@ func toJSON(v any) string {
 	return string(res)
 }
 
-// ptr returns a pointer to the given value.
-func ptr[T any](value T) *T {
-	return &value
-}
-
 // getLocals returns a list of all local variables contained in node for the given pos.
 func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.Identifier {
 	locals := map[string]*ast.Identifier{}
@@ -34,8 +29,8 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 		switch node := node.(type) {
 		case *ast.ForInStatement:
 			if isInside {
-				for _, ident := range node.Names {
-					locals[ident.Token.Literal] = ident
+				for _, ident := range node.Names.Pairs {
+					locals[ident.Node.Token.Literal] = ident.Node
 				}
 			}
 		case *ast.ForStatement:
@@ -46,14 +41,14 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 			}
 		case *ast.FunctionExpression:
 			if isInside {
-				for _, ident := range node.Params {
-					locals[ident.Token.Literal] = ident
+				for _, ident := range node.Params.Pairs {
+					locals[ident.Node.Token.Literal] = ident.Node
 				}
 			}
 		case *ast.FunctionStatement:
 			if isInside {
-				for _, ident := range node.Params {
-					locals[ident.Token.Literal] = ident
+				for _, ident := range node.Params.Pairs {
+					locals[ident.Node.Token.Literal] = ident.Node
 				}
 			}
 			if isBefore || includeSelf {
@@ -63,8 +58,8 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 			}
 		case *ast.LocalStatement:
 			if isBefore || includeSelf {
-				for _, ident := range node.Names {
-					locals[ident.Token.Literal] = ident
+				for _, ident := range node.Names.Pairs {
+					locals[ident.Node.Token.Literal] = ident.Node
 				}
 			}
 		default:

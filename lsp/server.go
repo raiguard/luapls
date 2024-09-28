@@ -3,6 +3,7 @@ package lsp
 import (
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/types"
+	"github.com/raiguard/luapls/util"
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -32,7 +33,7 @@ type Server struct {
 }
 
 func Run(logLevel int) {
-	commonlog.Configure(logLevel, ptr("/tmp/luapls.log"))
+	commonlog.Configure(logLevel, util.Ptr("/tmp/luapls.log"))
 
 	s := Server{
 		files: map[string]*File{},

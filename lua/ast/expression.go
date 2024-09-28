@@ -12,7 +12,7 @@ type Expression interface {
 type FunctionCall struct {
 	Name       Expression
 	LeftParen  *Unit // Optional
-	Args       []Expression
+	Args       Punctuated[Expression]
 	RightParen *Unit // Optional
 }
 
@@ -25,8 +25,8 @@ func (fc *FunctionCall) End() token.Pos {
 	if fc.RightParen != nil {
 		return fc.RightParen.End()
 	}
-	if len(fc.Args) > 0 {
-		return fc.Args[len(fc.Args)-1].End()
+	if len(fc.Args.Pairs) > 0 {
+		return fc.Args.Pairs[len(fc.Args.Pairs)-1].End()
 	}
 	if fc.LeftParen != nil {
 		return fc.LeftParen.End()
@@ -37,7 +37,7 @@ func (fc *FunctionCall) End() token.Pos {
 type FunctionExpression struct {
 	Function   Unit
 	LeftParen  Unit
-	Params     []*Identifier
+	Params     Punctuated[*Identifier]
 	Vararg     *Unit
 	RightParen Unit
 	Body       Block

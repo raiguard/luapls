@@ -17,11 +17,8 @@ func Walk(node Node, visitor Visitor) {
 
 	switch node := node.(type) {
 	case *AssignmentStatement:
-		WalkList(node.Vars, visitor)
-		WalkList(node.Exps, visitor)
-
-	case *Block:
-		WalkList(node.Stmts, visitor)
+		Walk(&node.Vars, visitor)
+		Walk(&node.Exps, visitor)
 
 	case *BooleanLiteral:
 		// Leaf
@@ -33,8 +30,8 @@ func Walk(node Node, visitor Visitor) {
 		Walk(&node.Body, visitor)
 
 	case *ForInStatement:
-		WalkList(node.Names, visitor)
-		WalkList(node.Exps, visitor)
+		Walk(&node.Names, visitor)
+		Walk(&node.Exps, visitor)
 		Walk(&node.Body, visitor)
 
 	case *ForStatement:
@@ -46,15 +43,15 @@ func Walk(node Node, visitor Visitor) {
 
 	case *FunctionCall:
 		Walk(node.Name, visitor)
-		WalkList(node.Args, visitor)
+		Walk(&node.Args, visitor)
 
 	case *FunctionExpression:
-		WalkList(node.Params, visitor)
+		Walk(&node.Params, visitor)
 		Walk(&node.Body, visitor)
 
 	case *FunctionStatement:
 		Walk(node.Left, visitor)
-		WalkList(node.Params, visitor)
+		Walk(&node.Params, visitor)
 		Walk(&node.Body, visitor)
 
 	case *GotoStatement:
@@ -79,8 +76,8 @@ func Walk(node Node, visitor Visitor) {
 		Walk(node.Right, visitor)
 
 	case *Invalid:
-		if node.Exps != nil {
-			WalkList(node.Exps, visitor)
+		if node.Exps.Pairs != nil {
+			Walk(&node.Exps, visitor)
 		}
 		// Otherwise, leaf
 
@@ -88,8 +85,8 @@ func Walk(node Node, visitor Visitor) {
 		// Leaf
 
 	case *LocalStatement:
-		WalkList(node.Names, visitor)
-		WalkList(node.Exps, visitor)
+		Walk(&node.Names, visitor)
+		Walk(&node.Exps, visitor)
 
 	case *NilLiteral:
 		// Leaf
@@ -97,15 +94,23 @@ func Walk(node Node, visitor Visitor) {
 	case *NumberLiteral:
 		// Leaf
 
+	case *Pair[Node]:
+		Walk(node.Node, visitor)
+
 	case *PrefixExpression:
 		Walk(node.Right, visitor)
+
+	case *Punctuated[Node]:
+		for i := 0; i < len(node.Pairs); i++ {
+			Walk(&node.Pairs[i], visitor)
+		}
 
 	case *RepeatStatement:
 		Walk(&node.Body, visitor)
 		Walk(node.Condition, visitor)
 
 	case *ReturnStatement:
-		WalkList(node.Exps, visitor)
+		Walk(&node.Exps, visitor)
 
 	case *StringLiteral:
 		// Leaf

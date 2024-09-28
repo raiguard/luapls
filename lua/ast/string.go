@@ -6,10 +6,6 @@ func (node *AssignmentStatement) String() string {
 	return fmt.Sprintf("%s()@%v", "AssignmentStatement", node.Pos())
 }
 
-func (node *Block) String() string {
-	return fmt.Sprintf("%s()@%v", "Block", node.Pos())
-}
-
 func (node *BooleanLiteral) String() string {
 	return fmt.Sprintf("%s(%s)@%v", "BooleanLiteral", node.Token.Literal, node.Pos())
 }
@@ -96,6 +92,10 @@ func (node *RepeatStatement) String() string {
 
 func (node *ReturnStatement) String() string {
 	return fmt.Sprintf("%s()@%v", "ReturnStatement", node.Pos())
+}
+
+func (node *SemicolonStatement) String() string {
+	return fmt.Sprintf("%s()@%v", "SemicolonStatement", node.Pos())
 }
 
 func (node *StringLiteral) String() string {

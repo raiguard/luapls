@@ -19,19 +19,6 @@ func (node *AssignmentStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (node *Block) MarshalJSON() ([]byte, error) {
-	type Alias Block
-	return json.Marshal(&struct {
-		Type  string
-		Range token.Range
-		*Alias
-	}{
-		Type:  "Block",
-		Range: Range(node),
-		Alias: (*Alias)(node),
-	})
-}
-
 func (node *BooleanLiteral) MarshalJSON() ([]byte, error) {
 	type Alias BooleanLiteral
 	return json.Marshal(&struct {
@@ -279,6 +266,32 @@ func (node *NumberLiteral) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (node *Pair[T]) MarshalJSON() ([]byte, error) {
+	type Alias Pair[T]
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "Pair",
+		Range: Range(node),
+		Alias: (*Alias)(node),
+	})
+}
+
+func (node *Punctuated[T]) MarshalJSON() ([]byte, error) {
+	type Alias Punctuated[T]
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "Punctuated",
+		Range: Range(node),
+		Alias: (*Alias)(node),
+	})
+}
+
 func (node *PrefixExpression) MarshalJSON() ([]byte, error) {
 	type Alias PrefixExpression
 	return json.Marshal(&struct {
@@ -313,6 +326,19 @@ func (node *ReturnStatement) MarshalJSON() ([]byte, error) {
 		*Alias
 	}{
 		Type:  "ReturnStatement",
+		Range: Range(node),
+		Alias: (*Alias)(node),
+	})
+}
+
+func (node *SemicolonStatement) MarshalJSON() ([]byte, error) {
+	type Alias SemicolonStatement
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "SemicolonStatement",
 		Range: Range(node),
 		Alias: (*Alias)(node),
 	})

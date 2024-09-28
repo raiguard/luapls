@@ -22,7 +22,7 @@ bar(i)
 	assertPositionsMatch(t, &file, protocol.Position{Line: 0, Character: 2}, 2)
 	assertPositionsMatch(t, &file, protocol.Position{Line: 2, Character: 7}, 41)
 
-	assertPositionsMatch(t, &file, protocol.Position{Line: 1, Character: 0}, file.Block.Stmts[1].Pos())
+	assertPositionsMatch(t, &file, protocol.Position{Line: 1, Character: 0}, file.Block.Pairs[1].Pos())
 }
 
 func assertPositionsMatch(t *testing.T, file *File, position protocol.Position, pos token.Pos) {

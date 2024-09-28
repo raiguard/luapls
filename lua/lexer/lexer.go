@@ -140,6 +140,7 @@ func (l *Lexer) Next() token.Token {
 				tok = token.IDENT
 			}
 		} else {
+			// TODO: Make this unreachable
 			l.read() // Always make progress
 		}
 	}

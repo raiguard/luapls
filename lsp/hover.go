@@ -5,6 +5,7 @@ import (
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
+	"github.com/raiguard/luapls/util"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -41,6 +42,6 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	// }
 	return &protocol.Hover{
 		Contents: contents,
-		Range:    ptr(file.File.ToProtocolRange(ast.Range(ident))),
+		Range:    util.Ptr(file.File.ToProtocolRange(ast.Range(ident))),
 	}, nil
 }

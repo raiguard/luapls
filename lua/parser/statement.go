@@ -37,6 +37,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseRepeatStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.SEMICOLON:
+		return p.parseSemicolonStatement()
 	case token.WHILE:
 		return p.parseWhileStatement()
 	}
@@ -45,8 +47,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	if p.tokIs(token.ASSIGN) {
 		return p.parseAssignmentStatement(exps)
 		// TODO: Can there ever be zero expressions?
-	} else if _, ok := exps[0].(*ast.FunctionCall); ok {
-		return exps[0].(*ast.FunctionCall)
+	} else if fc, ok := exps.Pairs[0].Node.(*ast.FunctionCall); ok {
+		return fc
 	} else {
 		stat := &ast.Invalid{Exps: exps}
 		p.addErrorForNode(stat, "Invalid statement")
@@ -54,13 +56,14 @@ func (p *Parser) parseStatement() ast.Statement {
 	}
 }
 
-func (p *Parser) parseAssignmentStatement(vars []ast.Expression) *ast.AssignmentStatement {
-	p.expect(token.ASSIGN)
+func (p *Parser) parseAssignmentStatement(vars ast.Punctuated[ast.Expression]) *ast.AssignmentStatement {
+	assign := p.expect(token.ASSIGN)
 	exps := p.parseExpressionList()
 
 	return &ast.AssignmentStatement{
-		Vars: vars,
-		Exps: exps,
+		Vars:   vars,
+		Assign: assign,
+		Exps:   exps,
 	}
 }
 
@@ -90,7 +93,7 @@ func (p *Parser) parseForStatement() ast.Statement {
 	p.expect(token.FOR)
 	names := p.parseNameList()
 
-	bareLoop := len(names) == 1 && p.tokIs(token.ASSIGN)
+	bareLoop := len(names.Pairs) == 1 && p.tokIs(token.ASSIGN)
 	if bareLoop {
 		p.next()
 	} else {
@@ -108,18 +111,18 @@ func (p *Parser) parseForStatement() ast.Statement {
 
 	if bareLoop {
 		var start, finish, step ast.Expression
-		if len(exps) < 1 || len(exps) > 3 {
+		if len(exps.Pairs) < 1 || len(exps.Pairs) > 3 {
 			p.addError("Expected 1 to 3 expressions")
 		}
-		start = exps[0]
-		if len(exps) > 1 {
-			finish = exps[1]
+		start = exps.Pairs[0].Node
+		if len(exps.Pairs) > 1 {
+			finish = exps.Pairs[1].Node
 		}
-		if len(exps) > 2 {
-			step = exps[2]
+		if len(exps.Pairs) > 2 {
+			step = exps.Pairs[2].Node
 		}
 		return &ast.ForStatement{
-			Name:     names[0],
+			Name:     names.Pairs[0].Node,
 			Start:    start,
 			Finish:   finish,
 			Step:     step,
@@ -229,7 +232,6 @@ func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
 	if !p.tokIs(token.ASSIGN) {
 		return &ast.LocalStatement{
 			Names:    names,
-			Exps:     []ast.Expression{},
 			StartPos: pos,
 		}
 	}
@@ -266,11 +268,16 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 			StartPos: pos,
 		}
 	} else {
-		return &ast.ReturnStatement{
-			Exps:     []ast.Expression{},
-			StartPos: pos,
-		}
+		return &ast.ReturnStatement{StartPos: pos}
 	}
+}
+
+func (p *Parser) parseSemicolonStatement() *ast.SemicolonStatement {
+	ss := &ast.SemicolonStatement{
+		Unit: *p.unit(),
+	}
+	p.next()
+	return ss
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {

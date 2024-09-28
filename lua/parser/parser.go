@@ -13,6 +13,7 @@ import (
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/token"
+	"github.com/raiguard/luapls/util"
 )
 
 type ParserError struct {
@@ -110,45 +111,54 @@ func (p *Parser) next() ast.Unit {
 }
 
 func (p *Parser) parseBlock() ast.Block {
-	block := ast.Block{
-		Stmts:    []ast.Statement{},
-		StartPos: p.unit().Token.Pos,
-	}
+	block := ast.Block{}
 
-	for !blockEnd[p.unit().Type()] {
-		stat := p.parseStatement()
-		block.Stmts = append(block.Stmts, stat)
-		for p.tokIs(token.SEMICOLON) {
+	for {
+		pair := ast.Pair[ast.Statement]{Node: p.parseStatement()}
+		if p.tokIs(token.SEMICOLON) {
+			pair.Delimeter = p.unit()
 			p.next()
+		}
+		block.Pairs = append(block.Pairs, pair)
+		if blockEnd[p.unit().Type()] {
+			break
 		}
 	}
 
 	return block
 }
 
-func (p *Parser) parseFunctionCall(left ast.Expression) *ast.FunctionCall {
+func (p *Parser) parseFunctionCall(name ast.Expression) *ast.FunctionCall {
+	fc := &ast.FunctionCall{Name: name}
 	if p.tokIs(token.STRING) {
-		return &ast.FunctionCall{Name: left, Args: []ast.Expression{p.parseStringLiteral()}}
+		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseTableLiteral())
+		return fc
 	}
 
 	if p.tokIs(token.LBRACE) {
-		lit := p.parseTableLiteral()
-		return &ast.FunctionCall{
-			Name: left,
-			Args: []ast.Expression{lit},
-		}
+		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseTableLiteral())
+		return fc
 	}
 
-	lparen := p.expect(token.LPAREN)
+	fc.LeftParen = util.Ptr(p.expect(token.LPAREN))
 
-	args := []ast.Expression{}
-	if !p.tokIs(token.RPAREN) {
-		args = p.parseExpressionList()
+	if rparen := p.accept(token.RPAREN); rparen != nil {
+		fc.RightParen = rparen
+		return fc
 	}
 
-	rparen := p.expect(token.RPAREN)
+	fc.Args = p.parseExpressionList()
 
-	return &ast.FunctionCall{Name: left, LeftParen: &lparen, Args: args, RightParen: &rparen}
+	fc.RightParen = util.Ptr(p.expect(token.RPAREN))
+
+	return fc
+}
+
+func (p *Parser) accept(tokenType token.TokenType) *ast.Unit {
+	if !p.tokIs(tokenType) {
+		return nil
+	}
+	return util.Ptr(p.next())
 }
 
 func (p *Parser) expect(tokenType token.TokenType) ast.Unit {

@@ -34,8 +34,8 @@ func (c *Environment) ResolveTypes() {
 func (e *Environment) resolveBlockTypes(block *ast.Block) {
 	e.pushNode(block)
 	defer e.popNode()
-	for _, stmt := range block.Stmts {
-		e.resolveStmtType(stmt)
+	for _, stmt := range block.Pairs {
+		e.resolveStmtType(stmt.Node)
 	}
 }
 
@@ -44,24 +44,24 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 	defer e.popNode()
 	switch stmt := stmt.(type) {
 	case *ast.AssignmentStatement:
-		for i := 0; i < len(stmt.Vars); i++ {
-			leftVar := stmt.Vars[i]
-			if i >= len(stmt.Exps) {
-				e.addType(leftVar, &Unknown{})
+		for i := 0; i < len(stmt.Vars.Pairs); i++ {
+			leftVar := stmt.Vars.Pairs[i]
+			if i >= len(stmt.Exps.Pairs) {
+				e.addType(leftVar.Node, &Unknown{})
 				continue
 			}
-			exp := stmt.Exps[i]
-			typ := e.resolveExprType(exp)
-			leftTyp := e.resolveExprType(leftVar)
+			exp := stmt.Exps.Pairs[i]
+			typ := e.resolveExprType(exp.Node)
+			leftTyp := e.resolveExprType(leftVar.Node)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
-				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar)})
-				e.addType(leftVar, leftTyp)
+				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar.Node)})
+				e.addType(leftVar.Node, leftTyp)
 				continue
 			}
 			if typ != nil {
-				e.addType(leftVar, typ)
+				e.addType(leftVar.Node, typ)
 			} else {
-				e.addType(leftVar, &Unknown{})
+				e.addType(leftVar.Node, &Unknown{})
 			}
 		}
 	case *ast.ForStatement:
@@ -144,29 +144,29 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 
 		// e.resolveExprType(stmt.Left)
 	case *ast.LocalStatement:
-		for i := 0; i < len(stmt.Names); i++ {
-			ident := stmt.Names[i]
-			if i >= len(stmt.Exps) {
-				e.addType(ident, &Unknown{})
+		for i := 0; i < len(stmt.Names.Pairs); i++ {
+			ident := stmt.Names.Pairs[i]
+			if i >= len(stmt.Exps.Pairs) {
+				e.addType(ident.Node, &Unknown{})
 				continue
 			}
-			exp := stmt.Exps[i]
-			typ := e.resolveExprType(exp)
-			leftTyp := e.resolveExprType(ident)
+			exp := stmt.Exps.Pairs[i]
+			typ := e.resolveExprType(exp.Node)
+			leftTyp := e.resolveExprType(ident.Node)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
-				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident)})
-				e.addType(ident, leftTyp)
+				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident.Node)})
+				e.addType(ident.Node, leftTyp)
 				continue
 			}
 			if typ != nil {
-				e.addType(ident, typ)
+				e.addType(ident.Node, typ)
 			} else {
-				e.addType(ident, &Unknown{})
+				e.addType(ident.Node, &Unknown{})
 			}
 		}
 	case *ast.ReturnStatement:
-		for _, expr := range stmt.Exps {
-			e.resolveExprType(expr)
+		for _, expr := range stmt.Exps.Pairs {
+			e.resolveExprType(expr.Node)
 		}
 	default:
 		e.addError(stmt, "Unimplemented")
@@ -200,9 +200,9 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 
 	case *ast.FunctionExpression:
 		typ := &Function{Params: []NameAndType{}}
-		for _, param := range expr.Params {
+		for _, param := range expr.Params.Pairs {
 			// TODO: Function parameter types - requires parsing doc comments
-			typ.Params = append(typ.Params, NameAndType{Name: param.Token.Literal, Type: &Unknown{}})
+			typ.Params = append(typ.Params, NameAndType{Name: param.Node.Token.Literal, Type: &Unknown{}})
 		}
 		return e.addType(expr, typ)
 	case *ast.FunctionCall:
@@ -243,15 +243,15 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		for i := len(e.Nodes) - 1; i >= 0; i-- {
 			switch node := e.Nodes[i].(type) {
 			case *ast.AssignmentStatement:
-				for j, leftVar := range node.Vars {
-					if leftVar == expr {
+				for j, leftVar := range node.Vars.Pairs {
+					if leftVar.Node == expr {
 						tbl.Fields = append(tbl.Fields, NameAndType{
 							Name: key,
-							Def:  node.Exps[j], // TODO: Out of bounds checking
-							Type: e.Types[node.Exps[j]],
+							Def:  node.Exps.Pairs[j].Node, // TODO: Out of bounds checking
+							Type: e.Types[node.Exps.Pairs[j].Node],
 						})
-						e.addType(expr, e.Types[node.Exps[j]])
-						e.addType(expr.Inner, e.Types[node.Exps[j]])
+						e.addType(expr, e.Types[node.Exps.Pairs[j].Node])
+						e.addType(expr.Inner, e.Types[node.Exps.Pairs[j].Node])
 						return nil
 					}
 				}
@@ -308,23 +308,23 @@ func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
 		e.addError(fc, "'%s' is not a function", fc.Name)
 		return typ
 	}
-	for i := 0; i < len(fc.Args); i++ {
-		arg := fc.Args[i]
-		argTyp := e.resolveExprType(arg)
+	for i := 0; i < len(fc.Args.Pairs); i++ {
+		arg := fc.Args.Pairs[i]
+		argTyp := e.resolveExprType(arg.Node)
 		if i >= len(function.Params) {
-			e.addError(arg, "Unused parameter")
+			e.addError(arg.Node, "Unused parameter")
 			break // TODO:
 		}
 		if argTyp == nil {
 			continue // TODO:
 		}
 		if argTyp != function.Params[i].Type {
-			e.addError(arg, "Cannot use '%s' as '%s' in argument.", argTyp, function.Params[i].Type)
+			e.addError(arg.Node, "Cannot use '%s' as '%s' in argument.", argTyp, function.Params[i].Type)
 		}
-		e.addType(arg, argTyp)
+		e.addType(arg.Node, argTyp)
 	}
-	if len(fc.Args) < len(function.Params) {
-		e.addError(fc, "Too few function parameters, expected %v, got %v", len(function.Params), len(fc.Args))
+	if len(fc.Args.Pairs) < len(function.Params) {
+		e.addError(fc, "Too few function parameters, expected %v, got %v", len(function.Params), len(fc.Args.Pairs))
 	}
 	return function.Return
 }
@@ -354,9 +354,9 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 		switch node := node.(type) {
 		case *ast.ForInStatement:
 			if isInside {
-				for _, ident := range node.Names {
-					if ident.Token.Literal == identFor.Token.Literal {
-						def = ident
+				for _, ident := range node.Names.Pairs {
+					if ident.Node.Token.Literal == identFor.Token.Literal {
+						def = ident.Node
 					}
 				}
 			}
@@ -368,17 +368,17 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 			}
 		case *ast.FunctionExpression:
 			if isInside {
-				for _, ident := range node.Params {
-					if ident.Token.Literal == identFor.Token.Literal {
-						def = ident
+				for _, ident := range node.Params.Pairs {
+					if ident.Node.Token.Literal == identFor.Token.Literal {
+						def = ident.Node
 					}
 				}
 			}
 		case *ast.FunctionStatement:
 			if isInside {
-				for _, ident := range node.Params {
-					if ident.Token.Literal == identFor.Token.Literal {
-						def = ident
+				for _, ident := range node.Params.Pairs {
+					if ident.Node.Token.Literal == identFor.Token.Literal {
+						def = ident.Node
 					}
 				}
 			}
@@ -388,9 +388,9 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 				}
 			}
 		case *ast.LocalStatement:
-			for _, ident := range node.Names {
-				if ident.Token.Literal == identFor.Token.Literal {
-					def = ident
+			for _, ident := range node.Names.Pairs {
+				if ident.Node.Token.Literal == identFor.Token.Literal {
+					def = ident.Node
 				}
 			}
 		default:

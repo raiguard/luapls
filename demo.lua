@@ -43,3 +43,11 @@ function tbl.fifth(first) end
 tbl.sixth = function(first, ...)
   print"bar"
 end
+
+script.on_event(defines.events.on_player_created, function(e)
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
+  player.print("Hello, world!")
+end)

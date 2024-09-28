@@ -63,31 +63,42 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	return left
 }
 
-func (p *Parser) parseExpressionList() []ast.Expression {
-	exps := []ast.Expression{p.parseExpression(LOWEST, true)}
+func (p *Parser) parseExpressionList() ast.Punctuated[ast.Expression] {
+	exps := ast.Punctuated[ast.Expression]{}
 
-	for p.tokIs(token.COMMA) {
-		p.next()
-		exps = append(exps, p.parseExpression(LOWEST, true))
+	for {
+		pair := ast.Pair[ast.Expression]{
+			Node: p.parseExpression(LOWEST, true),
+		}
+		if p.tokIs(token.COMMA) {
+			pair.Delimeter = p.unit()
+			p.next()
+		}
+		exps.Pairs = append(exps.Pairs, pair)
+		if pair.Delimeter == nil {
+			break
+		}
 	}
 
 	return exps
 }
 
 // Identical to parseExpressionList, but only for identifiers
-func (p *Parser) parseNameList() []*ast.Identifier {
-	list := []*ast.Identifier{}
+func (p *Parser) parseNameList() ast.Punctuated[*ast.Identifier] {
+	list := ast.Punctuated[*ast.Identifier]{}
 
-	if !p.tokIs(token.IDENT) {
-		return list
-	}
-
-	list = append(list, p.parseIdentifier())
-
-	for p.tokIs(token.COMMA) {
-		p.next()
-		if !p.tokIs(token.VARARG) {
-			list = append(list, p.parseIdentifier())
+	for {
+		if !p.tokIs(token.IDENT) {
+			break
+		}
+		pair := ast.Pair[*ast.Identifier]{Node: p.parseIdentifier()}
+		if p.tokIs(token.COMMA) {
+			pair.Delimeter = p.unit()
+			p.next()
+		}
+		list.Pairs = append(list.Pairs, pair)
+		if pair.Delimeter == nil {
+			break
 		}
 	}
 
@@ -95,7 +106,7 @@ func (p *Parser) parseNameList() []*ast.Identifier {
 }
 
 // Parses a namelist, then an optional vararg
-func (p *Parser) parseParameterList() ([]*ast.Identifier, *ast.Unit) {
+func (p *Parser) parseParameterList() (ast.Punctuated[*ast.Identifier], *ast.Unit) {
 	names := p.parseNameList()
 	if p.tokIs(token.VARARG) {
 		vararg := p.unit()
