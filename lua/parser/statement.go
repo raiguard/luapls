@@ -75,15 +75,13 @@ func (p *Parser) parseBreakStatement() *ast.BreakStatement {
 }
 
 func (p *Parser) parseDoStatement() *ast.DoStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.DO)
+	do := p.expect(token.DO)
 	block := p.parseBlock()
-	end := p.unit().Token.End()
-	p.expect(token.END)
+	end := p.expect(token.END)
 	return &ast.DoStatement{
-		Body:     block,
-		StartPos: pos,
-		EndPos:   end,
+		DoTok:  do,
+		Body:   block,
+		EndTok: end,
 	}
 }
 

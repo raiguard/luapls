@@ -166,7 +166,8 @@ func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 		p.expectedTokenError(tokenType)
 	}
 	// TODO: Smart error recovery
-	return p.next()
+	p.next()
+	return p.units[p.pos-1]
 }
 
 func (p *Parser) expectedTokenError(expected token.TokenType) {

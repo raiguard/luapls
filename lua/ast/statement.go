@@ -34,17 +34,17 @@ func (bs *BreakStatement) End() token.Pos {
 }
 
 type DoStatement struct {
-	Body     Block
-	StartPos token.Pos `json:"-"`
-	EndPos   token.Pos `json:"-"`
+	DoTok  Unit
+	Body   Block
+	EndTok Unit
 }
 
 func (ds *DoStatement) statementNode() {}
 func (ds *DoStatement) Pos() token.Pos {
-	return ds.StartPos
+	return ds.DoTok.Pos()
 }
 func (ds *DoStatement) End() token.Pos {
-	return ds.EndPos
+	return ds.EndTok.End()
 }
 
 type ForStatement struct {
