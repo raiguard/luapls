@@ -1,3 +1,5 @@
+local foo, bar
+
 local i, j = 0;;
 
 local helpers = {}
@@ -20,3 +22,17 @@ for i = 1, 10 do
   end
 end
   end
+
+repeat
+  print("hallo " .. i)
+  i = i + 1
+  if i > 20 then
+    return
+  end
+until i == 10
+
+i = 0
+
+while i < 5 do
+  i = i + 0.1
+end

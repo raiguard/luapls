@@ -52,7 +52,7 @@ func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.I
 				}
 			}
 			if isBefore || includeSelf {
-				if ident, ok := node.Left.(*ast.Identifier); ok {
+				if ident, ok := node.Name.(*ast.Identifier); ok {
 					locals[ident.Token.Literal] = ident
 				}
 			}

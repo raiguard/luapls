@@ -382,7 +382,7 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 					}
 				}
 			}
-			if ident, ok := node.Left.(*ast.Identifier); ok {
+			if ident, ok := node.Name.(*ast.Identifier); ok {
 				if ident.Token.Literal == identFor.Token.Literal {
 					def = ident
 				}

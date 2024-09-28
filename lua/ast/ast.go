@@ -54,20 +54,20 @@ func (tf *TableField) End() token.Pos {
 type Invalid struct {
 	Exps Punctuated[Expression] `json:",omitempty"`
 	// OR
-	Token *token.Token `json:",omitempty"`
+	Unit *Unit `json:",omitempty"`
 }
 
 func (i *Invalid) expressionNode() {}
 func (i *Invalid) statementNode()  {}
 func (i *Invalid) Pos() token.Pos {
-	if i.Token != nil {
-		return i.Token.Pos
+	if i.Unit != nil {
+		return i.Unit.Pos()
 	}
 	return i.Exps.Pairs[0].Pos()
 }
 func (i *Invalid) End() token.Pos {
-	if i.Token != nil {
-		return i.Token.End()
+	if i.Unit != nil {
+		return i.Unit.End()
 	}
 	return i.Exps.Pairs[len(i.Exps.Pairs)-1].End()
 }

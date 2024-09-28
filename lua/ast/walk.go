@@ -50,7 +50,7 @@ func Walk(node Node, visitor Visitor) {
 		Walk(&node.Body, visitor)
 
 	case *FunctionStatement:
-		Walk(node.Left, visitor)
+		Walk(node.Name, visitor)
 		Walk(&node.Params, visitor)
 		Walk(&node.Body, visitor)
 
@@ -86,7 +86,7 @@ func Walk(node Node, visitor Visitor) {
 
 	case *LocalStatement:
 		Walk(&node.Names, visitor)
-		Walk(&node.Exps, visitor)
+		Walk(node.Exps, visitor)
 
 	case *NilLiteral:
 		// Leaf
@@ -110,7 +110,7 @@ func Walk(node Node, visitor Visitor) {
 		Walk(node.Condition, visitor)
 
 	case *ReturnStatement:
-		Walk(&node.Exps, visitor)
+		Walk(node.Exps, visitor)
 
 	case *StringLiteral:
 		// Leaf

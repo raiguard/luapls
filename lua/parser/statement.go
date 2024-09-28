@@ -15,7 +15,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.FOR:
 		return p.parseForStatement()
 	case token.FUNCTION:
-		return p.parseFunctionStatement(p.unit().Token.Pos, false)
+		return p.parseFunctionStatement(nil)
 	case token.GOTO:
 		return p.parseGotoStatement()
 	case token.IF:
@@ -23,15 +23,14 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.LABEL:
 		return p.parseLabelStatement()
 	case token.LOCAL:
-		tok := p.unit().Token
-		p.next()
+		tok := p.expect(token.LOCAL)
 		switch p.unit().Type() {
 		case token.FUNCTION:
-			return p.parseFunctionStatement(tok.Pos, true)
+			return p.parseFunctionStatement(&tok)
 		case token.IDENT:
-			return p.parseLocalStatement(tok.Pos)
+			return p.parseLocalStatement(tok)
 		}
-		stat := &ast.Invalid{Token: &tok}
+		stat := &ast.Invalid{Unit: &tok}
 		p.addErrorForNode(stat, "Invalid statement")
 		return stat
 	case token.REPEAT:
@@ -138,24 +137,25 @@ func (p *Parser) parseForStatement() ast.Statement {
 	}
 }
 
-func (p *Parser) parseFunctionStatement(pos token.Pos, isLocal bool) *ast.FunctionStatement {
-	p.expect(token.FUNCTION)
-	left := p.parseExpression(LOWEST, false)
-	p.expect(token.LPAREN)
+func (p *Parser) parseFunctionStatement(localTok *ast.Unit) *ast.FunctionStatement {
+	funcTok := p.expect(token.FUNCTION)
+	name := p.parseExpression(LOWEST, false)
+	lparen := p.expect(token.LPAREN)
 	params, vararg := p.parseParameterList()
-	p.expect(token.RPAREN)
+	rparen := p.expect(token.RPAREN)
 	body := p.parseBlock()
-	end := p.unit().Token.End()
-	p.expect(token.END)
+	endTok := p.expect(token.END)
 
 	return &ast.FunctionStatement{
-		Left:     left,
-		Params:   params,
-		Vararg:   vararg,
-		Body:     body,
-		IsLocal:  isLocal,
-		StartPos: pos,
-		EndPos:   end,
+		LocalTok:   localTok,
+		FuncTok:    funcTok,
+		Name:       name,
+		LeftParen:  lparen,
+		Params:     params,
+		Vararg:     vararg,
+		RightParen: rparen,
+		Body:       body,
+		EndTok:     endTok,
 	}
 }
 
@@ -224,71 +224,55 @@ func (p *Parser) parseLabelStatement() *ast.LabelStatement {
 	}
 }
 
-func (p *Parser) parseLocalStatement(pos token.Pos) *ast.LocalStatement {
-	names := p.parseNameList()
-	if !p.tokIs(token.ASSIGN) {
-		return &ast.LocalStatement{
-			Names:    names,
-			StartPos: pos,
-		}
+func (p *Parser) parseLocalStatement(localTok ast.Unit) *ast.LocalStatement {
+	ls := &ast.LocalStatement{
+		LocalTok: localTok,
+		Names:    p.parseNameList(),
 	}
-
-	p.next()
-	exps := p.parseExpressionList()
-
-	return &ast.LocalStatement{
-		Names:    names,
-		Exps:     exps,
-		StartPos: pos,
+	if assignTok := p.accept(token.ASSIGN); assignTok != nil {
+		ls.AssignTok = assignTok
+		ls.Exps = util.Ptr(p.parseExpressionList())
 	}
+	return ls
 }
 
 func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.REPEAT)
+	repeatTok := p.expect(token.REPEAT)
 	body := p.parseBlock()
-	p.expect(token.UNTIL)
+	untilTok := p.expect(token.UNTIL)
 	condition := p.parseExpression(LOWEST, true)
 	return &ast.RepeatStatement{
+		RepeatTok: repeatTok,
 		Body:      body,
+		UntilTok:  untilTok,
 		Condition: condition,
-		StartPos:  pos,
 	}
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.RETURN)
+	returnTok := p.expect(token.RETURN)
+	rs := &ast.ReturnStatement{ReturnTok: returnTok}
 	if !blockEnd[p.unit().Type()] {
-		return &ast.ReturnStatement{
-			Exps:     p.parseExpressionList(),
-			StartPos: pos,
-		}
-	} else {
-		return &ast.ReturnStatement{StartPos: pos}
+		rs.Exps = util.Ptr(p.parseExpressionList())
 	}
+	return rs
 }
 
 func (p *Parser) parseSemicolonStatement() *ast.SemicolonStatement {
-	ss := &ast.SemicolonStatement{
-		Unit: *p.unit(),
-	}
-	p.next()
-	return ss
+	return util.Ptr(ast.SemicolonStatement(p.expect(token.SEMICOLON)))
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.WHILE)
+	whileTok := p.expect(token.WHILE)
 	condition := p.parseExpression(LOWEST, true)
-	p.expect(token.DO)
+	doTok := p.expect(token.DO)
 	body := p.parseBlock()
-	end := p.unit().Token.End()
-	p.expect(token.END)
+	endTok := p.expect(token.END)
 	return &ast.WhileStatement{
+		WhileTok:  whileTok,
 		Condition: condition,
+		DoTok:     doTok,
 		Body:      body,
-		StartPos:  pos,
-		EndPos:    end,
+		EndTok:    endTok,
 	}
 }
