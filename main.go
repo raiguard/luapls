@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/raiguard/luapls/lsp"
 	"github.com/raiguard/luapls/lua/lexer"
@@ -67,41 +68,41 @@ func lexFile(filename string) {
 	l := lexer.New(string(src))
 	for {
 		tok := l.Next()
+		fmt.Println(tok.String())
 		if tok.Type == token.EOF || tok.Type == token.INVALID {
 			break
 		}
-		fmt.Println(tok.String())
 	}
 	fmt.Println(l.GetLineBreaks())
 }
 
 func parseFile(filename string) {
-	// before := time.Now()
+	before := time.Now()
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	units, _ := parser.Run(string(src))
-	bytes, err := json.MarshalIndent(units, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(bytes))
-	// p := parser.New(string(src))
-	// file := p.ParseFile()
-	// bytes, err := json.MarshalIndent(struct {
-	// 	Duration string
-	// 	File     parser.File
-	// }{
-	// 	Duration: time.Since(before).String(),
-	// 	File:     file,
-	// }, "", "  ")
+	// units, _ := parser.Run(string(src))
+	// bytes, err := json.MarshalIndent(units, "", "  ")
 	// if err != nil {
-	// 	fmt.Fprintln(os.Stderr, err)
-	// 	os.Exit(1)
+	// 	panic(err)
 	// }
 	// fmt.Println(string(bytes))
+	p := parser.New(string(src))
+	file := p.ParseFile()
+	bytes, err := json.MarshalIndent(struct {
+		Duration string
+		File     parser.File
+	}{
+		Duration: time.Since(before).String(),
+		File:     file,
+	}, "", "  ")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println(string(bytes))
 }
 
 type testSpec struct {

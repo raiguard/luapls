@@ -25,20 +25,19 @@ func (pe *ParserError) String() string {
 }
 
 type Parser struct {
-	lexer  *lexer.Lexer
-	errors []ParserError
-	unit   ast.Unit
-	tok    token.Token
+	errors     []ParserError
+	lineBreaks []int
+	units      []ast.Unit
+	pos        int
 }
 
 func New(input string) *Parser {
+	units, lineBreaks := Run(input)
 	p := &Parser{
-		lexer:  lexer.New(input),
-		errors: []ParserError{},
+		errors:     []ParserError{},
+		lineBreaks: lineBreaks,
+		units:      units,
 	}
-
-	p.tok = p.lexer.Next()
-	p.next()
 
 	return p
 }
@@ -82,6 +81,7 @@ func Run(input string) ([]ast.Unit, []int) {
 			}
 		}
 	}
+	newUnit()
 
 	return units, lineBreaks
 }
@@ -94,42 +94,28 @@ func (p *Parser) ParseFile() File {
 	return File{
 		Block:      p.parseBlock(),
 		Errors:     p.errors,
-		LineBreaks: p.lexer.GetLineBreaks(),
+		LineBreaks: p.lineBreaks,
 	}
 }
 
+func (p *Parser) unit() *ast.Unit {
+	return &p.units[p.pos]
+}
+
 func (p *Parser) next() ast.Unit {
-	u := ast.Unit{
-		LeadingTrivia:  []token.Token{},
-		Token:          token.Token{},
-		TrailingTrivia: []token.Token{},
+	if p.pos < len(p.units)-1 {
+		p.pos++
 	}
-	// TODO: Parse type annotations
-	for p.tok.Type == token.COMMENT || p.tok.Type == token.WHITESPACE {
-		u.LeadingTrivia = append(u.LeadingTrivia, p.tok)
-		p.tok = p.lexer.Next()
-	}
-	u.Token = p.tok
-	p.tok = p.lexer.Next()
-	for p.tok.Type == token.COMMENT || p.tok.Type == token.WHITESPACE {
-		lit := p.tok.Literal
-		u.TrailingTrivia = append(u.TrailingTrivia, p.tok)
-		p.tok = p.lexer.Next()
-		if lit == "\n" {
-			break
-		}
-	}
-	p.unit = u
-	return u
+	return p.units[p.pos]
 }
 
 func (p *Parser) parseBlock() ast.Block {
 	block := ast.Block{
 		Stmts:    []ast.Statement{},
-		StartPos: p.unit.Token.Pos,
+		StartPos: p.unit().Token.Pos,
 	}
 
-	for !blockEnd[p.unit.Token.Type] {
+	for !blockEnd[p.unit().Type()] {
 		stat := p.parseStatement()
 		block.Stmts = append(block.Stmts, stat)
 		for p.tokIs(token.SEMICOLON) {
@@ -177,16 +163,16 @@ func (p *Parser) expectedTokenError(expected token.TokenType) {
 	p.addError(
 		fmt.Sprintf("Expected %s, got %s",
 			token.TokenStr[expected],
-			token.TokenStr[p.unit.Token.Type]),
+			token.TokenStr[p.unit().Type()]),
 	)
 }
 
 func (p *Parser) invalidTokenError() {
-	p.addError(fmt.Sprintf("Unexpected %s", token.TokenStr[p.unit.Token.Type]))
+	p.addError(fmt.Sprintf("Unexpected %s", token.TokenStr[p.unit().Type()]))
 }
 
 func (p *Parser) addError(message string) {
-	p.errors = append(p.errors, ParserError{Range: p.unit.Token.Range(), Message: message})
+	p.errors = append(p.errors, ParserError{Range: p.unit().Token.Range(), Message: message})
 }
 
 func (p *Parser) addErrorForNode(node ast.Node, message string) {
@@ -194,11 +180,11 @@ func (p *Parser) addErrorForNode(node ast.Node, message string) {
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {
-	return p.unit.Type() == tokenType
+	return p.unit().Type() == tokenType
 }
 
 func (p *Parser) tokPrecedence() operatorPrecedence {
-	if p, ok := precedences[p.unit.Token.Type]; ok {
+	if p, ok := precedences[p.unit().Type()]; ok {
 		return p
 	}
 	return LOWEST
