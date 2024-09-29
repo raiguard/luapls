@@ -160,67 +160,64 @@ func (p *Parser) parseFunctionStatement(localTok *ast.Unit) *ast.FunctionStateme
 }
 
 func (p *Parser) parseGotoStatement() *ast.GotoStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.GOTO)
+	gotoTok := p.expect(token.GOTO)
 	name := p.parseIdentifier()
 	return &ast.GotoStatement{
-		Name:     name,
-		StartPos: pos,
+		GotoTok: gotoTok,
+		Name:    name,
 	}
 }
 
 func (p *Parser) parseIfStatement() *ast.IfStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.IF)
+	ifTok := p.expect(token.IF)
 
-	clauses := []*ast.IfClause{p.parseIfClause(pos)}
+	clauses := []*ast.IfClause{p.parseIfClause(ifTok)}
 
 	for p.tokIs(token.ELSEIF) {
-		clausePos := p.unit().Token.Pos
-		p.next()
-		clauses = append(clauses, p.parseIfClause(clausePos))
+		elseifTok := p.expect(token.ELSEIF)
+		clauses = append(clauses, p.parseIfClause(elseifTok))
 	}
 
 	if p.tokIs(token.ELSE) {
-		clausePos := p.unit().Token.Pos
-		p.next()
+		elseTok := p.expect(token.ELSE)
 		body := p.parseBlock()
-		clauses = append(clauses, &ast.IfClause{Body: body, StartPos: clausePos, EndPos: body.End()})
+		clauses = append(clauses, &ast.IfClause{
+			LeadingTok: elseTok,
+			Condition:  nil,
+			ThenTok:    nil,
+			Body:       body,
+		})
 	}
 
-	end := p.unit().Token.End()
-	p.expect(token.END)
+	endTok := p.expect(token.END)
 
 	return &ast.IfStatement{
-		Clauses:  clauses,
-		StartPos: pos,
-		EndPos:   end,
+		IfTok:   ifTok,
+		Clauses: clauses,
+		EndTok:  endTok,
 	}
 }
 
-// TODO: Comments
-func (p *Parser) parseIfClause(pos token.Pos) *ast.IfClause {
+func (p *Parser) parseIfClause(leadingTok ast.Unit) *ast.IfClause {
 	condition := p.parseExpression(LOWEST, true)
-	p.expect(token.THEN)
+	thenTok := p.expect(token.THEN)
 	block := p.parseBlock()
 	return &ast.IfClause{
-		Condition: condition,
-		Body:      block,
-		StartPos:  pos,
-		EndPos:    block.End(),
+		LeadingTok: leadingTok,
+		Condition:  condition,
+		ThenTok:    &thenTok,
+		Body:       block,
 	}
 }
 
 func (p *Parser) parseLabelStatement() *ast.LabelStatement {
-	pos := p.unit().Token.Pos
-	p.expect(token.LABEL)
+	leadingLabelTok := p.expect(token.LABEL)
 	name := p.parseIdentifier()
-	end := p.unit().Token.End()
-	p.expect(token.LABEL)
+	trailingLabelTok := p.expect(token.LABEL)
 	return &ast.LabelStatement{
-		Name:     name,
-		StartPos: pos,
-		EndPos:   end,
+		LeadingLabelTok:  leadingLabelTok,
+		Name:             name,
+		TrailingLabelTok: trailingLabelTok,
 	}
 }
 

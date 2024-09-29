@@ -109,59 +109,59 @@ func (fs *FunctionStatement) End() token.Pos {
 }
 
 type GotoStatement struct {
-	Name     *Identifier
-	StartPos token.Pos `json:"-"`
+	GotoTok Unit
+	Name    *Identifier
 }
 
 func (gs *GotoStatement) statementNode() {}
 func (gs *GotoStatement) Pos() token.Pos {
-	return gs.StartPos
+	return gs.GotoTok.Pos()
 }
 func (gs *GotoStatement) End() token.Pos {
 	return gs.Name.End()
 }
 
 type IfStatement struct {
-	Clauses  []*IfClause
-	StartPos token.Pos
-	EndPos   token.Pos `json:"-"`
+	IfTok   Unit // TODO: Remove this in favor of Clauses[0].LeadingTok, since it will always exist
+	Clauses []*IfClause
+	EndTok  Unit
 }
 
 func (is *IfStatement) statementNode() {}
 func (is *IfStatement) Pos() token.Pos {
-	return is.StartPos
+	return is.IfTok.Pos()
 }
 func (is *IfStatement) End() token.Pos {
-	return is.EndPos
+	return is.EndTok.Pos()
 }
 
 type IfClause struct {
-	Condition Expression
-	Body      Block
-	StartPos  token.Pos `json:"-"`
-	EndPos    token.Pos `json:"-"`
+	LeadingTok Unit
+	Condition  Expression
+	ThenTok    *Unit
+	Body       Block
 }
 
 func (ic *IfClause) statementNode() {}
 func (ic *IfClause) Pos() token.Pos {
-	return ic.StartPos
+	return ic.LeadingTok.Pos()
 }
 func (ic *IfClause) End() token.Pos {
-	return ic.EndPos
+	return ic.Body.End()
 }
 
 type LabelStatement struct {
-	Name     *Identifier
-	StartPos token.Pos `json:"-"`
-	EndPos   token.Pos `json:"-"`
+	LeadingLabelTok  Unit
+	Name             *Identifier
+	TrailingLabelTok Unit
 }
 
 func (ls *LabelStatement) statementNode() {}
 func (ls *LabelStatement) Pos() token.Pos {
-	return ls.StartPos
+	return ls.LeadingLabelTok.Pos()
 }
 func (ls *LabelStatement) End() token.Pos {
-	return ls.EndPos
+	return ls.TrailingLabelTok.End()
 }
 func (ls *LabelStatement) leaf() {}
 

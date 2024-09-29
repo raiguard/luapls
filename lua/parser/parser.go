@@ -111,18 +111,18 @@ func (p *Parser) next() ast.Unit {
 }
 
 func (p *Parser) parseBlock() ast.Block {
-	block := ast.Block{}
+	block := ast.Block{StartPos: p.unit().Pos()}
 
 	for {
+		if blockEnd[p.unit().Type()] {
+			break
+		}
 		pair := ast.Pair[ast.Statement]{Node: p.parseStatement()}
 		if p.tokIs(token.SEMICOLON) {
 			pair.Delimeter = p.unit()
 			p.next()
 		}
 		block.Pairs = append(block.Pairs, pair)
-		if blockEnd[p.unit().Type()] {
-			break
-		}
 	}
 
 	return block
