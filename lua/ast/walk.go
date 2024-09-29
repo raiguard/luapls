@@ -80,10 +80,7 @@ func Walk(node Node, visitor Visitor) {
 		Walk(node.Right, visitor)
 
 	case *Invalid:
-		if node.Exps.Pairs != nil {
-			Walk(&node.Exps, visitor)
-		}
-		// Otherwise, leaf
+		// Leaf
 
 	case *LabelStatement:
 		// Leaf
@@ -110,6 +107,18 @@ func Walk(node Node, visitor Visitor) {
 	case *Pair[*Identifier]:
 		Walk(node.Node, visitor)
 
+	case *Pair[TableField]:
+		Walk(node.Node, visitor)
+
+	case *Pair[*TableSimpleKeyField]:
+		Walk(node.Node, visitor)
+
+	case *Pair[*TableArrayField]:
+		Walk(node.Node, visitor)
+
+	case *Pair[*TableExpressionKeyField]:
+		Walk(node.Node, visitor)
+
 	case *PrefixExpression:
 		Walk(node.Right, visitor)
 
@@ -129,6 +138,11 @@ func Walk(node Node, visitor Visitor) {
 		}
 
 	case *Punctuated[*Identifier]:
+		for i := 0; i < len(node.Pairs); i++ {
+			Walk(&node.Pairs[i], visitor)
+		}
+
+	case *Punctuated[TableField]:
 		for i := 0; i < len(node.Pairs); i++ {
 			Walk(&node.Pairs[i], visitor)
 		}

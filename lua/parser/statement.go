@@ -30,7 +30,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		case token.IDENT:
 			return p.parseLocalStatement(tok)
 		}
-		stat := &ast.Invalid{Unit: &tok}
+		stat := &ast.Invalid{Position: tok.Pos()}
 		p.addErrorForNode(stat, "Invalid statement")
 		return stat
 	case token.REPEAT:
@@ -50,7 +50,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	} else if fc, ok := exps.Pairs[0].Node.(*ast.FunctionCall); ok {
 		return fc
 	} else {
-		stat := &ast.Invalid{Exps: exps}
+		stat := &ast.Invalid{Position: exps.Pos()}
 		p.addErrorForNode(stat, "Invalid statement")
 		return stat
 	}

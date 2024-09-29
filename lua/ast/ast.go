@@ -32,6 +32,10 @@ func (u *Unit) End() token.Pos {
 	return u.Token.End()
 }
 
+func (u *Unit) Range() token.Range {
+	return token.Range{Start: u.Pos(), End: u.End()}
+}
+
 func (u *Unit) String() string {
 	return u.Token.Literal
 }
@@ -39,24 +43,16 @@ func (u *Unit) String() string {
 type Block = Punctuated[Statement]
 
 type Invalid struct {
-	Exps Punctuated[Expression] `json:",omitempty"`
-	// OR
-	Unit *Unit `json:",omitempty"`
+	Position token.Pos
 }
 
 func (i *Invalid) expressionNode() {}
 func (i *Invalid) statementNode()  {}
 func (i *Invalid) Pos() token.Pos {
-	if i.Unit != nil {
-		return i.Unit.Pos()
-	}
-	return i.Exps.Pairs[0].Pos()
+	return i.Position
 }
 func (i *Invalid) End() token.Pos {
-	if i.Unit != nil {
-		return i.Unit.End()
-	}
-	return i.Exps.Pairs[len(i.Exps.Pairs)-1].End()
+	return i.Position
 }
 
 // A Leaf node has no children and is interactable in the editor.

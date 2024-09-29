@@ -163,9 +163,54 @@ func (p *Parser) accept(tokenType token.TokenType) *ast.Unit {
 
 func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 	if !p.tokIs(tokenType) {
-		p.expectedTokenError(tokenType)
+		initialPos := p.pos
+		errorTokens := []token.Token{p.unit().Token}
+		limit := p.pos + 5
+		if limit > len(p.units)-1 {
+			limit = len(p.units) - 1
+		}
+		for i := p.pos + 1; i < limit; i++ {
+			unit := p.units[i]
+			if unit.Type() == tokenType {
+				p.pos = i
+				break
+			} else {
+				for _, tok := range unit.LeadingTrivia {
+					errorTokens = append(errorTokens, tok)
+				}
+				errorTokens = append(errorTokens, unit.Token)
+				for _, tok := range unit.TrailingTrivia {
+					errorTokens = append(errorTokens, tok)
+				}
+			}
+		}
+		if p.pos != initialPos {
+			unit := &p.units[p.pos]
+			for _, tok := range errorTokens {
+				p.errors = append(p.errors, ParserError{
+					Message: fmt.Sprintf("Extraneous %s", token.TokenStr[tok.Type]),
+					Range:   tok.Range(),
+				})
+				unit.LeadingTrivia = append(unit.LeadingTrivia, tok)
+			}
+		} else {
+			fakeTok := ast.Unit{
+				LeadingTrivia: []token.Token{},
+				Token: token.Token{
+					Type:    tokenType,
+					Literal: "",
+					Pos:     initialPos,
+				},
+				TrailingTrivia: []token.Token{},
+			}
+			p.errors = append(p.errors, ParserError{
+				Message: fmt.Sprintf("Missing %s", token.TokenStr[tokenType]),
+				Range:   fakeTok.Range(),
+			})
+			p.next()
+			return fakeTok
+		}
 	}
-	// TODO: Smart error recovery
 	p.next()
 	return p.units[p.pos-1]
 }

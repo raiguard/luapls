@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/util"
@@ -32,8 +30,8 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 	case token.VARARG:
 		left = p.parseVararg()
 	default:
-		p.addError(fmt.Sprintf("Expected expression, got %s", token.TokenStr[p.unit().Type()]))
-		invalid := ast.Invalid{Unit: p.unit()}
+		invalid := ast.Invalid{Position: p.unit().Pos()}
+		p.addError("Expected expression")
 		p.next()
 		return &invalid
 	}
