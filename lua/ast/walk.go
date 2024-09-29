@@ -72,7 +72,7 @@ func Walk(node Node, visitor Visitor) {
 		WalkList(node.Clauses, visitor)
 
 	case *IndexExpression:
-		Walk(node.Left, visitor)
+		Walk(node.Prefix, visitor)
 		Walk(node.Inner, visitor)
 
 	case *InfixExpression:
@@ -143,12 +143,19 @@ func Walk(node Node, visitor Visitor) {
 	case *StringLiteral:
 		// Leaf
 
-	case *TableField:
-		Walk(node.Key, visitor)
-		Walk(node.Value, visitor)
+	case *TableArrayField:
+		Walk(node.Expr, visitor)
+
+	case *TableExpressionKeyField:
+		Walk(node.Name, visitor)
+		Walk(node.Expr, visitor)
+
+	case *TableSimpleKeyField:
+		Walk(&node.Name, visitor)
+		Walk(node.Expr, visitor)
 
 	case *TableLiteral:
-		WalkList(node.Fields, visitor)
+		Walk(&node.Fields, visitor)
 
 	case *Vararg:
 		// Leaf

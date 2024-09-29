@@ -99,11 +99,19 @@ func (node *SemicolonStatement) String() string {
 }
 
 func (node *StringLiteral) String() string {
-	return fmt.Sprintf("%s(%s)@%v", "StringLiteral", node.Unit.Token.Literal, node.Pos())
+	return fmt.Sprintf("%s(%s)@%v", "StringLiteral", node.Token.Literal, node.Pos())
 }
 
-func (node *TableField) String() string {
-	return fmt.Sprintf("%s()@%v", "TableField", node.Pos())
+func (node *TableArrayField) String() string {
+	return fmt.Sprintf("%s()@%v", "TableArrayField", node.Pos())
+}
+
+func (node *TableSimpleKeyField) String() string {
+	return fmt.Sprintf("%s()@%v", "TableSimpleKeyField", node.Pos())
+}
+
+func (node *TableExpressionKeyField) String() string {
+	return fmt.Sprintf("%s()@%v", "TableExpressionKeyField", node.Pos())
 }
 
 func (node *TableLiteral) String() string {

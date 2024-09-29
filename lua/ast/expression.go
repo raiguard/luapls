@@ -53,23 +53,26 @@ func (fe *FunctionExpression) End() token.Pos {
 }
 
 type IndexExpression struct {
-	Left    Expression
-	Indexer token.TokenType
-	Inner   Expression
-	EndPos  token.Pos `json:"-"`
+	Prefix       Expression
+	LeftIndexer  Unit
+	Inner        Expression
+	RightIndexer *Unit
 }
 
 func (ie *IndexExpression) expressionNode() {}
 func (ie *IndexExpression) Pos() token.Pos {
-	return ie.Left.Pos()
+	return ie.Prefix.Pos()
 }
 func (ie *IndexExpression) End() token.Pos {
-	return ie.EndPos
+	if ie.RightIndexer != nil {
+		return ie.RightIndexer.End()
+	}
+	return ie.Inner.End()
 }
 
 type InfixExpression struct {
 	Left     Expression
-	Operator token.TokenType
+	Operator Unit
 	Right    Expression
 }
 
@@ -82,14 +85,13 @@ func (be *InfixExpression) End() token.Pos {
 }
 
 type PrefixExpression struct {
-	Operator token.TokenType
+	Operator Unit
 	Right    Expression
-	StartPos token.Pos `json:"-"`
 }
 
 func (pe *PrefixExpression) expressionNode() {}
 func (pe *PrefixExpression) Pos() token.Pos {
-	return pe.StartPos
+	return pe.Operator.Pos()
 }
 func (pe *PrefixExpression) End() token.Pos {
 	return pe.Right.End()
@@ -119,16 +121,14 @@ func (i *Identifier) End() token.Pos {
 }
 func (i *Identifier) leaf() {}
 
-type NilLiteral struct {
-	StartPos token.Pos `json:"-"`
-}
+type NilLiteral Unit
 
 func (i *NilLiteral) expressionNode() {}
 func (i *NilLiteral) Pos() token.Pos {
-	return i.StartPos
+	return i.Token.Pos
 }
 func (i *NilLiteral) End() token.Pos {
-	return i.StartPos + len("nil")
+	return i.Token.End()
 }
 func (n *NilLiteral) leaf() {}
 
@@ -143,43 +143,38 @@ func (nl *NumberLiteral) End() token.Pos {
 }
 func (nl *NumberLiteral) leaf() {}
 
-type StringLiteral struct {
-	Unit Unit
-	// TODO: Store type of quote
-}
+type StringLiteral Unit
 
 func (sl *StringLiteral) expressionNode() {}
 func (sl *StringLiteral) Pos() token.Pos {
-	return sl.Unit.Pos()
+	return sl.Token.Pos
 }
 func (sl *StringLiteral) End() token.Pos {
-	return sl.Unit.End()
+	return sl.Token.End()
 }
 func (sl *StringLiteral) leaf() {}
 
 type TableLiteral struct {
-	Fields   []*TableField
-	StartPos token.Pos
-	EndPos   token.Pos `json:"-"`
+	LeftBrace  Unit
+	Fields     Punctuated[TableField]
+	RightBrace Unit
 }
 
 func (tl *TableLiteral) expressionNode() {}
 func (tl *TableLiteral) Pos() token.Pos {
-	return tl.StartPos
+	return tl.LeftBrace.Pos()
 }
 func (tl *TableLiteral) End() token.Pos {
-	return tl.EndPos
+	return tl.RightBrace.End()
 }
 
-type Vararg struct {
-	StartPos token.Pos `json:"-"`
-}
+type Vararg Unit
 
 func (va *Vararg) expressionNode() {}
 func (va *Vararg) Pos() token.Pos {
-	return va.StartPos
+	return va.Token.Pos
 }
 func (va *Vararg) End() token.Pos {
-	return va.StartPos + len(token.VARARG.String())
+	return va.Token.End()
 }
 func (va *Vararg) leaf() {}

@@ -357,14 +357,40 @@ func (node *StringLiteral) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (node *TableField) MarshalJSON() ([]byte, error) {
-	type Alias TableField
+func (node *TableArrayField) MarshalJSON() ([]byte, error) {
+	type Alias TableArrayField
 	return json.Marshal(&struct {
 		Type  string
 		Range token.Range
 		*Alias
 	}{
-		Type:  "TableField",
+		Type:  "TableArrayField",
+		Range: Range(node),
+		Alias: (*Alias)(node),
+	})
+}
+
+func (node *TableSimpleKeyField) MarshalJSON() ([]byte, error) {
+	type Alias TableSimpleKeyField
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "TableSimpleKeyField",
+		Range: Range(node),
+		Alias: (*Alias)(node),
+	})
+}
+
+func (node *TableExpressionKeyField) MarshalJSON() ([]byte, error) {
+	type Alias TableExpressionKeyField
+	return json.Marshal(&struct {
+		Type  string
+		Range token.Range
+		*Alias
+	}{
+		Type:  "TableExpressionKeyField",
 		Range: Range(node),
 		Alias: (*Alias)(node),
 	})

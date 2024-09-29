@@ -211,7 +211,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 	case *ast.FunctionCall:
 		return e.resolveFunctionCallType(expr)
 	case *ast.IndexExpression:
-		leftTyp := e.resolveExprType(expr.Left)
+		leftTyp := e.resolveExprType(expr.Prefix)
 		if leftTyp == nil {
 			return e.addType(expr, &Unknown{})
 		}
@@ -228,7 +228,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		case *ast.Identifier:
 			key = inner.Token.Literal
 		case *ast.StringLiteral:
-			key = inner.Unit.Token.Literal
+			key = inner.Token.Literal
 		default:
 			e.addError(inner, "Unimplemented")
 			return nil
@@ -272,27 +272,28 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 
 		e.addError(expr.Inner, "Unknown field '%s'", key)
-	case *ast.TableLiteral:
-		typ := Table{
-			Fields: []NameAndType{},
-		}
-		for _, fieldNode := range expr.Fields {
-			ident, ok := fieldNode.Key.(*ast.Identifier)
-			if !ok {
-				// TODO:
-				continue
-			}
-			valueTyp := e.resolveExprType(fieldNode.Value)
-			field := NameAndType{
-				Name: ident.Token.Literal,
-				Type: valueTyp,
-			}
-			typ.Fields = append(typ.Fields, field)
-			e.addType(fieldNode, valueTyp)
-			e.addType(ident, valueTyp)
-		}
-		e.addType(expr, &typ)
-		return &typ
+	// TODO:
+	// case *ast.TableLiteral:
+	// 	typ := Table{
+	// 		Fields: []NameAndType{},
+	// 	}
+	// 	for _, fieldNode := range expr.Fields.Pairs {
+	// 		ident, ok := fieldNode.Node.Key.(*ast.Identifier)
+	// 		if !ok {
+	// 			// TODO:
+	// 			continue
+	// 		}
+	// 		valueTyp := e.resolveExprType(fieldNode.Node.Value)
+	// 		field := NameAndType{
+	// 			Name: ident.Token.Literal,
+	// 			Type: valueTyp,
+	// 		}
+	// 		typ.Fields = append(typ.Fields, field)
+	// 		e.addType(fieldNode.Node, valueTyp)
+	// 		e.addType(ident, valueTyp)
+	// 	}
+	// 	e.addType(expr, &typ)
+	// 	return &typ
 	default:
 		e.addError(expr, "Unimplemented")
 	}

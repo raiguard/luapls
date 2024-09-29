@@ -38,19 +38,6 @@ func (u *Unit) String() string {
 
 type Block = Punctuated[Statement]
 
-type TableField struct {
-	Key      Expression
-	Value    Expression
-	StartPos token.Pos `json:"-"` // Needed in case of bracketed keys
-}
-
-func (tf *TableField) Pos() token.Pos {
-	return tf.StartPos
-}
-func (tf *TableField) End() token.Pos {
-	return tf.Value.End()
-}
-
 type Invalid struct {
 	Exps Punctuated[Expression] `json:",omitempty"`
 	// OR
