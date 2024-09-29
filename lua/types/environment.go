@@ -146,6 +146,9 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names.Pairs); i++ {
 			ident := stmt.Names.Pairs[i]
+			if stmt.Exps == nil {
+				continue
+			}
 			if i >= len(stmt.Exps.Pairs) {
 				e.addType(ident.Node, &Unknown{})
 				continue

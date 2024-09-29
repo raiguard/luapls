@@ -91,11 +91,12 @@ func parseFile(filename string) {
 	// fmt.Println(string(bytes))
 	p := parser.New(string(src))
 	file := p.ParseFile()
+	duration := time.Since(before)
 	bytes, err := json.MarshalIndent(struct {
 		Duration string
 		File     parser.File
 	}{
-		Duration: time.Since(before).String(),
+		Duration: duration.String(),
 		File:     file,
 	}, "", "  ")
 	if err != nil {

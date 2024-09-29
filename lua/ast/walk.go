@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/raiguard/luapls/lua/token"
 )
@@ -11,7 +12,10 @@ type Visitor func(node Node) bool
 // Walk performs a depth-first traversal of the AST, calling the visitor for each node.
 // If the visitor returns false, this node's children are not traversed.
 func Walk(node Node, visitor Visitor) {
-	if node == nil || !visitor(node) {
+	if node == nil || reflect.ValueOf(node).IsNil() {
+		return
+	}
+	if !visitor(node) {
 		return
 	}
 
@@ -97,10 +101,34 @@ func Walk(node Node, visitor Visitor) {
 	case *Pair[Node]:
 		Walk(node.Node, visitor)
 
+	case *Pair[Statement]:
+		Walk(node.Node, visitor)
+
+	case *Pair[Expression]:
+		Walk(node.Node, visitor)
+
+	case *Pair[*Identifier]:
+		Walk(node.Node, visitor)
+
 	case *PrefixExpression:
 		Walk(node.Right, visitor)
 
 	case *Punctuated[Node]:
+		for i := 0; i < len(node.Pairs); i++ {
+			Walk(&node.Pairs[i], visitor)
+		}
+
+	case *Punctuated[Statement]:
+		for i := 0; i < len(node.Pairs); i++ {
+			Walk(&node.Pairs[i], visitor)
+		}
+
+	case *Punctuated[Expression]:
+		for i := 0; i < len(node.Pairs); i++ {
+			Walk(&node.Pairs[i], visitor)
+		}
+
+	case *Punctuated[*Identifier]:
 		for i := 0; i < len(node.Pairs); i++ {
 			Walk(&node.Pairs[i], visitor)
 		}

@@ -65,7 +65,7 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 }
 
 func (p *Parser) parseExpressionList() ast.Punctuated[ast.Expression] {
-	exps := ast.Punctuated[ast.Expression]{}
+	exps := ast.Punctuated[ast.Expression]{StartPos: p.unit().Pos()}
 
 	for {
 		pair := ast.Pair[ast.Expression]{
@@ -86,7 +86,7 @@ func (p *Parser) parseExpressionList() ast.Punctuated[ast.Expression] {
 
 // Identical to parseExpressionList, but only for identifiers
 func (p *Parser) parseNameList() ast.Punctuated[*ast.Identifier] {
-	list := ast.Punctuated[*ast.Identifier]{}
+	list := ast.Punctuated[*ast.Identifier]{StartPos: p.unit().Pos()}
 
 	for {
 		if !p.tokIs(token.IDENT) {
@@ -108,13 +108,7 @@ func (p *Parser) parseNameList() ast.Punctuated[*ast.Identifier] {
 
 // Parses a namelist, then an optional vararg
 func (p *Parser) parseParameterList() (ast.Punctuated[*ast.Identifier], *ast.Unit) {
-	names := p.parseNameList()
-	if p.tokIs(token.VARARG) {
-		vararg := p.unit()
-		p.next()
-		return names, vararg
-	}
-	return names, nil
+	return p.parseNameList(), p.accept(token.VARARG)
 }
 
 func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {

@@ -2,6 +2,8 @@ local foo, bar
 
 local i, j = 0;;
 
+local l, m
+
 local helpers = {}
 
 --- Returns the sum of two numbers.
