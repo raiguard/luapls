@@ -59,7 +59,9 @@ func (s *Server) createFile(uri protocol.URI) *File {
 	parserFile := parser.New(string(src)).ParseFile()
 	file := &File{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
 	file.Env.ResolveTypes()
+	s.filesMutex.Lock()
 	s.files[uri] = file
+	s.filesMutex.Unlock()
 	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
 
 	return file

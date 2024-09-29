@@ -1,6 +1,12 @@
 package lsp
 
 import (
+	"io/fs"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
@@ -23,11 +29,12 @@ type File struct {
 
 // Type Server contains the state for the LSP session.
 type Server struct {
-	files    map[string]*File
-	handler  protocol.Handler
-	log      commonlog.Logger
-	rootPath string
-	server   *glspserv.Server
+	files      map[string]*File
+	filesMutex sync.RWMutex
+	handler    protocol.Handler
+	log        commonlog.Logger
+	rootPath   string
+	server     *glspserv.Server
 
 	isInitialized bool
 }
@@ -68,6 +75,30 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 }
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
+	var toParse []string
+	filepath.Walk(s.rootPath, func(path string, info fs.FileInfo, err error) error {
+		if strings.HasSuffix(path, ".lua") {
+			toParse = append(toParse, path)
+		}
+		return nil
+	})
+	before := time.Now()
+	var parseWg sync.WaitGroup
+	for _, path := range toParse {
+		parseWg.Add(1)
+		go func(path string) {
+			uri, err := pathToURI(path)
+			if err != nil {
+				s.log.Errorf("%s", err)
+				return
+			}
+			s.createFile(uri)
+			parseWg.Done()
+		}(path)
+	}
+	parseWg.Wait()
+	s.log.Noticef("Initial parse (%d files): %s", len(toParse), time.Since(before))
+
 	go func() {
 		s.isInitialized = true
 		s.log.Debug("Initialized")
