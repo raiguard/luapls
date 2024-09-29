@@ -26,7 +26,7 @@ func Run() {
 		fmt.Println("TOKENS:")
 		tokens, _ := lexer.Run(line)
 		for _, tok := range tokens {
-			fmt.Println(tok.String())
+			fmt.Println(tok.Dump())
 		}
 
 		fmt.Println("AST:")

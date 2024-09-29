@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/raiguard/luapls/lsp"
+	"github.com/raiguard/luapls/lua/doc_lexer"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
-	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/repl"
 	"github.com/tliron/kutil/util"
@@ -31,6 +31,12 @@ func main() {
 			os.Exit(1)
 		}
 		lexFile(args[2])
+	case "lexcomment":
+		if len(args) < 3 {
+			fmt.Fprintln(os.Stderr, "Did not provide a string to lex")
+			os.Exit(1)
+		}
+		lexComment(args[2])
 	case "lsp":
 		level := int64(0)
 		if len(args) > 2 {
@@ -65,15 +71,18 @@ func lexFile(filename string) {
 	if err != nil {
 		panic(err)
 	}
-	l := lexer.New(string(src))
-	for {
-		tok := l.Next()
-		fmt.Println(tok.String())
-		if tok.Type == token.EOF || tok.Type == token.INVALID {
-			break
-		}
+	tokens, lineBreaks := lexer.Run(string(src))
+	for _, tok := range tokens {
+		fmt.Println(tok.Dump())
 	}
-	fmt.Println(l.GetLineBreaks())
+	fmt.Println(lineBreaks)
+}
+
+func lexComment(input string) {
+	tokens := doc_lexer.Run(input)
+	for _, tok := range tokens {
+		fmt.Println(tok.Dump())
+	}
 }
 
 func parseFile(filename string) {

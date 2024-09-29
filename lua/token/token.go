@@ -78,6 +78,11 @@ const (
 	DOT
 	SEMICOLON
 	VARARG
+
+	// Doc comments
+	DOC_START
+	DOC_PARAM
+	DOC_RETURN
 )
 
 func (t TokenType) String() string {
@@ -107,6 +112,10 @@ func (t *Token) Range() Range {
 }
 
 func (t *Token) String() string {
+	return t.Literal
+}
+
+func (t *Token) Dump() string {
 	return fmt.Sprintf("[%s] `%s` %v", TokenStr[t.Type], strings.NewReplacer("\n", "\\n", "\t", "\\t").Replace(t.Literal), t.Pos)
 }
 
@@ -195,6 +204,11 @@ var TokenStr = map[TokenType]string{
 	DOT:       "dot",
 	SEMICOLON: "semicolon",
 	VARARG:    "vararg",
+
+	// Annotations
+	DOC_START:  "---",
+	DOC_PARAM:  "@param",
+	DOC_RETURN: "@return",
 }
 
 var Reserved = map[string]TokenType{
@@ -220,4 +234,7 @@ var Reserved = map[string]TokenType{
 	"true":     TRUE,
 	"until":    UNTIL,
 	"while":    WHILE,
+
+	"@param":  DOC_PARAM,
+	"@return": DOC_RETURN,
 }
