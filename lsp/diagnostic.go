@@ -15,13 +15,13 @@ func (s *Server) publishDiagnostics(ctx *glsp.Context, file *File) {
 			Message:  err.Message,
 		})
 	}
-	for _, err := range file.Env.Errors {
-		diagnostics = append(diagnostics, protocol.Diagnostic{
-			Range:    file.File.ToProtocolRange(err.Range),
-			Severity: util.Ptr(protocol.DiagnosticSeverityWarning),
-			Message:  err.Message,
-		})
-	}
+	// for _, err := range file.Env.Errors {
+	// 	diagnostics = append(diagnostics, protocol.Diagnostic{
+	// 		Range:    file.File.ToProtocolRange(err.Range),
+	// 		Severity: util.Ptr(protocol.DiagnosticSeverityWarning),
+	// 		Message:  err.Message,
+	// 	})
+	// }
 	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
 		URI:         file.Path,
 		Diagnostics: diagnostics,
