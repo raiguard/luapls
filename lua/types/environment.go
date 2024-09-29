@@ -10,7 +10,7 @@ import (
 type Environment struct {
 	file   *parser.File
 	Types  map[ast.Node]Type
-	Errors []parser.ParserError
+	Errors []ast.Error
 	Nodes  []ast.Node
 }
 
@@ -18,7 +18,7 @@ func NewEnvironment(file *parser.File) Environment {
 	return Environment{
 		file:   file,
 		Types:  map[ast.Node]Type{},
-		Errors: []parser.ParserError{},
+		Errors: []ast.Error{},
 		Nodes:  []ast.Node{},
 	}
 }
@@ -54,7 +54,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			typ := e.resolveExprType(exp.Node)
 			leftTyp := e.resolveExprType(leftVar.Node)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
-				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar.Node)})
+				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar.Node)})
 				e.addType(leftVar.Node, leftTyp)
 				continue
 			}
@@ -157,7 +157,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			typ := e.resolveExprType(exp.Node)
 			leftTyp := e.resolveExprType(ident.Node)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
-				e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident.Node)})
+				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident.Node)})
 				e.addType(ident.Node, leftTyp)
 				continue
 			}
@@ -198,7 +198,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 				return e.addType(expr, typ)
 			}
 		} else {
-			e.Errors = append(e.Errors, parser.ParserError{Message: fmt.Sprintf("Unknown variable '%s'", expr.Token.Literal), Range: ast.Range(expr)})
+			e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Unknown variable '%s'", expr.Token.Literal), Range: ast.Range(expr)})
 		}
 
 	case *ast.FunctionExpression:
@@ -407,7 +407,7 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 }
 
 func (e *Environment) addError(node ast.Node, messageFmt string, messageArgs ...any) {
-	e.Errors = append(e.Errors, parser.ParserError{
+	e.Errors = append(e.Errors, ast.Error{
 		Message: fmt.Sprintf(messageFmt, messageArgs...),
 		Range:   ast.Range(node),
 	})

@@ -8,7 +8,7 @@ import (
 
 type File struct {
 	Block      ast.Block
-	Errors     []ParserError
+	Errors     []ast.Error
 	LineBreaks []int
 	// TODO: Global exports, etc.
 }
