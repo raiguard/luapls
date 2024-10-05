@@ -122,7 +122,7 @@ func (p *Parser) parseBlock() ast.Block {
 func (p *Parser) parseFunctionCall(name ast.Expression) *ast.FunctionCall {
 	fc := &ast.FunctionCall{Name: name}
 	if p.tokIs(token.STRING) {
-		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseTableLiteral())
+		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseStringLiteral())
 		return fc
 	}
 
