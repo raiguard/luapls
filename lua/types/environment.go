@@ -2,8 +2,10 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/token"
 )
 
 type Environment struct {
@@ -87,59 +89,74 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 	case *ast.FunctionCall:
 		e.resolveFunctionCallType(stmt)
 	case *ast.FunctionStatement:
-		// typ := &Function{
-		// 	Params: []NameAndType{},
-		// 	Return: nil,
-		// }
-		// comments := stmt.GetComments()
-		// for _, param := range stmt.Params {
-		// 	template := fmt.Sprintf("@param %s", param.Literal)
-		// 	defStart := strings.Index(comments, template)
-		// 	if defStart == -1 {
-		// 		e.addType(param, &Any{})
-		// 		continue
-		// 	}
-		// 	// This is awful
-		// 	def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
-		// 	var paramTyp Type = &Unknown{}
-		// 	switch def {
-		// 	case "any":
-		// 		paramTyp = &Any{}
-		// 	case "boolean":
-		// 		paramTyp = &Boolean{}
-		// 	case "number":
-		// 		paramTyp = &Number{}
-		// 	case "string":
-		// 		paramTyp = &String{}
-		// 	}
-		// 	e.addType(param, paramTyp)
-		// 	typ.Params = append(typ.Params, NameAndType{
-		// 		Name: param.Literal,
-		// 		Type: paramTyp,
-		// 	})
-		// 	// TODO: Custom types
-		// }
-		// {
-		// 	template := "@return"
-		// 	defStart := strings.Index(comments, template)
-		// 	if defStart != -1 {
-		// 		// This is awful
-		// 		def := strings.TrimSpace(strings.Split(comments[defStart+len(template):], "\n")[0])
-		// 		switch def {
-		// 		case "any":
-		// 			typ.Return = &Any{}
-		// 		case "boolean":
-		// 			typ.Return = &Boolean{}
-		// 		case "number":
-		// 			typ.Return = &Number{}
-		// 		case "string":
-		// 			typ.Return = &String{}
-		// 		}
-		// 	}
-		// }
-		// e.addType(stmt, typ)
-		// // TODO: Parse index expression
-		// e.addType(stmt.Left, typ)
+		typ := &Function{
+			Params: []NameAndType{},
+			Return: nil,
+		}
+		var trivia []token.Token
+		if stmt.LocalTok != nil {
+			trivia = stmt.LocalTok.LeadingTrivia
+		} else {
+			trivia = stmt.FuncTok.LeadingTrivia
+		}
+		for _, trivia := range trivia {
+			if trivia.Type != token.COMMENT {
+				continue
+			}
+			annotationBody, ok := strings.CutPrefix(trivia.Literal, "---")
+			if !ok {
+				continue
+			}
+			parts := strings.Split(strings.TrimSpace(annotationBody), " ")
+			if len(parts) < 2 {
+				continue
+			}
+			if parts[0] == "@param" && len(parts) >= 3 {
+				paramName := parts[1]
+				var param *ast.Identifier
+				for _, realParam := range stmt.Params.Pairs {
+					if realParam.Node.Token.Literal == paramName {
+						param = realParam.Node
+						break
+					}
+				}
+				if param == nil {
+					continue
+				}
+				def := parts[2]
+				var paramTyp Type = &Unknown{}
+				switch def {
+				case "any":
+					paramTyp = &Any{}
+				case "boolean":
+					paramTyp = &Boolean{}
+				case "number":
+					paramTyp = &Number{}
+				case "string":
+					paramTyp = &String{}
+				}
+				e.addType(param, paramTyp)
+				typ.Params = append(typ.Params, NameAndType{
+					Name: param.Token.Literal,
+					Type: paramTyp,
+				})
+			} else if parts[0] == "@return" && len(parts) >= 2 {
+				def := parts[1]
+				switch def {
+				case "any":
+					typ.Return = &Any{}
+				case "boolean":
+					typ.Return = &Boolean{}
+				case "number":
+					typ.Return = &Number{}
+				case "string":
+					typ.Return = &String{}
+				}
+			}
+		}
+		e.addType(stmt, typ)
+		// TODO: Parse index expression
+		e.addType(stmt.Name, typ)
 
 		// e.resolveExprType(stmt.Left)
 	case *ast.LocalStatement:

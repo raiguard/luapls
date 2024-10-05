@@ -51,3 +51,7 @@ script.on_event(defines.events.on_player_created, function(e)
   end
   player.print("Hello, world!")
 end)
+
+for i = 1, 10 do
+  print(i)
+end
