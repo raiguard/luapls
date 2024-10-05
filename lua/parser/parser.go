@@ -82,8 +82,8 @@ func (p *Parser) Errors() []ast.Error {
 	return p.errors
 }
 
-func (p *Parser) ParseFile() File {
-	return File{
+func (p *Parser) ParseFile() ast.File {
+	return ast.File{
 		Block:      p.parseBlock(),
 		Errors:     p.errors,
 		LineBreaks: p.lineBreaks,

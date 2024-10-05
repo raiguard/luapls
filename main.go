@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/raiguard/luapls/lsp"
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
@@ -94,7 +95,7 @@ func parseFile(filename string) {
 	duration := time.Since(before)
 	bytes, err := json.MarshalIndent(struct {
 		Duration string
-		File     parser.File
+		File     ast.File
 	}{
 		Duration: duration.String(),
 		File:     file,

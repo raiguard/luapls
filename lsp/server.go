@@ -1,7 +1,7 @@
 package lsp
 
 import (
-	"github.com/raiguard/luapls/lua/parser"
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
 	"github.com/tliron/commonlog"
@@ -16,7 +16,7 @@ import (
 const LS_NAME = "luapls"
 
 type File struct {
-	File *parser.File
+	File *ast.File
 	Env  types.Environment
 	Path string
 }

@@ -4,17 +4,16 @@ import (
 	"fmt"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/parser"
 )
 
 type Environment struct {
-	file   *parser.File
+	file   *ast.File
 	Types  map[ast.Node]Type
 	Errors []ast.Error
 	Nodes  []ast.Node
 }
 
-func NewEnvironment(file *parser.File) Environment {
+func NewEnvironment(file *ast.File) Environment {
 	return Environment{
 		file:   file,
 		Types:  map[ast.Node]Type{},
