@@ -24,6 +24,14 @@ end
 
 local baz = add(true, 3)
 
+--- Returns the difference of two numbers.
+--- @param a number
+--- @param b number
+--- @return number
+local sub = function(a, b)
+  return a - b
+end
+
 --- @param input string
 local function print(input) end
 

@@ -21,13 +21,15 @@ type File struct {
 	Path string
 }
 
-// Type Server contains the state for the LSP session.
+// Server contains the state for the LSP session.
 type Server struct {
 	files    map[string]*File
 	handler  protocol.Handler
 	log      commonlog.Logger
 	rootPath string
 	server   *glspserv.Server
+
+	config Config
 
 	isInitialized bool
 }
@@ -41,6 +43,7 @@ func Run(logLevel int) {
 
 	s.handler.Initialize = s.initialize
 	s.handler.Initialized = s.initialized
+	s.handler.WorkspaceDidChangeConfiguration = s.didChangeConfiguration
 	s.handler.Shutdown = s.shutdown
 	s.handler.SetTrace = s.setTrace
 	s.handler.TextDocumentDidOpen = s.textDocumentDidOpen
@@ -60,6 +63,8 @@ func Run(logLevel int) {
 func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
 	capabilities := s.handler.CreateServerCapabilities()
 	s.rootPath = *params.RootPath
+
+	s.updateConfig(params.InitializationOptions)
 
 	return protocol.InitializeResult{
 		Capabilities: capabilities,
