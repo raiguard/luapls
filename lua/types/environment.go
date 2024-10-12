@@ -52,8 +52,8 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				continue
 			}
 			exp := stmt.Exps.Pairs[i]
-			typ := e.resolveExprType(exp.Node)
-			leftTyp := e.resolveExprType(leftVar.Node)
+			typ := e.resolveExprType(exp.Node, true)
+			leftTyp := e.resolveExprType(leftVar.Node, false)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
 				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar.Node)})
 				e.addType(leftVar.Node, leftTyp)
@@ -66,7 +66,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			}
 		}
 	case *ast.ForStatement:
-		typ := e.resolveExprType(stmt.Start.Node)
+		typ := e.resolveExprType(stmt.Start.Node, true)
 		if typ == nil {
 			e.addType(stmt.Name, &Unknown{})
 			return
@@ -76,12 +76,12 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 			return
 		}
 		e.addType(stmt.Name, typ)
-		finishTyp := e.resolveExprType(stmt.Finish.Node)
+		finishTyp := e.resolveExprType(stmt.Finish.Node, true)
 		if typ != finishTyp {
 			e.addError(&stmt.Finish, "Range end must be of type '%s'", typ)
 		}
 		if stmt.Step != nil {
-			stepTyp := e.resolveExprType(stmt.Step.Node)
+			stepTyp := e.resolveExprType(stmt.Step.Node, true)
 			if typ != stepTyp {
 				e.addError(stmt.Step, "Range step must be of type '%s'", typ)
 			}
@@ -158,7 +158,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 		// TODO: Parse index expression
 		e.addType(stmt.Name, typ)
 
-		// e.resolveExprType(stmt.Left)
+		// e.resolveExprType(stmt.Left, true)
 	case *ast.LocalStatement:
 		for i := 0; i < len(stmt.Names.Pairs); i++ {
 			ident := stmt.Names.Pairs[i]
@@ -170,8 +170,8 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 				continue
 			}
 			exp := stmt.Exps.Pairs[i]
-			typ := e.resolveExprType(exp.Node)
-			leftTyp := e.resolveExprType(ident.Node)
+			typ := e.resolveExprType(exp.Node, true)
+			leftTyp := e.resolveExprType(ident.Node, true)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
 				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident.Node)})
 				e.addType(ident.Node, leftTyp)
@@ -185,14 +185,14 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 		}
 	case *ast.ReturnStatement:
 		for _, expr := range stmt.Exps.Pairs {
-			e.resolveExprType(expr.Node)
+			e.resolveExprType(expr.Node, true)
 		}
-	default:
-		e.addError(stmt, "Unimplemented")
+		// default:
+		// 	e.addError(stmt, "Unimplemented")
 	}
 }
 
-func (e *Environment) resolveExprType(expr ast.Expression) Type {
+func (e *Environment) resolveExprType(expr ast.Expression, unknownError bool) Type {
 	e.pushNode(expr)
 	defer e.popNode()
 	switch expr := expr.(type) {
@@ -213,7 +213,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			if typ != nil {
 				return e.addType(expr, typ)
 			}
-		} else {
+		} else if unknownError {
 			e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Unknown variable '%s'", expr.Token.Literal), Range: ast.Range(expr)})
 		}
 
@@ -227,7 +227,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 	case *ast.FunctionCall:
 		return e.resolveFunctionCallType(expr)
 	case *ast.IndexExpression:
-		leftTyp := e.resolveExprType(expr.Prefix)
+		leftTyp := e.resolveExprType(expr.Prefix, unknownError)
 		if leftTyp == nil {
 			return e.addType(expr, &Unknown{})
 		}
@@ -237,7 +237,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 			return nil
 		}
 
-		// e.resolveExprType(expr.Inner)
+		// e.resolveExprType(expr.Inner, true)
 
 		var key string
 		switch inner := expr.Inner.(type) {
@@ -246,7 +246,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		case *ast.StringLiteral:
 			key = inner.Token.Literal
 		default:
-			e.addError(inner, "Unimplemented")
+			// e.addError(inner, "Unimplemented")
 			return nil
 		}
 
@@ -288,28 +288,28 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 		}
 
 		e.addError(expr.Inner, "Unknown field '%s'", key)
-	// TODO:
-	// case *ast.TableLiteral:
-	// 	typ := Table{
-	// 		Fields: []NameAndType{},
-	// 	}
-	// 	for _, fieldNode := range expr.Fields.Pairs {
-	// 		ident, ok := fieldNode.Node.Key.(*ast.Identifier)
-	// 		if !ok {
-	// 			// TODO:
-	// 			continue
-	// 		}
-	// 		valueTyp := e.resolveExprType(fieldNode.Node.Value)
-	// 		field := NameAndType{
-	// 			Name: ident.Token.Literal,
-	// 			Type: valueTyp,
-	// 		}
-	// 		typ.Fields = append(typ.Fields, field)
-	// 		e.addType(fieldNode.Node, valueTyp)
-	// 		e.addType(ident, valueTyp)
-	// 	}
-	// 	e.addType(expr, &typ)
-	// 	return &typ
+	case *ast.TableLiteral:
+		typ := Table{
+			Fields: []NameAndType{},
+		}
+		for _, fieldNode := range expr.Fields.Pairs {
+			switch fieldNode := fieldNode.Node.(type) {
+			// TODO:
+			// case *ast.TableArrayField:
+			// case *ast.TableExpressionKeyField:
+			case *ast.TableSimpleKeyField:
+				valueTyp := e.resolveExprType(fieldNode.Expr, true)
+				field := NameAndType{
+					Name: fieldNode.Name.Token.Literal,
+					Type: valueTyp,
+				}
+				typ.Fields = append(typ.Fields, field)
+				e.addType(&fieldNode.Name, valueTyp)
+				e.addType(fieldNode.Expr, valueTyp)
+			}
+		}
+		e.addType(expr, &typ)
+		return &typ
 	default:
 		e.addError(expr, "Unimplemented")
 	}
@@ -318,7 +318,7 @@ func (e *Environment) resolveExprType(expr ast.Expression) Type {
 }
 
 func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
-	typ := e.resolveExprType(fc.Name)
+	typ := e.resolveExprType(fc.Name, true)
 	if typ == nil {
 		return nil
 	}
@@ -330,7 +330,7 @@ func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
 	}
 	for i := 0; i < len(fc.Args.Pairs); i++ {
 		arg := fc.Args.Pairs[i]
-		argTyp := e.resolveExprType(arg.Node)
+		argTyp := e.resolveExprType(arg.Node, true)
 		if i >= len(function.Params) {
 			e.addError(arg.Node, "Unused parameter")
 			break // TODO:
@@ -411,6 +411,14 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 			for _, ident := range node.Names.Pairs {
 				if ident.Node.Token.Literal == identFor.Token.Literal {
 					def = ident.Node
+				}
+			}
+		case *ast.AssignmentStatement:
+			for _, lVar := range node.Vars.Pairs {
+				if ident, ok := lVar.Node.(*ast.Identifier); ok {
+					if ident.Token.Literal == identFor.Token.Literal {
+						def = ident
+					}
 				}
 			}
 		default:
