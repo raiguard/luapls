@@ -154,6 +154,9 @@ func Walk(node Node, visitor Visitor) {
 	case *ReturnStatement:
 		Walk(node.Exps, visitor)
 
+	case *SemicolonStatement:
+		// Leaf
+
 	case *StringLiteral:
 		// Leaf
 
