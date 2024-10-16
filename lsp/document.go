@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"github.com/raiguard/luapls/lua/ast"
@@ -41,11 +42,11 @@ func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidCh
 }
 
 func (s *Server) textDocumentDidClose(ctx *glsp.Context, params *protocol.DidCloseTextDocumentParams) error {
-	s.files[params.TextDocument.URI] = nil
+	s.legacyFiles[params.TextDocument.URI] = nil
 	return nil
 }
 
-func (s *Server) createFile(uri protocol.URI) *File {
+func (s *Server) createFile(uri protocol.URI) *LegacyFile {
 	path, err := uriToPath(uri)
 	if err != nil {
 		s.log.Errorf("%s", err)
@@ -58,15 +59,18 @@ func (s *Server) createFile(uri protocol.URI) *File {
 	}
 	timer := time.Now()
 	parserFile := parser.New(string(src)).ParseFile()
-	file := &File{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
+	file := &LegacyFile{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
 	file.Env.ResolveTypes()
-	s.files[uri] = file
+	s.legacyFiles[uri] = file
 	s.log.Debugf("Parsed and checked file '%s' in %s", uri, time.Since(timer).String())
 
 	return file
 }
 
-func (s *Server) parseFile(uri protocol.URI) *ast.File {
+func (s *Server) parseFile(uri protocol.URI, parent *FileNode) *FileNode {
+	if existing := s.fileGraph.Files[uri]; existing != nil {
+		return existing
+	}
 	path, err := uriToPath(uri)
 	if err != nil {
 		s.log.Errorf("%s", err)
@@ -81,5 +85,50 @@ func (s *Server) parseFile(uri protocol.URI) *ast.File {
 	file := parser.New(string(src)).ParseFile()
 	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
 
-	return &file
+	fileNode := &FileNode{
+		File:        &file,
+		Path:        uri,
+		Types:       []*types.Type{},
+		Diagnostics: []ast.Error{},
+		Parent:      parent,
+		Children:    []*FileNode{},
+		Visited:     false,
+	}
+	s.fileGraph.Files[uri] = fileNode
+	s.log.Debugf("Walking %s", uri)
+
+	ast.Walk(&file.Block, func(n ast.Node) bool {
+		fc, ok := n.(*ast.FunctionCall)
+		if !ok {
+			return true
+		}
+		ident, ok := fc.Name.(*ast.Identifier)
+		if !ok || ident.Token.Literal != "require" {
+			return true
+		}
+		if len(fc.Args.Pairs) != 1 {
+			return true
+		}
+		pathNode, ok := fc.Args.Pairs[0].Node.(*ast.StringLiteral)
+		if !ok {
+			return false // There are no children to iterate at this point
+		}
+		// TODO: Clean this up
+		pathString := strings.ReplaceAll(pathNode.Token.Literal[1:len(pathNode.Token.Literal)-1], ".", "/")
+		if !strings.HasSuffix(pathString, ".lua") {
+			pathString += ".lua"
+		}
+		pathURI, err := pathToURI(pathString)
+		if err != nil {
+			s.log.Errorf("%s", err)
+			return false
+		}
+		s.log.Debugf("Found require path %s", pathURI)
+		child := s.parseFile(pathURI, fileNode)
+		if child != nil {
+			fileNode.Children = append(fileNode.Children, child)
+		}
+		return false // No children to iterate
+	})
+	return fileNode
 }

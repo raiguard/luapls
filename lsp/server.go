@@ -1,8 +1,6 @@
 package lsp
 
 import (
-	"strings"
-
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
@@ -17,19 +15,58 @@ import (
 
 const LS_NAME = "luapls"
 
-type File struct {
+type LegacyFile struct {
 	File *ast.File
 	Env  types.Environment
 	Path string
 }
 
+type FileGraph struct {
+	Roots []*FileNode
+	Files map[protocol.URI]*FileNode
+}
+
+func (fg *FileGraph) Traverse(visitor func(fn *FileNode) bool) {
+	for _, root := range fg.Roots {
+		root.Traverse(visitor)
+	}
+	for _, file := range fg.Files {
+		file.Visited = false
+	}
+}
+
+type FileNode struct {
+	File        *ast.File // Will be after initial parse
+	Path        string
+	Types       []*types.Type
+	Diagnostics []ast.Error
+
+	Parent   *FileNode
+	Children []*FileNode // In order of appearance in file.
+
+	Visited bool
+}
+
+func (fn *FileNode) Traverse(visitor func(fn *FileNode) bool) {
+	if fn == nil || fn.Visited {
+		return
+	}
+	fn.Visited = true
+	if visitor(fn) {
+		for _, child := range fn.Children {
+			child.Traverse(visitor)
+		}
+	}
+}
+
 // Server contains the state for the LSP session.
 type Server struct {
-	files    map[string]*File
-	handler  protocol.Handler
-	log      commonlog.Logger
-	rootPath string
-	server   *glspserv.Server
+	legacyFiles map[string]*LegacyFile
+	fileGraph   FileGraph
+	handler     protocol.Handler
+	log         commonlog.Logger
+	rootPath    string
+	server      *glspserv.Server
 
 	config Config
 
@@ -39,7 +76,12 @@ type Server struct {
 func Run(logLevel int) {
 	commonlog.Configure(logLevel, util.Ptr("/tmp/luapls.log"))
 
-	s := Server{files: map[string]*File{}}
+	s := Server{
+		legacyFiles: map[string]*LegacyFile{},
+		fileGraph: FileGraph{
+			Roots: []*FileNode{},
+			Files: map[string]*FileNode{},
+		}}
 
 	s.handler.Initialize = s.initialize
 	s.handler.Initialized = s.initialized
@@ -74,65 +116,35 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 	go func() {
-		s.isInitialized = true
-		s.log.Debug("Initialized")
-		toParse := []string{}
 		for _, path := range *s.config.Roots {
 			uri, err := pathToURI(path)
 			if err != nil {
 				s.log.Errorf("%s", err)
-			}
-			toParse = append(toParse, uri)
-		}
-		parsed := map[string]bool{}
-		for i := 0; i < len(toParse); i++ {
-			uri := toParse[i]
-			// TODO: Normalize paths
-			if parsed[uri] {
 				continue
 			}
-			file := s.parseFile(uri)
-			if file == nil {
-				continue
+			file := s.parseFile(uri, nil)
+			if file != nil {
+				s.fileGraph.Roots = append(s.fileGraph.Roots, file)
 			}
-			parsed[uri] = true
-			s.log.Debugf("walking %s", uri)
-
-			ast.Walk(&file.Block, func(n ast.Node) bool {
-				fc, ok := n.(*ast.FunctionCall)
-				if !ok {
-					return true
-				}
-				ident, ok := fc.Name.(*ast.Identifier)
-				if !ok || ident.Token.Literal != "require" {
-					return true
-				}
-				if len(fc.Args.Pairs) != 1 {
-					return true
-				}
-				pathNode, ok := fc.Args.Pairs[0].Node.(*ast.StringLiteral)
-				if !ok {
-					return false // There are no children to iterate at this point
-				}
-				// TODO: Clean this up
-				pathString := strings.ReplaceAll(pathNode.Token.Literal[1:len(pathNode.Token.Literal)-1], ".", "/")
-				if !strings.HasSuffix(pathString, ".lua") {
-					pathString += ".lua"
-				}
-				pathURI, err := pathToURI(pathString)
-				if err != nil {
-					s.log.Errorf("%s", err)
-					return false
-				}
-				s.log.Debugf("found require path %s", pathURI)
-				toParse = append(toParse, pathURI)
-				return false // No children to iterate
-			})
 		}
+		s.isInitialized = true
+		s.log.Debug("Initialized")
 
-		for _, file := range s.files {
+		for _, file := range s.legacyFiles {
 			s.publishDiagnostics(ctx, file)
 		}
+
+		s.fileGraph.Traverse(func(file *FileNode) bool {
+			prefix := ""
+			parent := file.Parent
+			for parent != nil {
+				prefix += "  "
+				parent = parent.Parent
+			}
+			s.log.Debugf("%s%s", prefix, file.Path)
+			return true
+		})
+
 	}()
 	return nil
 }
@@ -147,11 +159,11 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri protocol.URI) *File {
+func (s *Server) getFile(uri protocol.URI) *LegacyFile {
 	if !s.isInitialized {
 		return nil
 	}
-	existing := s.files[uri]
+	existing := s.legacyFiles[uri]
 	if existing != nil {
 		return existing
 	}

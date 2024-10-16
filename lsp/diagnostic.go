@@ -6,7 +6,7 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func (s *Server) publishDiagnostics(ctx *glsp.Context, file *File) {
+func (s *Server) publishDiagnostics(ctx *glsp.Context, file *LegacyFile) {
 	diagnostics := []protocol.Diagnostic{}
 	for _, err := range file.File.Errors {
 		diagnostics = append(diagnostics, protocol.Diagnostic{
