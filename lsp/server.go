@@ -1,6 +1,8 @@
 package lsp
 
 import (
+	"time"
+
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
@@ -41,7 +43,7 @@ type FileNode struct {
 	Types       []*types.Type
 	Diagnostics []ast.Error
 
-	Parent   *FileNode
+	Parent   *FileNode   // TODO: Multiple parents will turn this into a graph!
 	Children []*FileNode // In order of appearance in file.
 
 	Visited bool
@@ -116,19 +118,21 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 	go func() {
+		before := time.Now()
 		for _, path := range *s.config.Roots {
 			uri, err := pathToURI(path)
 			if err != nil {
 				s.log.Errorf("%s", err)
 				continue
 			}
+			// TODO: Check for duplicate roots
 			file := s.parseFile(uri, nil)
 			if file != nil {
 				s.fileGraph.Roots = append(s.fileGraph.Roots, file)
 			}
 		}
 		s.isInitialized = true
-		s.log.Debug("Initialized")
+		s.log.Debugf("Initialized in %s", time.Since(before).String())
 
 		for _, file := range s.legacyFiles {
 			s.publishDiagnostics(ctx, file)
