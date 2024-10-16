@@ -4,6 +4,8 @@
 
 * User defines "environments" that have a specified set of root files.
 * Iterate these root files in order.
+* Files are represented as a connected graph.
+  * Need to store parent backreferences.
 * Gather a list of all the files it `require`s in order.
 * Parse those files.
   * Detect if a file has already been parsed and don't do it again.
@@ -38,3 +40,13 @@ This only works for fields that are defined with literal strings.
 
 Assigning a global variable does not throw a warning, though I would like to add a way to be strict about which globals you introduce.
 However, attempting to _read_ an unknown global (using as parameter, indexing, doing operations) will show a warning.
+
+When you need to resolve the type of a variable, you need to check:
+* The value of the assignment
+* Definition of value
+*
+
+Walk backwards up the AST:
+* If index expression, add left to parents
+* If infix left, get type of right then apply that type to corresponding infix metamethod.
+* If identifier in expression list or namelist, then resolve definition of identifier and get that type.

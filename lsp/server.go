@@ -1,6 +1,8 @@
 package lsp
 
 import (
+	"strings"
+
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
@@ -37,9 +39,7 @@ type Server struct {
 func Run(logLevel int) {
 	commonlog.Configure(logLevel, util.Ptr("/tmp/luapls.log"))
 
-	s := Server{
-		files: map[string]*File{},
-	}
+	s := Server{files: map[string]*File{}}
 
 	s.handler.Initialize = s.initialize
 	s.handler.Initialized = s.initialized
@@ -76,6 +76,60 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 	go func() {
 		s.isInitialized = true
 		s.log.Debug("Initialized")
+		toParse := []string{}
+		for _, path := range *s.config.Roots {
+			uri, err := pathToURI(path)
+			if err != nil {
+				s.log.Errorf("%s", err)
+			}
+			toParse = append(toParse, uri)
+		}
+		parsed := map[string]bool{}
+		for i := 0; i < len(toParse); i++ {
+			uri := toParse[i]
+			// TODO: Normalize paths
+			if parsed[uri] {
+				continue
+			}
+			file := s.parseFile(uri)
+			if file == nil {
+				continue
+			}
+			parsed[uri] = true
+			s.log.Debugf("walking %s", uri)
+
+			ast.Walk(&file.Block, func(n ast.Node) bool {
+				fc, ok := n.(*ast.FunctionCall)
+				if !ok {
+					return true
+				}
+				ident, ok := fc.Name.(*ast.Identifier)
+				if !ok || ident.Token.Literal != "require" {
+					return true
+				}
+				if len(fc.Args.Pairs) != 1 {
+					return true
+				}
+				pathNode, ok := fc.Args.Pairs[0].Node.(*ast.StringLiteral)
+				if !ok {
+					return false // There are no children to iterate at this point
+				}
+				// TODO: Clean this up
+				pathString := strings.ReplaceAll(pathNode.Token.Literal[1:len(pathNode.Token.Literal)-1], ".", "/")
+				if !strings.HasSuffix(pathString, ".lua") {
+					pathString += ".lua"
+				}
+				pathURI, err := pathToURI(pathString)
+				if err != nil {
+					s.log.Errorf("%s", err)
+					return false
+				}
+				s.log.Debugf("found require path %s", pathURI)
+				toParse = append(toParse, pathURI)
+				return false // No children to iterate
+			})
+		}
+
 		for _, file := range s.files {
 			s.publishDiagnostics(ctx, file)
 		}

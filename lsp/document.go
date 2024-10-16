@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/tliron/glsp"
@@ -60,7 +61,25 @@ func (s *Server) createFile(uri protocol.URI) *File {
 	file := &File{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
 	file.Env.ResolveTypes()
 	s.files[uri] = file
-	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
+	s.log.Debugf("Parsed and checked file '%s' in %s", uri, time.Since(timer).String())
 
 	return file
+}
+
+func (s *Server) parseFile(uri protocol.URI) *ast.File {
+	path, err := uriToPath(uri)
+	if err != nil {
+		s.log.Errorf("%s", err)
+		return nil
+	}
+	src, err := os.ReadFile(path)
+	if err != nil {
+		s.log.Errorf("Failed to parse file %s: %s", uri, err)
+		return nil
+	}
+	timer := time.Now()
+	file := parser.New(string(src)).ParseFile()
+	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
+
+	return &file
 }

@@ -1,5 +1,7 @@
 --- @diagnostic disable:unused-local,unused-function
 
+local other = require("demos.demo2")
+
 local num = 3
 local other_num = num
 local other_other_num = other_num
