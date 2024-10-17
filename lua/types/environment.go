@@ -204,15 +204,10 @@ func (e *Environment) CheckPhase1() {
 				}
 				name := parts[0]
 				if e.Types[name] != nil {
-					file.Diagnostics = append(file.Diagnostics, ast.Error{
-						Message:  "Duplicate class",
-						Range:    trivia.Range(),
-						Severity: protocol.DiagnosticSeverityWarning,
-					})
-					// TODO: Warning at other location
 					continue
 				}
 				// TODO: Narrow location to actual name
+				// TODO: Support multiple definition locations
 				e.Types[name] = &Named{Name: name, Range: trivia.Range()}
 			}
 			return true
