@@ -24,12 +24,26 @@ End goals:
   * AST can be regenerated as needed, it's fairly cheap to do so.
 * Type annotations are a single global namespace so they need to be resolved first.
 
-* First pass, top-down: Assemble info for all `@class`, `@type`, and `@alias` annotations.
-  * These are in a shared global namespace and are entirely static, so they are the launchpad for the rest of the checking.
-  * This can be performed for each file in parallel.
-  * Only support fully defined `---@class`es for now.
-* Second pass, bottom-up: Resolve file exports and global variables.
-  * Fully typecheck the root scope and check for any global exports in non-executed child functions.
+**First pass**
+
+First pass assembles all types that exist, following `@class`, `@type`, and `@alias` annotations as well as table literal declarations (for dynamic table types).
+It does _not_ resolve the fields of these types; it only gathers which types exist.
+This is to allow recursive types.
+
+**Second pass**
+
+Second pass is performed depth-first, and resolves fields of each type as it encounters them.
+"Unknown type" diagnostics are generated here, but "unknown field" etc. diagnostics are not.
+At the end of this pass, we should have a complete type graph.
+
+**Third pass**
+
+Third pass checks all type declarations and accesses to ensure they are well-formed.
+This is where "unknown variable" and "unknown field" diagnostics are generated.
+
+**Future work**
+
+How will type inference fit in?
 
 # Dynamic table types
 

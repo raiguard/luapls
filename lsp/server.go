@@ -33,27 +33,31 @@ func (fg *FileGraph) Traverse(visitor func(fn *FileNode) bool) {
 		root.Traverse(visitor)
 	}
 	for _, file := range fg.Files {
-		file.Visited = false
+		file.visited = false
 	}
 }
 
+// TODO: Atomics to allow multithreading
 type FileNode struct {
-	File        *ast.File // Will be after initial parse
-	Path        string
-	Types       []*types.Type
+	// AST is discarded after type checking is complete, unless the file is open in the editor.
+	AST        *ast.Block
+	LineBreaks []int
+
 	Diagnostics []ast.Error
+	Types       []*types.Type
 
-	Parents  []*FileNode // TODO: Multiple parents will turn this into a graph!
-	Children []*FileNode // In order of appearance in file.
+	Parents  []*FileNode
+	Children []*FileNode
 
-	Visited bool
+	Path    string
+	visited bool
 }
 
 func (fn *FileNode) Traverse(visitor func(fn *FileNode) bool) {
-	if fn == nil || fn.Visited {
+	if fn == nil || fn.visited {
 		return
 	}
-	fn.Visited = true
+	fn.visited = true
 	if visitor(fn) {
 		for _, child := range fn.Children {
 			child.Traverse(visitor)

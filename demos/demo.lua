@@ -1,5 +1,11 @@
 --- @diagnostic disable:unused-local,unused-function
 
+--- @class Foo
+--- @field field Bar
+
+--- @class Bar
+--- @field field Foo
+
 local other = require("demos.demo2")
 
 local num = 3

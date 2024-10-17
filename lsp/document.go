@@ -90,13 +90,14 @@ func (s *Server) parseFile(uri protocol.URI, parent *FileNode) *FileNode {
 	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
 
 	fileNode := &FileNode{
-		File:        &file,
-		Path:        uri,
+		AST:         &file.Block,
+		LineBreaks:  file.LineBreaks,
+		Diagnostics: file.Errors,
 		Types:       []*types.Type{},
-		Diagnostics: []ast.Error{},
 		Parents:     []*FileNode{},
 		Children:    []*FileNode{},
-		Visited:     false,
+		visited:     false,
+		Path:        uri,
 	}
 	if parent != nil {
 		fileNode.Parents = append(fileNode.Parents, parent)
