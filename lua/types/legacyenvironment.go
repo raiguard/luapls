@@ -15,7 +15,7 @@ type LegacyEnvironment struct {
 	Nodes  []ast.Node
 }
 
-func NewEnvironment(file *ast.File) LegacyEnvironment {
+func NewLegacyEnvironment(file *ast.File) LegacyEnvironment {
 	return LegacyEnvironment{
 		file:   file,
 		Types:  map[ast.Node]Type{},

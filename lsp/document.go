@@ -33,7 +33,7 @@ func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidCh
 			before := time.Now()
 			newFile := parser.New(change.Text).ParseFile()
 			file.File = &newFile
-			file.Env = types.NewEnvironment(&newFile)
+			file.Env = types.NewLegacyEnvironment(&newFile)
 			file.Env.ResolveTypes()
 			s.log.Debugf("Reparse duration: %s", time.Since(before).String())
 			s.publishDiagnostics(ctx, file)
@@ -60,7 +60,7 @@ func (s *Server) createFile(uri protocol.URI) *LegacyFile {
 	}
 	timer := time.Now()
 	parserFile := parser.New(string(src)).ParseFile()
-	file := &LegacyFile{File: &parserFile, Env: types.NewEnvironment(&parserFile), Path: uri}
+	file := &LegacyFile{File: &parserFile, Env: types.NewLegacyEnvironment(&parserFile), Path: uri}
 	file.Env.ResolveTypes()
 	s.legacyFiles[uri] = file
 	s.log.Debugf("Parsed and checked file '%s' in %s", uri, time.Since(timer).String())

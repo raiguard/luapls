@@ -152,7 +152,7 @@ func checkFile(path string) {
 		return // TODO: Support partial type checking
 	}
 
-	env := types.NewEnvironment(&file)
+	env := types.NewLegacyEnvironment(&file)
 	env.ResolveTypes()
 	if len(env.Errors) > 0 {
 		fmt.Println("ERRORS:")
