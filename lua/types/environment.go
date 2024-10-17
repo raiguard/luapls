@@ -67,20 +67,17 @@ func (e *Environment) Init() {
 
 func (e *Environment) AddFile(uri protocol.URI, parent *File) *File {
 	if existing := e.Files.Files[uri]; existing != nil {
-		e.log.Debugf("FOUND EXISTING %s", uri)
 		if parent != nil && !slices.Contains(existing.Parents, parent) {
 			existing.Parents = append(existing.Parents, parent)
 			e.Files.Roots = slices.DeleteFunc(e.Files.Roots, func(file *File) bool { return file == existing })
 		}
 		return existing
 	}
-	e.log.Debugf("Parsing uri %s", uri)
 	path, err := util.URIToPath(uri)
 	if err != nil {
 		e.log.Errorf("%s", err)
 		return nil
 	}
-	// e.log.Debugf("Parsing %s", path)
 	src, err := os.ReadFile(path)
 	if err != nil {
 		e.log.Errorf("Failed to parse file %s: %s", path, err)
