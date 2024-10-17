@@ -19,7 +19,7 @@ const LS_NAME = "luapls"
 
 type LegacyFile struct {
 	File *ast.File
-	Env  types.Environment
+	Env  types.LegacyEnvironment
 	Path string
 }
 

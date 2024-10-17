@@ -8,15 +8,15 @@ import (
 	"github.com/raiguard/luapls/lua/token"
 )
 
-type Environment struct {
+type LegacyEnvironment struct {
 	file   *ast.File
 	Types  map[ast.Node]Type
 	Errors []ast.Error
 	Nodes  []ast.Node
 }
 
-func NewEnvironment(file *ast.File) Environment {
-	return Environment{
+func NewEnvironment(file *ast.File) LegacyEnvironment {
+	return LegacyEnvironment{
 		file:   file,
 		Types:  map[ast.Node]Type{},
 		Errors: []ast.Error{},
@@ -24,7 +24,7 @@ func NewEnvironment(file *ast.File) Environment {
 	}
 }
 
-func (c *Environment) ResolveTypes() {
+func (c *LegacyEnvironment) ResolveTypes() {
 	clear(c.Types)
 	clear(c.Errors)
 	c.Nodes = []ast.Node{}
@@ -32,7 +32,7 @@ func (c *Environment) ResolveTypes() {
 	c.resolveBlockTypes(&c.file.Block)
 }
 
-func (e *Environment) resolveBlockTypes(block *ast.Block) {
+func (e *LegacyEnvironment) resolveBlockTypes(block *ast.Block) {
 	e.pushNode(block)
 	defer e.popNode()
 	for _, stmt := range block.Pairs {
@@ -40,7 +40,7 @@ func (e *Environment) resolveBlockTypes(block *ast.Block) {
 	}
 }
 
-func (e *Environment) resolveStmtType(stmt ast.Statement) {
+func (e *LegacyEnvironment) resolveStmtType(stmt ast.Statement) {
 	e.pushNode(stmt)
 	defer e.popNode()
 	switch stmt := stmt.(type) {
@@ -192,7 +192,7 @@ func (e *Environment) resolveStmtType(stmt ast.Statement) {
 	}
 }
 
-func (e *Environment) resolveExprType(expr ast.Expression, unknownError bool) Type {
+func (e *LegacyEnvironment) resolveExprType(expr ast.Expression, unknownError bool) Type {
 	e.pushNode(expr)
 	defer e.popNode()
 	switch expr := expr.(type) {
@@ -317,7 +317,7 @@ func (e *Environment) resolveExprType(expr ast.Expression, unknownError bool) Ty
 	return nil
 }
 
-func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
+func (e *LegacyEnvironment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
 	typ := e.resolveExprType(fc.Name, true)
 	if typ == nil {
 		return nil
@@ -349,12 +349,12 @@ func (e *Environment) resolveFunctionCallType(fc *ast.FunctionCall) Type {
 	return function.Return
 }
 
-func (e *Environment) addType(node ast.Node, typ Type) Type {
+func (e *LegacyEnvironment) addType(node ast.Node, typ Type) Type {
 	e.Types[node] = typ
 	return typ
 }
 
-func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
+func (e *LegacyEnvironment) FindDefinition(path ast.NodePath) *ast.Identifier {
 	if path.Node == nil {
 		return nil
 	}
@@ -430,18 +430,18 @@ func (e *Environment) FindDefinition(path ast.NodePath) *ast.Identifier {
 	return def
 }
 
-func (e *Environment) addError(node ast.Node, messageFmt string, messageArgs ...any) {
+func (e *LegacyEnvironment) addError(node ast.Node, messageFmt string, messageArgs ...any) {
 	e.Errors = append(e.Errors, ast.Error{
 		Message: fmt.Sprintf(messageFmt, messageArgs...),
 		Range:   ast.Range(node),
 	})
 }
 
-func (e *Environment) pushNode(node ast.Node) {
+func (e *LegacyEnvironment) pushNode(node ast.Node) {
 	e.Nodes = append(e.Nodes, node)
 }
 
-func (e *Environment) popNode() {
+func (e *LegacyEnvironment) popNode() {
 	if len(e.Nodes) == 0 {
 		return
 	}
