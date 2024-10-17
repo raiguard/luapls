@@ -18,7 +18,7 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 	}
 	nodePath := ast.GetSemanticNode(file.AST, file.LineBreaks.ToPos(params.Position))
 	if nodePath.Node == nil {
-		return nil, errors.New("Node not found")
+		return nil, nil
 	}
 	highlights := []protocol.DocumentHighlight{}
 	// TODO: Labels
