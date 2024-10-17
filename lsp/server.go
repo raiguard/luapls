@@ -1,8 +1,6 @@
 package lsp
 
 import (
-	"time"
-
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
@@ -26,7 +24,7 @@ type LegacyFile struct {
 // Server contains the state for the LSP session.
 type Server struct {
 	legacyFiles map[string]*LegacyFile
-	fileGraph   types.FileGraph
+	environment *types.Environment
 	handler     protocol.Handler
 	log         commonlog.Logger
 	rootPath    string
@@ -42,10 +40,8 @@ func Run(logLevel int) {
 
 	s := Server{
 		legacyFiles: map[string]*LegacyFile{},
-		fileGraph: types.FileGraph{
-			Roots: []*types.FileNode{},
-			Files: map[string]*types.FileNode{},
-		}}
+		environment: types.NewEnvironment(),
+	}
 
 	s.handler.Initialize = s.initialize
 	s.handler.Initialized = s.initialized
@@ -68,7 +64,8 @@ func Run(logLevel int) {
 
 func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
 	capabilities := s.handler.CreateServerCapabilities()
-	s.rootPath = *params.RootPath
+	// TODO: RootURI / WorkspaceFolders fallbacks
+	s.environment.RootPath = *params.RootPath
 
 	s.updateConfig(params.InitializationOptions)
 
@@ -79,41 +76,7 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 }
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
-	go func() {
-		before := time.Now()
-		for _, path := range *s.config.Roots {
-			uri, err := pathToURI(path)
-			if err != nil {
-				s.log.Errorf("%s", err)
-				continue
-			}
-			// TODO: Check for duplicate roots
-			file := s.parseFile(uri, nil)
-			if file != nil {
-				s.fileGraph.Roots = append(s.fileGraph.Roots, file)
-			}
-		}
-		s.isInitialized = true
-		s.log.Debugf("Initialized in %s", time.Since(before).String())
-
-		for _, file := range s.legacyFiles {
-			s.publishDiagnostics(ctx, file)
-		}
-
-		s.fileGraph.Traverse(func(file *types.FileNode) bool {
-			s.log.Debugf("FILE: %s", file.Path)
-			s.log.Debug("  PARENTS:")
-			for _, parent := range file.Parents {
-				s.log.Debugf("    %s", parent.Path)
-			}
-			s.log.Debug("  CHILDREN:")
-			for _, child := range file.Children {
-				s.log.Debugf("    %s", child.Path)
-			}
-			return true
-		})
-
-	}()
+	go s.environment.Init()
 	return nil
 }
 

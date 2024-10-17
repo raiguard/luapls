@@ -2,15 +2,16 @@ package types
 
 import (
 	"github.com/raiguard/luapls/lua/ast"
-	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
+// FileGraph specifies a set of files and the relationships between them.
 type FileGraph struct {
-	Roots []*FileNode
-	Files map[protocol.URI]*FileNode
+	Files map[string]*File
+	// Roots are all files with no parent files.
+	Roots []*File
 }
 
-func (fg *FileGraph) Traverse(visitor func(fn *FileNode) bool) {
+func (fg *FileGraph) Traverse(visitor func(fn *File) bool) {
 	for _, root := range fg.Roots {
 		root.Traverse(visitor)
 	}
@@ -20,7 +21,7 @@ func (fg *FileGraph) Traverse(visitor func(fn *FileNode) bool) {
 }
 
 // TODO: Atomics to allow multithreading
-type FileNode struct {
+type File struct {
 	// AST is discarded after type checking is complete, unless the file is open in the editor.
 	AST        *ast.Block
 	LineBreaks []int
@@ -28,14 +29,14 @@ type FileNode struct {
 	Diagnostics []ast.Error
 	Types       []*Type
 
-	Parents  []*FileNode
-	Children []*FileNode
+	Parents  []*File
+	Children []*File
 
 	Path    string
 	Visited bool
 }
 
-func (fn *FileNode) Traverse(visitor func(fn *FileNode) bool) {
+func (fn *File) Traverse(visitor func(fn *File) bool) {
 	if fn == nil || fn.Visited {
 		return
 	}
