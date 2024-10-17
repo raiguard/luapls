@@ -6,6 +6,7 @@ import (
 
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/token"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type LegacyEnvironment struct {
@@ -55,7 +56,7 @@ func (e *LegacyEnvironment) resolveStmtType(stmt ast.Statement) {
 			typ := e.resolveExprType(exp.Node, true)
 			leftTyp := e.resolveExprType(leftVar.Node, false)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
-				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar.Node)})
+				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(leftVar.Node), Severity: protocol.DiagnosticSeverityError})
 				e.addType(leftVar.Node, leftTyp)
 				continue
 			}
@@ -173,7 +174,7 @@ func (e *LegacyEnvironment) resolveStmtType(stmt ast.Statement) {
 			typ := e.resolveExprType(exp.Node, true)
 			leftTyp := e.resolveExprType(ident.Node, true)
 			if leftTyp != nil && typ != nil && leftTyp != typ {
-				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident.Node)})
+				e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Cannot assign '%s' to '%s'", typ, leftTyp), Range: ast.Range(ident.Node), Severity: protocol.DiagnosticSeverityError})
 				e.addType(ident.Node, leftTyp)
 				continue
 			}
@@ -214,7 +215,7 @@ func (e *LegacyEnvironment) resolveExprType(expr ast.Expression, unknownError bo
 				return e.addType(expr, typ)
 			}
 		} else if unknownError {
-			e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Unknown variable '%s'", expr.Token.Literal), Range: ast.Range(expr)})
+			e.Errors = append(e.Errors, ast.Error{Message: fmt.Sprintf("Unknown variable '%s'", expr.Token.Literal), Range: ast.Range(expr), Severity: protocol.DiagnosticSeverityError})
 		}
 
 	case *ast.FunctionExpression:
@@ -432,8 +433,9 @@ func (e *LegacyEnvironment) FindDefinition(path ast.NodePath) *ast.Identifier {
 
 func (e *LegacyEnvironment) addError(node ast.Node, messageFmt string, messageArgs ...any) {
 	e.Errors = append(e.Errors, ast.Error{
-		Message: fmt.Sprintf(messageFmt, messageArgs...),
-		Range:   ast.Range(node),
+		Message:  fmt.Sprintf(messageFmt, messageArgs...),
+		Range:    ast.Range(node),
+		Severity: protocol.DiagnosticSeverityError,
 	})
 }
 

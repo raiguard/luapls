@@ -230,7 +230,7 @@ func (p *Parser) addError(message string) {
 }
 
 func (p *Parser) addErrorForNode(node ast.Node, message string) {
-	p.errors = append(p.errors, ast.Error{Range: ast.Range(node), Message: message})
+	p.errors = append(p.errors, ast.Error{Range: ast.Range(node), Message: message, Severity: protocol.DiagnosticSeverityError})
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {
