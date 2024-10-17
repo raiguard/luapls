@@ -23,52 +23,10 @@ type LegacyFile struct {
 	Path string
 }
 
-type FileGraph struct {
-	Roots []*FileNode
-	Files map[protocol.URI]*FileNode
-}
-
-func (fg *FileGraph) Traverse(visitor func(fn *FileNode) bool) {
-	for _, root := range fg.Roots {
-		root.Traverse(visitor)
-	}
-	for _, file := range fg.Files {
-		file.visited = false
-	}
-}
-
-// TODO: Atomics to allow multithreading
-type FileNode struct {
-	// AST is discarded after type checking is complete, unless the file is open in the editor.
-	AST        *ast.Block
-	LineBreaks []int
-
-	Diagnostics []ast.Error
-	Types       []*types.Type
-
-	Parents  []*FileNode
-	Children []*FileNode
-
-	Path    string
-	visited bool
-}
-
-func (fn *FileNode) Traverse(visitor func(fn *FileNode) bool) {
-	if fn == nil || fn.visited {
-		return
-	}
-	fn.visited = true
-	if visitor(fn) {
-		for _, child := range fn.Children {
-			child.Traverse(visitor)
-		}
-	}
-}
-
 // Server contains the state for the LSP session.
 type Server struct {
 	legacyFiles map[string]*LegacyFile
-	fileGraph   FileGraph
+	fileGraph   types.FileGraph
 	handler     protocol.Handler
 	log         commonlog.Logger
 	rootPath    string
@@ -84,9 +42,9 @@ func Run(logLevel int) {
 
 	s := Server{
 		legacyFiles: map[string]*LegacyFile{},
-		fileGraph: FileGraph{
-			Roots: []*FileNode{},
-			Files: map[string]*FileNode{},
+		fileGraph: types.FileGraph{
+			Roots: []*types.FileNode{},
+			Files: map[string]*types.FileNode{},
 		}}
 
 	s.handler.Initialize = s.initialize
@@ -142,7 +100,7 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 			s.publishDiagnostics(ctx, file)
 		}
 
-		s.fileGraph.Traverse(func(file *FileNode) bool {
+		s.fileGraph.Traverse(func(file *types.FileNode) bool {
 			s.log.Debugf("FILE: %s", file.Path)
 			s.log.Debug("  PARENTS:")
 			for _, parent := range file.Parents {

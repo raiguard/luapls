@@ -68,7 +68,7 @@ func (s *Server) createFile(uri protocol.URI) *LegacyFile {
 	return file
 }
 
-func (s *Server) parseFile(uri protocol.URI, parent *FileNode) *FileNode {
+func (s *Server) parseFile(uri protocol.URI, parent *types.FileNode) *types.FileNode {
 	if existing := s.fileGraph.Files[uri]; existing != nil {
 		if !slices.Contains(existing.Parents, parent) {
 			existing.Parents = append(existing.Parents, parent)
@@ -89,15 +89,15 @@ func (s *Server) parseFile(uri protocol.URI, parent *FileNode) *FileNode {
 	file := parser.New(string(src)).ParseFile()
 	s.log.Debugf("Parsed file '%s' in %s", uri, time.Since(timer).String())
 
-	fileNode := &FileNode{
+	fileNode := &types.FileNode{
 		AST:         &file.Block,
 		LineBreaks:  file.LineBreaks,
 		Diagnostics: file.Errors,
 		Types:       []*types.Type{},
-		Parents:     []*FileNode{},
-		Children:    []*FileNode{},
-		visited:     false,
+		Parents:     []*types.FileNode{},
+		Children:    []*types.FileNode{},
 		Path:        uri,
+		Visited:     false,
 	}
 	if parent != nil {
 		fileNode.Parents = append(fileNode.Parents, parent)
