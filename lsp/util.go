@@ -19,7 +19,7 @@ func toJSON(v any) string {
 func getLocals(node ast.Node, pos token.Pos, includeSelf bool) map[string]*ast.Identifier {
 	locals := map[string]*ast.Identifier{}
 
-	ast.Walk(node, func(node ast.Node) bool {
+	ast.WalkSemantic(node, func(node ast.Node) bool {
 		isAfter := node.Pos() > pos && pos < node.End()
 		if isAfter {
 			return false

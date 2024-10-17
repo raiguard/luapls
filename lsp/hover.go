@@ -18,7 +18,7 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if file.AST == nil {
 		return nil, errors.New("Attempted to highlight file with no AST")
 	}
-	nodePath := ast.GetNode(file.AST, file.LineBreaks.ToPos(params.Position))
+	nodePath := ast.GetSemanticNode(file.AST, file.LineBreaks.ToPos(params.Position))
 	if nodePath.Node == nil {
 		return nil, nil
 	}

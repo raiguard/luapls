@@ -9,6 +9,7 @@ type Node interface {
 	End() token.Pos
 	String() string
 	GetLeadingTrivia() []token.Token
+	GetSemanticChildren() []Node
 }
 
 func Range(n Node) token.Range {

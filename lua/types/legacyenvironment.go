@@ -365,7 +365,7 @@ func (e *LegacyEnvironment) FindDefinition(path ast.NodePath) *ast.Identifier {
 
 	pos := identFor.Pos()
 	var def *ast.Identifier
-	ast.Walk(&e.file.Block, func(node ast.Node) bool {
+	ast.WalkSemantic(&e.file.Block, func(node ast.Node) bool {
 		isAfter := node.Pos() > pos && pos < node.End()
 		if isAfter {
 			return false
