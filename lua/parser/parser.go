@@ -14,6 +14,7 @@ import (
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/token"
 	"github.com/raiguard/luapls/util"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type Parser struct {
@@ -179,8 +180,9 @@ func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 			unit := &p.units[p.pos]
 			for _, tok := range errorTokens {
 				p.errors = append(p.errors, ast.Error{
-					Message: fmt.Sprintf("Extraneous %s", token.TokenStr[tok.Type]),
-					Range:   tok.Range(),
+					Message:  fmt.Sprintf("Extraneous %s", token.TokenStr[tok.Type]),
+					Range:    tok.Range(),
+					Severity: protocol.DiagnosticSeverityError,
 				})
 				unit.LeadingTrivia = append(unit.LeadingTrivia, tok)
 			}
@@ -195,8 +197,9 @@ func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 				TrailingTrivia: []token.Token{},
 			}
 			p.errors = append(p.errors, ast.Error{
-				Message: fmt.Sprintf("Missing %s", token.TokenStr[tokenType]),
-				Range:   fakeTok.Range(),
+				Message:  fmt.Sprintf("Missing %s", token.TokenStr[tokenType]),
+				Range:    fakeTok.Range(),
+				Severity: protocol.DiagnosticSeverityError,
 			})
 			p.next()
 			return fakeTok
@@ -219,7 +222,11 @@ func (p *Parser) invalidTokenError() {
 }
 
 func (p *Parser) addError(message string) {
-	p.errors = append(p.errors, ast.Error{Range: p.unit().Token.Range(), Message: message})
+	p.errors = append(p.errors, ast.Error{
+		Range:    p.unit().Token.Range(),
+		Message:  message,
+		Severity: protocol.DiagnosticSeverityError,
+	})
 }
 
 func (p *Parser) addErrorForNode(node ast.Node, message string) {

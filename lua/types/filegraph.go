@@ -29,12 +29,11 @@ type File struct {
 	LineBreaks token.LineBreaks
 
 	Diagnostics []ast.Error
-	Types       []*Type
 
 	Parents  []*File
 	Children []*File
 
-	URI    protocol.URI
+	URI     protocol.URI
 	Visited bool
 }
 

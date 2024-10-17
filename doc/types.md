@@ -2,6 +2,11 @@
 
 ## Step 1: Generate ASTs
 
+Gather all Lua files in the workspace and parse them.
+Cannot build file dependency graphs until after type checking has been completed.
+
+DEFUNCT:
+
 * User defines "environments" that have a specified set of root files.
 * Iterate these root files in order.
 * Files are represented as a connected graph.
@@ -27,7 +32,7 @@ End goals:
 **First pass**
 
 First pass assembles all types that exist, following `@class`, `@type`, and `@alias` annotations as well as table literal declarations (for dynamic table types).
-It does _not_ resolve the fields of these types; it only gathers which types exist.
+It does _not_ resolve the details of these types; it only gathers which types exist.
 This is to allow recursive types.
 
 **Second pass**

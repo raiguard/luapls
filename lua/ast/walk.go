@@ -8,7 +8,7 @@ import (
 
 type Visitor func(node Node) bool
 
-// WalkSemantic performs a depth-first traversal of the AST, calling the visitor for each node.
+// WalkSemantic performs a depth-first traversal of the AST nodes, calling the visitor for each node.
 // If the visitor returns false, this node's children are not traversed.
 func WalkSemantic(node Node, visitor Visitor) {
 	if node == nil || reflect.ValueOf(node).IsNil() {
