@@ -43,7 +43,7 @@ type FileNode struct {
 	Types       []*types.Type
 	Diagnostics []ast.Error
 
-	Parent   *FileNode   // TODO: Multiple parents will turn this into a graph!
+	Parents  []*FileNode // TODO: Multiple parents will turn this into a graph!
 	Children []*FileNode // In order of appearance in file.
 
 	Visited bool
@@ -139,13 +139,15 @@ func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedPara
 		}
 
 		s.fileGraph.Traverse(func(file *FileNode) bool {
-			prefix := ""
-			parent := file.Parent
-			for parent != nil {
-				prefix += "  "
-				parent = parent.Parent
+			s.log.Debugf("FILE: %s", file.Path)
+			s.log.Debug("  PARENTS:")
+			for _, parent := range file.Parents {
+				s.log.Debugf("    %s", parent.Path)
 			}
-			s.log.Debugf("%s%s", prefix, file.Path)
+			s.log.Debug("  CHILDREN:")
+			for _, child := range file.Children {
+				s.log.Debugf("    %s", child.Path)
+			}
 			return true
 		})
 

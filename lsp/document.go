@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -69,6 +70,9 @@ func (s *Server) createFile(uri protocol.URI) *LegacyFile {
 
 func (s *Server) parseFile(uri protocol.URI, parent *FileNode) *FileNode {
 	if existing := s.fileGraph.Files[uri]; existing != nil {
+		if !slices.Contains(existing.Parents, parent) {
+			existing.Parents = append(existing.Parents, parent)
+		}
 		return existing
 	}
 	path, err := uriToPath(uri)
@@ -90,9 +94,12 @@ func (s *Server) parseFile(uri protocol.URI, parent *FileNode) *FileNode {
 		Path:        uri,
 		Types:       []*types.Type{},
 		Diagnostics: []ast.Error{},
-		Parent:      parent,
+		Parents:     []*FileNode{},
 		Children:    []*FileNode{},
 		Visited:     false,
+	}
+	if parent != nil {
+		fileNode.Parents = append(fileNode.Parents, parent)
 	}
 	s.fileGraph.Files[uri] = fileNode
 	s.log.Debugf("Walking %s", uri)
