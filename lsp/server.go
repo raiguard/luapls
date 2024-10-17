@@ -1,7 +1,6 @@
 package lsp
 
 import (
-	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
 	"github.com/tliron/commonlog"
@@ -15,15 +14,8 @@ import (
 
 const LS_NAME = "luapls"
 
-type LegacyFile struct {
-	File *ast.File
-	Env  types.LegacyEnvironment
-	Path string
-}
-
 // Server contains the state for the LSP session.
 type Server struct {
-	legacyFiles map[string]*LegacyFile
 	environment *types.Environment
 	handler     protocol.Handler
 	log         commonlog.Logger
@@ -39,7 +31,6 @@ func Run(logLevel int) {
 	commonlog.Configure(logLevel, util.Ptr("/tmp/luapls.log"))
 
 	s := Server{
-		legacyFiles: map[string]*LegacyFile{},
 		environment: types.NewEnvironment(),
 	}
 

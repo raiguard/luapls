@@ -39,6 +39,6 @@ func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidCh
 }
 
 func (s *Server) textDocumentDidClose(ctx *glsp.Context, params *protocol.DidCloseTextDocumentParams) error {
-	s.legacyFiles[params.TextDocument.URI] = nil
+	// TODO: Remove file ASTs from memory
 	return nil
 }

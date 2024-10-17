@@ -13,7 +13,6 @@ import (
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
-	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/repl"
 	"github.com/tliron/kutil/util"
 )
@@ -137,28 +136,29 @@ func readOrMakeSpecs(path string) []testSpec {
 }
 
 func checkFile(path string) {
-	src, err := os.ReadFile(path)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	p := parser.New(string(src))
-	file := p.ParseFile()
-	if len(file.Errors) > 0 {
-		fmt.Println("Parsing errors:")
-		for _, err := range file.Errors {
-			fmt.Println(&err)
-		}
-		return // TODO: Support partial type checking
-	}
+	fmt.Println("Unimplemented")
+	// src, err := os.ReadFile(path)
+	// if err != nil {
+	// 	fmt.Fprintln(os.Stderr, err)
+	// 	os.Exit(1)
+	// }
+	// p := parser.New(string(src))
+	// file := p.ParseFile()
+	// if len(file.Errors) > 0 {
+	// 	fmt.Println("Parsing errors:")
+	// 	for _, err := range file.Errors {
+	// 		fmt.Println(&err)
+	// 	}
+	// 	return // TODO: Support partial type checking
+	// }
 
-	env := types.NewLegacyEnvironment(&file)
-	env.ResolveTypes()
-	if len(env.Errors) > 0 {
-		fmt.Println("ERRORS:")
-		for _, err := range env.Errors {
-			fmt.Println(err.String())
-		}
-		os.Exit(1)
-	}
+	// env := types.NewLegacyEnvironment(&file)
+	// env.ResolveTypes()
+	// if len(env.Errors) > 0 {
+	// 	fmt.Println("ERRORS:")
+	// 	for _, err := range env.Errors {
+	// 		fmt.Println(err.String())
+	// 	}
+	// 	os.Exit(1)
+	// }
 }
