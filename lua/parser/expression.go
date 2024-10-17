@@ -122,7 +122,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 	end := p.expect(token.END)
 
 	return &ast.FunctionExpression{
-		Function:   function,
+		FuncTok:   function,
 		LeftParen:  lparen,
 		Params:     params,
 		Vararg:     vararg,

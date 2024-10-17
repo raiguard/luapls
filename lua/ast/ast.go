@@ -8,6 +8,7 @@ type Node interface {
 	Pos() token.Pos
 	End() token.Pos
 	String() string
+	GetLeadingTrivia() []token.Token
 }
 
 func Range(n Node) token.Range {

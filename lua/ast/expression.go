@@ -35,7 +35,7 @@ func (fc *FunctionCall) End() token.Pos {
 }
 
 type FunctionExpression struct {
-	Function   Unit
+	FuncTok   Unit
 	LeftParen  Unit
 	Params     Punctuated[*Identifier]
 	Vararg     *Unit
@@ -46,7 +46,7 @@ type FunctionExpression struct {
 
 func (fe *FunctionExpression) expressionNode() {}
 func (fe *FunctionExpression) Pos() token.Pos {
-	return fe.Function.Pos()
+	return fe.FuncTok.Pos()
 }
 func (fe *FunctionExpression) End() token.Pos {
 	return fe.EndUnit.End()
