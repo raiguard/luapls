@@ -1,10 +1,10 @@
 package lsp
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/raiguard/luapls/lua/ast"
-	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -15,7 +15,10 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if file == nil {
 		return nil, nil
 	}
-	nodePath := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
+	if file.AST == nil {
+		return nil, errors.New("Attempted to highlight file with no AST")
+	}
+	nodePath := ast.GetNode(file.AST, file.LineBreaks.ToPos(params.Position))
 	if nodePath.Node == nil {
 		return nil, nil
 	}
@@ -23,11 +26,11 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	if !ok {
 		return nil, nil
 	}
-	typ, ok := file.Env.Types[ident]
-	if !ok {
-		typ = &types.Unknown{}
-	}
-	contents := fmt.Sprintf("```lua\n(variable) %s: %s\n```", ident.Token.Literal, typ)
+	// typ, ok := file.Env.Types[ident]
+	// if !ok {
+	// 	typ = &types.Unknown{}
+	// }
+	contents := fmt.Sprintf("```lua\n(variable) %s\n```", ident.Token.Literal)
 	// comments := ident.GetComments()
 	// i := len(nodePath.Parents) - 1
 	// for comments == "" && i >= 0 {
@@ -42,6 +45,6 @@ func (s *Server) textDocumentHover(ctx *glsp.Context, params *protocol.HoverPara
 	// }
 	return &protocol.Hover{
 		Contents: contents,
-		Range:    util.Ptr(file.File.ToProtocolRange(ast.Range(ident))),
+		Range:    util.Ptr(file.LineBreaks.ToProtocolRange(ast.Range(ident))),
 	}, nil
 }

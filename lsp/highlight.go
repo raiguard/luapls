@@ -1,6 +1,8 @@
 package lsp
 
 import (
+	"errors"
+
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -9,11 +11,14 @@ import (
 func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
 	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
-		return nil, nil
+		return nil, errors.New("File not found")
 	}
-	nodePath := ast.GetNode(&file.File.Block, file.File.ToPos(params.Position))
+	if file.AST == nil {
+		return nil, errors.New("Attempted to highlight file that has no AST")
+	}
+	nodePath := ast.GetNode(file.AST, file.LineBreaks.ToPos(params.Position))
 	if nodePath.Node == nil {
-		return nil, nil
+		return nil, errors.New("Node not found")
 	}
 	highlights := []protocol.DocumentHighlight{}
 	// TODO: Labels
@@ -22,12 +27,13 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 		return nil, nil
 	}
 	// TODO: References
-	highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(nodePath.Node))})
+	highlights = append(highlights, protocol.DocumentHighlight{Range: file.LineBreaks.ToProtocolRange(ast.Range(nodePath.Node))})
 
-	def := file.Env.FindDefinition(nodePath)
-	if def != nil {
-		highlights = append(highlights, protocol.DocumentHighlight{Range: file.File.ToProtocolRange(ast.Range(def))})
-	}
+	// TODO:
+	// def := file.Env.FindDefinition(nodePath)
+	// if def != nil {
+	// 	highlights = append(highlights, protocol.DocumentHighlight{Range: file.LineBreaks.ToProtocolRange(ast.Range(def))})
+	// }
 
 	return highlights, nil
 }

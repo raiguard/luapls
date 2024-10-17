@@ -2,11 +2,13 @@ package types
 
 import (
 	"github.com/raiguard/luapls/lua/ast"
+	"github.com/raiguard/luapls/lua/token"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 // FileGraph specifies a set of files and the relationships between them.
 type FileGraph struct {
-	Files map[string]*File
+	Files map[protocol.URI]*File
 	// Roots are all files with no parent files.
 	Roots []*File
 }
@@ -24,7 +26,7 @@ func (fg *FileGraph) Traverse(visitor func(fn *File) bool) {
 type File struct {
 	// AST is discarded after type checking is complete, unless the file is open in the editor.
 	AST        *ast.Block
-	LineBreaks []int
+	LineBreaks token.LineBreaks
 
 	Diagnostics []ast.Error
 	Types       []*Type
@@ -32,7 +34,7 @@ type File struct {
 	Parents  []*File
 	Children []*File
 
-	Path    string
+	URI    protocol.URI
 	Visited bool
 }
 

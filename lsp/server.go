@@ -69,6 +69,8 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 
 	s.updateConfig(params.InitializationOptions)
 
+	s.environment.Init()
+
 	return protocol.InitializeResult{
 		Capabilities: capabilities,
 		ServerInfo:   &protocol.InitializeResultServerInfo{Name: LS_NAME},
@@ -76,7 +78,7 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 }
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
-	go s.environment.Init()
+	s.isInitialized = true
 	return nil
 }
 
@@ -90,13 +92,9 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri protocol.URI) *LegacyFile {
+func (s *Server) getFile(uri protocol.URI) *types.File {
 	if !s.isInitialized {
 		return nil
 	}
-	existing := s.legacyFiles[uri]
-	if existing != nil {
-		return existing
-	}
-	return nil
+	return s.environment.Files.Files[uri]
 }

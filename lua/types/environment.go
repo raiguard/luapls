@@ -12,6 +12,7 @@ import (
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/util"
 	"github.com/tliron/commonlog"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type Environment struct {
@@ -22,38 +23,54 @@ type Environment struct {
 }
 
 func NewEnvironment() *Environment {
-	e := &Environment{
-		Files: FileGraph{Files: map[string]*File{}, Roots: []*File{}},
+	return &Environment{
+		Files: FileGraph{Files: map[protocol.URI]*File{}, Roots: []*File{}},
 		log:   commonlog.GetLogger("luapls.environment"),
 	}
-
-	return e
 }
 
 // Init parses all Lua files in the root directory and builds the type graph.
 func (e *Environment) Init() {
-	filepath.Walk(e.RootPath, func(path string, info fs.FileInfo, err error) error {
-		if strings.HasSuffix(path, ".lua") {
-			e.AddFile(path, nil)
+	before := time.Now()
+	filepath.WalkDir(e.RootPath, func(path string, info fs.DirEntry, err error) error {
+		if !info.IsDir() && strings.HasSuffix(path, ".lua") {
+			uri, err := util.PathToURI(path)
+			if err != nil {
+				return err
+			}
+			e.AddFile(uri, nil)
 		}
 		return nil
 	})
+	e.log.Debugf("Initialization took %s", time.Since(before).String())
 
+	e.log.Debugf("ROOTS:")
 	for _, root := range e.Files.Roots {
-		e.log.Debug(root.Path)
+		e.log.Debug(root.URI)
+	}
+
+	e.log.Debugf("FILES:")
+	for uri := range e.Files.Files {
+		e.log.Debug(uri)
 	}
 }
 
-func (e *Environment) AddFile(path string, parent *File) *File {
-	if existing := e.Files.Files[path]; existing != nil {
+func (e *Environment) AddFile(uri protocol.URI, parent *File) *File {
+	if existing := e.Files.Files[uri]; existing != nil {
+		e.log.Debugf("FOUND EXISTING %s", uri)
 		if parent != nil && !slices.Contains(existing.Parents, parent) {
 			existing.Parents = append(existing.Parents, parent)
-			if i := slices.Index(e.Files.Roots, existing); i >= 0 {
-				e.Files.Roots = slices.Delete(e.Files.Roots, i, i)
-			}
+			e.Files.Roots = slices.DeleteFunc(e.Files.Roots, func(file *File) bool { return file == existing })
 		}
 		return existing
 	}
+	e.log.Debugf("Parsing uri %s", uri)
+	path, err := util.URIToPath(uri)
+	if err != nil {
+		e.log.Errorf("%s", err)
+		return nil
+	}
+	// e.log.Debugf("Parsing %s", path)
 	src, err := os.ReadFile(path)
 	if err != nil {
 		e.log.Errorf("Failed to parse file %s: %s", path, err)
@@ -70,7 +87,7 @@ func (e *Environment) AddFile(path string, parent *File) *File {
 		Types:       []*Type{},
 		Parents:     []*File{},
 		Children:    []*File{},
-		Path:        path,
+		URI:         uri,
 		Visited:     false,
 	}
 	if parent != nil {
@@ -78,7 +95,7 @@ func (e *Environment) AddFile(path string, parent *File) *File {
 	} else if !slices.Contains(e.Files.Roots, file) {
 		e.Files.Roots = append(e.Files.Roots, file)
 	}
-	e.Files.Files[path] = file
+	e.Files.Files[uri] = file
 
 	ast.Walk(&astFile.Block, func(n ast.Node) bool {
 		fc, ok := n.(*ast.FunctionCall)
@@ -86,6 +103,7 @@ func (e *Environment) AddFile(path string, parent *File) *File {
 			return true
 		}
 		ident, ok := fc.Name.(*ast.Identifier)
+		// TODO: Don't hardcode the name!
 		if !ok || ident.Token.Literal != "require" {
 			return true
 		}
@@ -111,15 +129,28 @@ func (e *Environment) AddFile(path string, parent *File) *File {
 			childPath = strings.ReplaceAll(childPath, "__", "")
 		}
 
-		relativePath := filepath.Join(filepath.Dir(file.Path), childPath)
-		// e.log.Debugf("Trying relative path %s", relativePath)
-		var child *File
+		var pathToUse string
+		relativePath := filepath.Join(filepath.Dir(file.URI), childPath)
+		e.log.Debugf("Relative: %s | Child: %s", relativePath, childPath)
+		e.log.Debugf("Trying relative path %s", relativePath)
 		if util.FileExists(relativePath) {
-			child = e.AddFile(relativePath, file)
+			pathToUse = relativePath
 		} else if util.FileExists(childPath) { // Root
-			child = e.AddFile(childPath, file)
+			pathToUse = childPath
 		}
-		if child != nil {
+		if pathToUse == "" {
+			e.log.Errorf("Unable to match %s", childPath)
+			return false
+		}
+
+		uri, err := util.PathToURI(pathToUse)
+		if err != nil {
+			e.log.Errorf("%s", err)
+			return false
+		}
+		// e.log.Debugf("Produced URI %s", uri)
+
+		if child := e.AddFile(uri, file); child != nil {
 			file.Children = append(file.Children, child)
 			if !slices.Contains(child.Parents, file) {
 				child.Parents = append(child.Parents, file)
