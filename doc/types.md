@@ -40,7 +40,7 @@ At the end of this pass, we should have a complete type graph.
 
 Third pass checks all type declarations and accesses to ensure they are well-formed.
 This is where "unknown variable" and "unknown field" diagnostics are generated.
-At the end of this pass, ASTs for any files that are not open are discarded to save memory.
+At the end of this pass, ASTs for any files that are not open in the editor are discarded to save memory.
 
 **Future work**
 
