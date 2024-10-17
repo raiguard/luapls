@@ -70,6 +70,11 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 	s.isInitialized = true
+
+	for _, file := range s.environment.Files.Files {
+		s.publishDiagnostics(ctx, file)
+	}
+
 	return nil
 }
 
