@@ -12,7 +12,7 @@ func (s *Server) textDocumentDefinition(ctx *glsp.Context, params *protocol.Defi
 	if file == nil {
 		return nil, nil
 	}
-	if file.AST == nil {
+	if file.Block == nil {
 		return nil, errors.New("Attempted to goto definition on a file with no AST")
 	}
 

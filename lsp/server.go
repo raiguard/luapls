@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/util"
 	"github.com/tliron/commonlog"
@@ -71,7 +72,7 @@ func (s *Server) initialize(ctx *glsp.Context, params *protocol.InitializeParams
 func (s *Server) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
 	s.isInitialized = true
 
-	for _, file := range s.environment.Files.Files {
+	for _, file := range s.environment.Files {
 		s.publishDiagnostics(ctx, file)
 	}
 
@@ -88,9 +89,9 @@ func (s *Server) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) er
 	return nil
 }
 
-func (s *Server) getFile(uri protocol.URI) *types.File {
+func (s *Server) getFile(uri protocol.URI) *ast.File {
 	if !s.isInitialized {
 		return nil
 	}
-	return s.environment.Files.Files[uri]
+	return s.environment.Files[uri]
 }

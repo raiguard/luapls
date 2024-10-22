@@ -85,9 +85,9 @@ func (p *Parser) Errors() []ast.Diagnostic {
 
 func (p *Parser) ParseFile() ast.File {
 	return ast.File{
-		Block:      p.parseBlock(),
-		Diagnostics:     p.errors,
-		LineBreaks: p.lineBreaks,
+		Block:       util.Ptr(p.parseBlock()),
+		Diagnostics: p.errors,
+		LineBreaks:  p.lineBreaks,
 	}
 }
 

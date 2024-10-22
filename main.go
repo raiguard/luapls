@@ -148,7 +148,7 @@ func check() {
 		fmt.Printf("    %s\n", typName)
 	}
 	fmt.Println("DIAGNOSTICS:")
-	for uri, file := range env.Files.Files {
+	for uri, file := range env.Files {
 		if len(file.Diagnostics) > 0 {
 			fmt.Printf("    %s\n", uri)
 			for _, diag := range file.Diagnostics {

@@ -13,10 +13,10 @@ func (s *Server) textDocumentHighlight(ctx *glsp.Context, params *protocol.Docum
 	if file == nil {
 		return nil, errors.New("File not found")
 	}
-	if file.AST == nil {
+	if file.Block == nil {
 		return nil, errors.New("Attempted to highlight file that has no AST")
 	}
-	nodePath := ast.GetSemanticNode(file.AST, file.LineBreaks.ToPos(params.Position))
+	nodePath := ast.GetSemanticNode(file.Block, file.LineBreaks.ToPos(params.Position))
 	if nodePath.Node == nil {
 		return nil, nil
 	}
