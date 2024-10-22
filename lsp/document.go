@@ -29,7 +29,7 @@ func (s *Server) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidCh
 			newFile := parser.New(change.Text).ParseFile()
 			file.AST = &newFile.Block
 			file.LineBreaks = newFile.LineBreaks
-			file.Diagnostics = newFile.Errors
+			file.Diagnostics = newFile.Diagnostics
 			// TODO: Re-add type errors
 			s.log.Debugf("Reparse duration: %s", time.Since(before).String())
 			s.publishDiagnostics(ctx, file)

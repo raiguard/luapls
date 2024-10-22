@@ -28,7 +28,7 @@ type File struct {
 	AST        *ast.Block
 	LineBreaks token.LineBreaks
 
-	Diagnostics []ast.Error
+	Diagnostics []ast.Diagnostic
 
 	Parents  []*File
 	Children []*File

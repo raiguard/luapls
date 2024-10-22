@@ -49,7 +49,7 @@ func testSpec(t *testing.T, spec *TestSpec) {
 		return
 	}
 
-	errors, err := json.Marshal(&file.Errors)
+	errors, err := json.Marshal(&file.Diagnostics)
 	if !assert.NoError(t, err) {
 		return
 	}

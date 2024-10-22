@@ -18,7 +18,7 @@ import (
 )
 
 type Parser struct {
-	errors     []ast.Error
+	errors     []ast.Diagnostic
 	lineBreaks []int
 	units      []ast.Unit
 	pos        int
@@ -27,7 +27,7 @@ type Parser struct {
 func New(input string) *Parser {
 	units, lineBreaks := Run(input)
 	p := &Parser{
-		errors:     []ast.Error{},
+		errors:     []ast.Diagnostic{},
 		lineBreaks: lineBreaks,
 		units:      units,
 	}
@@ -79,14 +79,14 @@ func Run(input string) ([]ast.Unit, []int) {
 	return units, lineBreaks
 }
 
-func (p *Parser) Errors() []ast.Error {
+func (p *Parser) Errors() []ast.Diagnostic {
 	return p.errors
 }
 
 func (p *Parser) ParseFile() ast.File {
 	return ast.File{
 		Block:      p.parseBlock(),
-		Errors:     p.errors,
+		Diagnostics:     p.errors,
 		LineBreaks: p.lineBreaks,
 	}
 }
@@ -183,7 +183,7 @@ func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 		if p.pos != initialPos {
 			unit := &p.units[p.pos]
 			for _, tok := range errorTokens {
-				p.errors = append(p.errors, ast.Error{
+				p.errors = append(p.errors, ast.Diagnostic{
 					Message:  fmt.Sprintf("Extraneous %s", token.TokenStr[tok.Type]),
 					Range:    tok.Range(),
 					Severity: protocol.DiagnosticSeverityError,
@@ -200,7 +200,7 @@ func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 				},
 				TrailingTrivia: []token.Token{},
 			}
-			p.errors = append(p.errors, ast.Error{
+			p.errors = append(p.errors, ast.Diagnostic{
 				Message:  fmt.Sprintf("Missing %s", token.TokenStr[tokenType]),
 				Range:    fakeTok.Range(),
 				Severity: protocol.DiagnosticSeverityError,
@@ -226,7 +226,7 @@ func (p *Parser) invalidTokenError() {
 }
 
 func (p *Parser) addError(message string) {
-	p.errors = append(p.errors, ast.Error{
+	p.errors = append(p.errors, ast.Diagnostic{
 		Range:    p.unit().Token.Range(),
 		Message:  message,
 		Severity: protocol.DiagnosticSeverityError,
@@ -234,7 +234,7 @@ func (p *Parser) addError(message string) {
 }
 
 func (p *Parser) addErrorForNode(node ast.Node, message string) {
-	p.errors = append(p.errors, ast.Error{Range: ast.Range(node), Message: message, Severity: protocol.DiagnosticSeverityError})
+	p.errors = append(p.errors, ast.Diagnostic{Range: ast.Range(node), Message: message, Severity: protocol.DiagnosticSeverityError})
 }
 
 func (p *Parser) tokIs(tokenType token.TokenType) bool {

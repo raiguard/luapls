@@ -7,12 +7,12 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-type Error struct {
+type Diagnostic struct {
 	Message  string
 	Range    token.Range
 	Severity protocol.DiagnosticSeverity
 }
 
-func (pe *Error) String() string {
+func (pe *Diagnostic) String() string {
 	return fmt.Sprintf("%s: %s", &pe.Range, pe.Message)
 }

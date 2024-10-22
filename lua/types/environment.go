@@ -90,7 +90,7 @@ func (e *Environment) AddFile(uri protocol.URI, parent *File) *File {
 	file := &File{
 		AST:         &astFile.Block,
 		LineBreaks:  astFile.LineBreaks,
-		Diagnostics: astFile.Errors,
+		Diagnostics: astFile.Diagnostics,
 		Parents:     []*File{},
 		Children:    []*File{},
 		URI:         uri,
@@ -192,7 +192,7 @@ func (e *Environment) CheckPhase1() {
 				content = strings.TrimSpace(content)
 				parts := strings.Split(content, " ")
 				if len(parts) == 0 {
-					file.Diagnostics = append(file.Diagnostics, ast.Error{
+					file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
 						Message:  "Missing class name",
 						Range:    trivia.Range(),
 						Severity: protocol.DiagnosticSeverityWarning,
