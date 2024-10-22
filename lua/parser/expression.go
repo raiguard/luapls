@@ -23,8 +23,10 @@ func (p *Parser) parseExpression(precedence operatorPrecedence, allowCall bool) 
 		left = p.parseNilLiteral()
 	case token.NUMBER:
 		left = p.parseNumberLiteral()
-	case token.STRING, token.RAWSTRING:
+	case token.STRING:
 		left = p.parseStringLiteral()
+	case token.RAWSTRING:
+		left = p.parseRawStringLiteral()
 	case token.TRUE, token.FALSE:
 		left = p.parseBooleanLiteral()
 	case token.VARARG:
@@ -122,7 +124,7 @@ func (p *Parser) parseFunctionExpression() *ast.FunctionExpression {
 	end := p.expect(token.END)
 
 	return &ast.FunctionExpression{
-		FuncTok:   function,
+		FuncTok:    function,
 		LeftParen:  lparen,
 		Params:     params,
 		Vararg:     vararg,
@@ -197,6 +199,10 @@ func (p *Parser) parseNumberLiteral() *ast.NumberLiteral {
 
 func (p *Parser) parseStringLiteral() *ast.StringLiteral {
 	return util.Ptr(ast.StringLiteral(p.expect(token.STRING)))
+}
+
+func (p *Parser) parseRawStringLiteral() *ast.StringLiteral {
+	return util.Ptr(ast.StringLiteral(p.expect(token.RAWSTRING)))
 }
 
 func (p *Parser) parseTableLiteral() *ast.TableLiteral {

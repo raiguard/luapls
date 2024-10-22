@@ -126,6 +126,10 @@ func (p *Parser) parseFunctionCall(name ast.Expression) *ast.FunctionCall {
 		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseStringLiteral())
 		return fc
 	}
+	if p.tokIs(token.RAWSTRING) {
+		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseRawStringLiteral())
+		return fc
+	}
 
 	if p.tokIs(token.LBRACE) {
 		fc.Args = ast.SimplePunctuated[ast.Expression](p.parseTableLiteral())
