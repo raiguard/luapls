@@ -13,6 +13,7 @@ import (
 	"github.com/raiguard/luapls/lua/lexer"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
+	"github.com/raiguard/luapls/lua/types"
 	"github.com/raiguard/luapls/repl"
 	"github.com/tliron/kutil/util"
 )
@@ -52,7 +53,7 @@ func main() {
 	case "repl":
 		repl.Run()
 	case "check":
-		checkFile(args[2])
+		check()
 	default:
 		fmt.Fprintf(os.Stderr, "%s: unrecognized subcommand\n", task)
 	}
@@ -135,30 +136,24 @@ func readOrMakeSpecs(path string) []testSpec {
 	return specs
 }
 
-func checkFile(path string) {
-	fmt.Println("Unimplemented")
-	// src, err := os.ReadFile(path)
-	// if err != nil {
-	// 	fmt.Fprintln(os.Stderr, err)
-	// 	os.Exit(1)
-	// }
-	// p := parser.New(string(src))
-	// file := p.ParseFile()
-	// if len(file.Errors) > 0 {
-	// 	fmt.Println("Parsing errors:")
-	// 	for _, err := range file.Errors {
-	// 		fmt.Println(&err)
-	// 	}
-	// 	return // TODO: Support partial type checking
-	// }
-
-	// env := types.NewLegacyEnvironment(&file)
-	// env.ResolveTypes()
-	// if len(env.Errors) > 0 {
-	// 	fmt.Println("ERRORS:")
-	// 	for _, err := range env.Errors {
-	// 		fmt.Println(err.String())
-	// 	}
-	// 	os.Exit(1)
-	// }
+func check() {
+	env := types.NewEnvironment()
+	if env == nil {
+		panic("Failed to initialize environment")
+	}
+	env.RootPath = "."
+	env.Init()
+	fmt.Println("TYPES:")
+	for typName := range env.Types {
+		fmt.Printf("    %s\n", typName)
+	}
+	fmt.Println("DIAGNOSTICS:")
+	for uri, file := range env.Files.Files {
+		if len(file.Diagnostics) > 0 {
+			fmt.Printf("    %s\n", uri)
+			for _, diag := range file.Diagnostics {
+				fmt.Printf("        %s: %s\n", diag.Range.String(), diag.Message)
+			}
+		}
+	}
 }
