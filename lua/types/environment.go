@@ -71,6 +71,7 @@ func (e *Environment) AddFile(uri protocol.URI) *ast.File {
 	timer := time.Now()
 	file := util.Ptr(parser.New(string(src)).ParseFile())
 	e.log.Debugf("Parsed file '%s' in %s", path, time.Since(timer).String())
+	file.URI = uri
 	e.Files[uri] = file
 
 	return file
@@ -80,40 +81,53 @@ func (e *Environment) AddFile(uri protocol.URI) *ast.File {
 // The first phase gathers a list of which types exist in the environment, but does not delve into details.
 func (e *Environment) CheckPhase1() {
 	for _, file := range e.Files {
-		ast.WalkSemantic(file.Block, func(n ast.Node) bool {
-			for _, trivia := range n.GetLeadingTrivia() {
-				if trivia.Type != token.COMMENT {
-					continue
-				}
-				content, ok := strings.CutPrefix(trivia.Literal, "---")
-				if !ok {
-					continue
-				}
-				// TODO: Proper parser for type annotations
-				content = strings.TrimSpace(content)
-				content, ok = strings.CutPrefix(content, "@class")
-				if !ok {
-					continue
-				}
-				content = strings.TrimSpace(content)
-				parts := strings.Split(content, " ")
-				if len(parts) == 0 {
-					file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
-						Message:  "Missing class name",
-						Range:    trivia.Range(),
-						Severity: protocol.DiagnosticSeverityWarning,
-					})
-					continue
-				}
-				name := parts[0]
-				if e.Types[name] != nil {
-					continue
-				}
-				// TODO: Narrow location to actual name
-				// TODO: Support multiple definition locations
-				e.Types[name] = &Named{Name: name, Range: trivia.Range()}
-			}
-			return true
-		})
+		e.CheckFilePhase1(file)
 	}
+}
+
+func (e *Environment) CheckFilePhase1(file *ast.File) {
+	ast.WalkSemantic(file.Block, func(n ast.Node) bool {
+		for _, trivia := range n.GetLeadingTrivia() {
+			if trivia.Type != token.COMMENT {
+				continue
+			}
+			content, ok := strings.CutPrefix(trivia.Literal, "---")
+			if !ok {
+				continue
+			}
+			// TODO: Proper parser for type annotations
+			content = strings.TrimSpace(content)
+			content, ok = strings.CutPrefix(content, "@class")
+			if !ok {
+				continue
+			}
+			content = strings.TrimSpace(content)
+			if len(content) == 0 {
+				file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
+					Message:  "Missing class name",
+					Range:    trivia.Range(),
+					Severity: protocol.DiagnosticSeverityWarning,
+				})
+				continue
+			}
+			parts := strings.Split(content, " ")
+			e.log.Debugf("%d", len(parts))
+			if len(parts) == 0 {
+				file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
+					Message:  "Missing class name",
+					Range:    trivia.Range(),
+					Severity: protocol.DiagnosticSeverityWarning,
+				})
+				continue
+			}
+			name := parts[0]
+			if e.Types[name] != nil {
+				continue
+			}
+			// TODO: Narrow location to actual name
+			// TODO: Support multiple definition locations
+			e.Types[name] = &Named{Name: name, Range: trivia.Range()}
+		}
+		return true
+	})
 }
