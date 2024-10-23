@@ -111,7 +111,6 @@ func (e *Environment) CheckFilePhase1(file *ast.File) {
 				continue
 			}
 			parts := strings.Split(content, " ")
-			e.log.Debugf("%d", len(parts))
 			if len(parts) == 0 {
 				file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
 					Message:  "Missing class name",
