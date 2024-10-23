@@ -125,6 +125,12 @@ func (l *Lexer) Next() token.Token {
 		if l.readString(r) {
 			tok = token.STRING
 		}
+	case '@':
+		if l.readIdentifier() {
+			if reserved, ok := token.Reserved[l.input[l.start:l.pos]]; ok {
+				tok = reserved
+			}
+		}
 	default:
 		if unicode.IsDigit(r) {
 			l.backup()

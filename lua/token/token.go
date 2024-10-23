@@ -78,6 +78,9 @@ const (
 	DOT
 	SEMICOLON
 	VARARG
+
+	// Annotation
+	DOC_CLASS
 )
 
 func (t TokenType) String() string {
@@ -195,6 +198,9 @@ var TokenStr = map[TokenType]string{
 	DOT:       "dot",
 	SEMICOLON: "semicolon",
 	VARARG:    "vararg",
+
+	// Annotation
+	DOC_CLASS: "@class",
 }
 
 var Reserved = map[string]TokenType{
@@ -220,4 +226,6 @@ var Reserved = map[string]TokenType{
 	"true":     TRUE,
 	"until":    UNTIL,
 	"while":    WHILE,
+
+	"@class": DOC_CLASS,
 }

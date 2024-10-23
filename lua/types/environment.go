@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/raiguard/luapls/lua/annotation"
 	"github.com/raiguard/luapls/lua/ast"
 	"github.com/raiguard/luapls/lua/parser"
 	"github.com/raiguard/luapls/lua/token"
@@ -95,37 +96,25 @@ func (e *Environment) CheckFilePhase1(file *ast.File) {
 			if !ok {
 				continue
 			}
-			// TODO: Proper parser for type annotations
-			content = strings.TrimSpace(content)
-			content, ok = strings.CutPrefix(content, "@class")
+			a, diags := annotation.Parse(content)
+			for _, diag := range diags {
+				diag.Range.Start += trivia.Pos + 3
+				diag.Range.End += trivia.Pos + 3
+				file.Diagnostics = append(file.Diagnostics, diag)
+			}
+			if a == nil {
+				continue
+			}
+			class, ok := a.(*annotation.Class)
 			if !ok {
 				continue
 			}
-			content = strings.TrimSpace(content)
-			if len(content) == 0 {
-				file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
-					Message:  "Missing class name",
-					Range:    trivia.Range(),
-					Severity: protocol.DiagnosticSeverityWarning,
-				})
-				continue
-			}
-			parts := strings.Split(content, " ")
-			if len(parts) == 0 {
-				file.Diagnostics = append(file.Diagnostics, ast.Diagnostic{
-					Message:  "Missing class name",
-					Range:    trivia.Range(),
-					Severity: protocol.DiagnosticSeverityWarning,
-				})
-				continue
-			}
-			name := parts[0]
-			if e.Types[name] != nil {
+			if e.Types[class.Name] != nil {
 				continue
 			}
 			// TODO: Narrow location to actual name
 			// TODO: Support multiple definition locations
-			e.Types[name] = &Named{Name: name, Range: trivia.Range()}
+			e.Types[class.Name] = &Named{Name: class.Name, Range: trivia.Range()}
 		}
 		return true
 	})
