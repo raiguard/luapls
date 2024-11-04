@@ -291,7 +291,7 @@ func (l *Lexer) readString(quote rune) bool {
 		if l.accept(string(quote)) {
 			break
 		}
-		if l.accept("\n") {
+		if l.accept("\n") || l.peek() == 0 {
 			// TODO: Lexing error
 			return false
 		}
