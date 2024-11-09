@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"errors"
 	"time"
 
 	"github.com/raiguard/luapls/lua/parser"
@@ -12,7 +13,10 @@ import (
 func (s *Server) textDocumentDidOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	file := s.getFile(params.TextDocument.URI)
 	if file == nil {
-		return nil
+		file = s.environment.AddTransientFile(params.TextDocument.URI, params.TextDocument.Text)
+	}
+	if file == nil {
+		return errors.New("Error creating file")
 	}
 	s.publishDiagnostics(ctx, file)
 	return nil

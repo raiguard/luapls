@@ -78,6 +78,24 @@ func (e *Environment) AddFile(uri protocol.URI) *ast.File {
 	return file
 }
 
+func (e *Environment) AddTransientFile(uri protocol.URI, content string) *ast.File {
+	if existing := e.Files[uri]; existing != nil {
+		return existing
+	}
+	path, err := util.URIToPath(uri)
+	if err != nil {
+		e.log.Errorf("%s", err)
+		return nil
+	}
+	timer := time.Now()
+	file := util.Ptr(parser.New(content).ParseFile())
+	e.log.Debugf("Parsed file '%s' in %s", path, time.Since(timer).String())
+	file.URI = uri
+	e.Files[uri] = file
+
+	return file
+}
+
 // CheckPhase1 executes the first phase of type checking.
 // The first phase gathers a list of which types exist in the environment, but does not delve into details.
 func (e *Environment) CheckPhase1() {
