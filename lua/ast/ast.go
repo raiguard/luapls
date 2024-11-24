@@ -8,7 +8,7 @@ type Node interface {
 	Pos() token.Pos
 	End() token.Pos
 	String() string
-	GetLeadingTrivia() []token.Token
+	GetLeadingTrivia() []Trivia
 	GetSemanticChildren() []Node
 }
 
@@ -17,9 +17,9 @@ func Range(n Node) token.Range {
 }
 
 type Unit struct {
-	LeadingTrivia  []token.Token
+	LeadingTrivia  []Trivia
 	Token          token.Token
-	TrailingTrivia []token.Token // Comments and whitespace up to the next newline
+	TrailingTrivia []Trivia // Up to the next newline
 }
 
 func (u *Unit) Type() token.TokenType {

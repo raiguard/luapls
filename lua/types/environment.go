@@ -107,32 +107,35 @@ func (e *Environment) CheckPhase1() {
 func (e *Environment) CheckFilePhase1(file *ast.File) {
 	ast.WalkSemantic(file.Block, func(n ast.Node) bool {
 		for _, trivia := range n.GetLeadingTrivia() {
-			if trivia.Type != token.COMMENT {
-				continue
+			switch trivia := trivia.(type) {
+			case *ast.SimpleTrivia:
+				if trivia.Tok.Type != token.COMMENT {
+					continue
+				}
+				content, ok := strings.CutPrefix(trivia.Tok.Literal, "---")
+				if !ok {
+					continue
+				}
+				a, diags := annotation.Parse(content)
+				for _, diag := range diags {
+					diag.Range.Start += trivia.Pos() + 3
+					diag.Range.End += trivia.Pos() + 3
+					file.Diagnostics = append(file.Diagnostics, diag)
+				}
+				if a == nil {
+					continue
+				}
+				class, ok := a.(*annotation.Class)
+				if !ok {
+					continue
+				}
+				if e.Types[class.Name] != nil {
+					continue
+				}
+				// TODO: Narrow location to actual name
+				// TODO: Support multiple definition locations
+				e.Types[class.Name] = &Named{Name: class.Name, Range: ast.Range(trivia)}
 			}
-			content, ok := strings.CutPrefix(trivia.Literal, "---")
-			if !ok {
-				continue
-			}
-			a, diags := annotation.Parse(content)
-			for _, diag := range diags {
-				diag.Range.Start += trivia.Pos + 3
-				diag.Range.End += trivia.Pos + 3
-				file.Diagnostics = append(file.Diagnostics, diag)
-			}
-			if a == nil {
-				continue
-			}
-			class, ok := a.(*annotation.Class)
-			if !ok {
-				continue
-			}
-			if e.Types[class.Name] != nil {
-				continue
-			}
-			// TODO: Narrow location to actual name
-			// TODO: Support multiple definition locations
-			e.Types[class.Name] = &Named{Name: class.Name, Range: trivia.Range()}
 		}
 		return true
 	})

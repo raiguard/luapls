@@ -40,25 +40,26 @@ func Run(input string) ([]ast.Unit, []int) {
 	tokens, lineBreaks := lexer.Run(input)
 	units := []ast.Unit{}
 	u := ast.Unit{
-		LeadingTrivia:  []token.Token{},
+		LeadingTrivia:  []ast.Trivia{},
 		Token:          token.Token{},
-		TrailingTrivia: []token.Token{},
+		TrailingTrivia: []ast.Trivia{},
 	}
 	state := "leading"
 	newUnit := func() {
 		units = append(units, u)
 		u = ast.Unit{
-			LeadingTrivia:  []token.Token{},
+			LeadingTrivia:  []ast.Trivia{},
 			Token:          token.Token{},
-			TrailingTrivia: []token.Token{},
+			TrailingTrivia: []ast.Trivia{},
 		}
 	}
 	for _, tok := range tokens {
 		if tok.Type == token.COMMENT || tok.Type == token.WHITESPACE {
+			// TODO: Parse type annotations
 			if state == "leading" {
-				u.LeadingTrivia = append(u.LeadingTrivia, tok)
+				u.LeadingTrivia = append(u.LeadingTrivia, &ast.SimpleTrivia{Tok: tok})
 			} else {
-				u.TrailingTrivia = append(u.TrailingTrivia, tok)
+				u.TrailingTrivia = append(u.TrailingTrivia, &ast.SimpleTrivia{Tok: tok})
 				if strings.Contains(tok.Literal, "\n") {
 					newUnit()
 					state = "leading"
@@ -159,56 +160,59 @@ func (p *Parser) accept(tokenType token.TokenType) *ast.Unit {
 
 func (p *Parser) expect(tokenType token.TokenType) ast.Unit {
 	if !p.tokIs(tokenType) {
-		initialPos := p.pos
-		errorTokens := []token.Token{p.unit().Token}
-		limit := p.pos + 5
-		if limit > len(p.units)-1 {
-			limit = len(p.units) - 1
-		}
-		for i := p.pos + 1; i < limit; i++ {
-			unit := p.units[i]
-			if unit.Type() == tokenType {
-				p.pos = i
-				break
-			} else {
-				for _, tok := range unit.LeadingTrivia {
-					errorTokens = append(errorTokens, tok)
-				}
-				errorTokens = append(errorTokens, unit.Token)
-				for _, tok := range unit.TrailingTrivia {
-					errorTokens = append(errorTokens, tok)
-				}
-			}
-		}
-		if p.pos != initialPos {
-			unit := &p.units[p.pos]
-			for _, tok := range errorTokens {
-				p.errors = append(p.errors, ast.Diagnostic{
-					Message:  fmt.Sprintf("Extraneous %s", token.TokenStr[tok.Type]),
-					Range:    tok.Range(),
-					Severity: protocol.DiagnosticSeverityError,
-				})
-				unit.LeadingTrivia = append(unit.LeadingTrivia, tok)
-			}
-		} else {
-			fakeTok := ast.Unit{
-				LeadingTrivia: []token.Token{},
-				Token: token.Token{
-					Type:    tokenType,
-					Literal: "",
-					Pos:     initialPos,
-				},
-				TrailingTrivia: []token.Token{},
-			}
-			p.errors = append(p.errors, ast.Diagnostic{
-				Message:  fmt.Sprintf("Missing %s", token.TokenStr[tokenType]),
-				Range:    fakeTok.Range(),
-				Severity: protocol.DiagnosticSeverityError,
-			})
-			p.next()
-			return fakeTok
-		}
+		p.expectedTokenError(tokenType)
 	}
+	// if !p.tokIs(tokenType) {
+	// 	initialPos := p.pos
+	// 	errorTokens := []token.Token{p.unit().Token}
+	// 	limit := p.pos + 5
+	// 	if limit > len(p.units)-1 {
+	// 		limit = len(p.units) - 1
+	// 	}
+	// 	for i := p.pos + 1; i < limit; i++ {
+	// 		unit := p.units[i]
+	// 		if unit.Type() == tokenType {
+	// 			p.pos = i
+	// 			break
+	// 		} else {
+	// 			for _, tok := range unit.LeadingTrivia {
+	// 				errorTokens = append(errorTokens, tok)
+	// 			}
+	// 			errorTokens = append(errorTokens, unit.Token)
+	// 			for _, tok := range unit.TrailingTrivia {
+	// 				errorTokens = append(errorTokens, tok)
+	// 			}
+	// 		}
+	// 	}
+	// 	if p.pos != initialPos {
+	// 		unit := &p.units[p.pos]
+	// 		for _, tok := range errorTokens {
+	// 			p.errors = append(p.errors, ast.Diagnostic{
+	// 				Message:  fmt.Sprintf("Extraneous %s", token.TokenStr[tok.Type]),
+	// 				Range:    tok.Range(),
+	// 				Severity: protocol.DiagnosticSeverityError,
+	// 			})
+	// 			unit.LeadingTrivia = append(unit.LeadingTrivia, tok)
+	// 		}
+	// 	} else {
+	// 		fakeTok := ast.Unit{
+	// 			LeadingTrivia: []token.Token{},
+	// 			Token: token.Token{
+	// 				Type:    tokenType,
+	// 				Literal: "",
+	// 				Pos:     initialPos,
+	// 			},
+	// 			TrailingTrivia: []token.Token{},
+	// 		}
+	// 		p.errors = append(p.errors, ast.Diagnostic{
+	// 			Message:  fmt.Sprintf("Missing %s", token.TokenStr[tokenType]),
+	// 			Range:    fakeTok.Range(),
+	// 			Severity: protocol.DiagnosticSeverityError,
+	// 		})
+	// 		p.next()
+	// 		return fakeTok
+	// 	}
+	// }
 	p.next()
 	return p.units[p.pos-1]
 }
