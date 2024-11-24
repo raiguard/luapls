@@ -1,10 +1,6 @@
 # vim: ft=kak
 
-define-command luapls-log %{
-  edit /tmp/luapls.log
-}
-
-hook global WinCreate /tmp/luapls\.log %{
+hook global WinCreate \*debug\* %{
   add-highlighter window/luapls-newserver regex 'reading from stdin, writing to stdout' 0:+r@keyword
   add-highlighter window/luapls-datetime regex '\d*/\d*/\d* \d*:\d*:\d*\.\d*' 0:comment
   add-highlighter window/luapls-server regex ' (\[[\w\.]*?\]) ' 1:value
@@ -16,8 +12,4 @@ hook global WinCreate /tmp/luapls\.log %{
   add-highlighter window/luapls-critical regex '[^\[]*?(CRIT)' 1:+r@Error
   add-highlighter window/luapls-server-send regex ' (<--) ' 1:function
   add-highlighter window/luapls-server-recv regex ' (-->) ' 1:string
-}
-
-hook global BufReload .*luapls\.log %{
-  execute-keys 'gjgh'
 }
