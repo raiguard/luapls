@@ -98,10 +98,6 @@ func (node *SemicolonStatement) String() string {
 	return fmt.Sprintf("%s()@%v", "SemicolonStatement", node.Pos())
 }
 
-func (node *SimpleTrivia) String() string {
-	return fmt.Sprintf("%s()@%v", "SimpleTrivia", node.Pos())
-}
-
 func (node *StringLiteral) String() string {
 	return fmt.Sprintf("%s(%s)@%v", "StringLiteral", node.Token.Literal, node.Pos())
 }

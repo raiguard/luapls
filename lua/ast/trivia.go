@@ -2,154 +2,140 @@ package ast
 
 import "github.com/raiguard/luapls/lua/token"
 
-type Trivia interface {
-	triviaNode()
-}
-
-type SimpleTrivia struct{ Tok token.Token }
-
-func (st *SimpleTrivia) triviaNode()    {}
-func (st *SimpleTrivia) Pos() token.Pos { return st.Tok.Pos }
-func (st *SimpleTrivia) End() token.Pos { return st.Tok.End() }
-
-func (node *AssignmentStatement) GetLeadingTrivia() []Trivia {
+func (node *AssignmentStatement) GetLeadingTrivia() []token.Token {
 	return node.Vars.GetLeadingTrivia()
 }
 
-func (node *BooleanLiteral) GetLeadingTrivia() []Trivia {
+func (node *BooleanLiteral) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *BreakStatement) GetLeadingTrivia() []Trivia {
+func (node *BreakStatement) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *DoStatement) GetLeadingTrivia() []Trivia {
+func (node *DoStatement) GetLeadingTrivia() []token.Token {
 	return node.DoTok.LeadingTrivia
 }
 
-func (node *ForInStatement) GetLeadingTrivia() []Trivia {
+func (node *ForInStatement) GetLeadingTrivia() []token.Token {
 	return node.ForTok.LeadingTrivia
 }
 
-func (node *ForStatement) GetLeadingTrivia() []Trivia {
+func (node *ForStatement) GetLeadingTrivia() []token.Token {
 	return node.ForTok.LeadingTrivia
 }
 
-func (node *FunctionCall) GetLeadingTrivia() []Trivia {
+func (node *FunctionCall) GetLeadingTrivia() []token.Token {
 	return node.Name.GetLeadingTrivia()
 }
 
-func (node *FunctionExpression) GetLeadingTrivia() []Trivia {
+func (node *FunctionExpression) GetLeadingTrivia() []token.Token {
 	return node.FuncTok.LeadingTrivia
 }
 
-func (node *FunctionStatement) GetLeadingTrivia() []Trivia {
+func (node *FunctionStatement) GetLeadingTrivia() []token.Token {
 	if node.LocalTok != nil {
 		return node.LocalTok.LeadingTrivia
 	}
 	return node.FuncTok.LeadingTrivia
 }
 
-func (node *GotoStatement) GetLeadingTrivia() []Trivia {
+func (node *GotoStatement) GetLeadingTrivia() []token.Token {
 	return node.GotoTok.LeadingTrivia
 }
 
-func (node *Identifier) GetLeadingTrivia() []Trivia {
+func (node *Identifier) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *IfClause) GetLeadingTrivia() []Trivia {
+func (node *IfClause) GetLeadingTrivia() []token.Token {
 	return node.LeadingTok.LeadingTrivia
 }
 
-func (node *IfStatement) GetLeadingTrivia() []Trivia {
+func (node *IfStatement) GetLeadingTrivia() []token.Token {
 	return node.IfTok.LeadingTrivia
 }
 
-func (node *IndexExpression) GetLeadingTrivia() []Trivia {
+func (node *IndexExpression) GetLeadingTrivia() []token.Token {
 	return node.Prefix.GetLeadingTrivia()
 }
 
-func (node *InfixExpression) GetLeadingTrivia() []Trivia {
+func (node *InfixExpression) GetLeadingTrivia() []token.Token {
 	return node.Left.GetLeadingTrivia()
 }
 
-func (node *LabelStatement) GetLeadingTrivia() []Trivia {
+func (node *LabelStatement) GetLeadingTrivia() []token.Token {
 	return node.LeadingLabelTok.LeadingTrivia
 }
 
-func (node *Invalid) GetLeadingTrivia() []Trivia {
-	return []Trivia{} // TODO:
+func (node *Invalid) GetLeadingTrivia() []token.Token {
+	return []token.Token{} // TODO:
 }
 
-func (node *LocalStatement) GetLeadingTrivia() []Trivia {
+func (node *LocalStatement) GetLeadingTrivia() []token.Token {
 	return node.LocalTok.LeadingTrivia
 }
 
-func (node *NilLiteral) GetLeadingTrivia() []Trivia {
+func (node *NilLiteral) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *NumberLiteral) GetLeadingTrivia() []Trivia {
+func (node *NumberLiteral) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *Pair[T]) GetLeadingTrivia() []Trivia {
+func (node *Pair[T]) GetLeadingTrivia() []token.Token {
 	return node.Node.GetLeadingTrivia()
 }
 
-func (node *Punctuated[T]) GetLeadingTrivia() []Trivia {
+func (node *Punctuated[T]) GetLeadingTrivia() []token.Token {
 	if len(node.Pairs) == 0 {
-		return []Trivia{}
+		return []token.Token{}
 	}
 	return node.Pairs[0].GetLeadingTrivia()
 }
 
-func (node *PrefixExpression) GetLeadingTrivia() []Trivia {
+func (node *PrefixExpression) GetLeadingTrivia() []token.Token {
 	return node.Operator.LeadingTrivia
 }
 
-func (node *RepeatStatement) GetLeadingTrivia() []Trivia {
+func (node *RepeatStatement) GetLeadingTrivia() []token.Token {
 	return node.RepeatTok.LeadingTrivia
 }
 
-func (node *ReturnStatement) GetLeadingTrivia() []Trivia {
+func (node *ReturnStatement) GetLeadingTrivia() []token.Token {
 	return node.ReturnTok.LeadingTrivia
 }
 
-func (node *SemicolonStatement) GetLeadingTrivia() []Trivia {
+func (node *SemicolonStatement) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *SimpleTrivia) GetLeadingTrivia() []Trivia {
-	return []Trivia{}
-}
-
-func (node *StringLiteral) GetLeadingTrivia() []Trivia {
+func (node *StringLiteral) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *TableArrayField) GetLeadingTrivia() []Trivia {
+func (node *TableArrayField) GetLeadingTrivia() []token.Token {
 	return node.Expr.GetLeadingTrivia()
 }
 
-func (node *TableSimpleKeyField) GetLeadingTrivia() []Trivia {
+func (node *TableSimpleKeyField) GetLeadingTrivia() []token.Token {
 	return node.Name.LeadingTrivia
 }
 
-func (node *TableExpressionKeyField) GetLeadingTrivia() []Trivia {
+func (node *TableExpressionKeyField) GetLeadingTrivia() []token.Token {
 	return node.LeftBracket.LeadingTrivia
 }
 
-func (node *TableLiteral) GetLeadingTrivia() []Trivia {
+func (node *TableLiteral) GetLeadingTrivia() []token.Token {
 	return node.LeftBrace.LeadingTrivia
 }
 
-func (node *Vararg) GetLeadingTrivia() []Trivia {
+func (node *Vararg) GetLeadingTrivia() []token.Token {
 	return node.LeadingTrivia
 }
 
-func (node *WhileStatement) GetLeadingTrivia() []Trivia {
+func (node *WhileStatement) GetLeadingTrivia() []token.Token {
 	return node.WhileTok.LeadingTrivia
 }

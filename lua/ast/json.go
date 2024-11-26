@@ -344,19 +344,6 @@ func (node *SemicolonStatement) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (node *SimpleTrivia) MarshalJSON() ([]byte, error) {
-	type Alias SimpleTrivia
-	return json.Marshal(&struct {
-		Type  string
-		Range token.Range
-		*Alias
-	}{
-		Type:  "SimpleTrivia",
-		Range: Range(node),
-		Alias: (*Alias)(node),
-	})
-}
-
 func (node *StringLiteral) MarshalJSON() ([]byte, error) {
 	type Alias StringLiteral
 	return json.Marshal(&struct {

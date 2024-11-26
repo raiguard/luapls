@@ -122,10 +122,6 @@ func (node *SemicolonStatement) GetSemanticChildren() []Node {
 	return []Node{}
 }
 
-func (node *SimpleTrivia) GetSemanticChildren() []Node {
-	return []Node{}
-}
-
 func (node *StringLiteral) GetSemanticChildren() []Node {
 	return []Node{}
 }
