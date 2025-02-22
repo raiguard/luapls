@@ -1,3 +1,5 @@
+# luapls will not be finished. Check out [emmylua_ls](https://github.com/CppCXY/emmylua-analyzer-rust) instead!
+
 # luapls
 
 luapls ("Lua please") is a language server for the Lua programming language.
